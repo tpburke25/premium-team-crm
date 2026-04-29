@@ -979,11 +979,6 @@ async function loadData() {
     }
     allDeals = all;
 
-    // Hide owner filter for reps — they only see their own deals
-    if (currentUser && currentUser.role === 'rep') {
-      document.getElementById('ownerFilter').parentElement.style.display = 'none';
-    }
-
     populateOwnerFilter();
     applyFilters();
   } catch(e) {
