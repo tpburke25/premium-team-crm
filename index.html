@@ -747,7 +747,7 @@ function dealCard(d, stageCls) {
   const dc = daysClass(days);
   return `
   <div class="deal-card ${stageCls}" onclick="openDetail('${d.opportunity_id}')">
-    <div class="card-account">${d.account_name || '—'}</div>
+    <div class="card-account">${d.account_name || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px;font-weight:400">${d.fts_id || ''}</span></div>
     <div class="card-fields">
       <div class="card-field">
         <div class="field-label">Close Date</div>
@@ -781,7 +781,7 @@ function renderList() {
     const dc = daysClass(d.days_since_activity);
     return `
     <tr onclick="openDetail('${d.opportunity_id}')">
-      <td class="primary">${d.account_name || '—'}</td>
+      <td class="primary">${d.account_name || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px;font-weight:400">${d.fts_id || ''}</span></td>
       <td><span class="stage-badge ${sc}">${d.stage || '—'}</span></td>
       <td class="mono">${fmt(d.close_date,'date')}</td>
       <td class="mono">${d.asm_flat_rate ? '$'+parseFloat(d.asm_flat_rate).toLocaleString() : '—'}</td>
