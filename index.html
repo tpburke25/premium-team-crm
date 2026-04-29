@@ -416,7 +416,7 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
   <div class="panel-header">
     <div class="panel-account" id="panelAccount"></div>
     <div class="panel-opp" id="panelOpp"></div>
-    <a id="panelSFLink" href="#" target="_blank" rel="noopener" style="display:none;align-items:center;gap:5px;font-size:12px;color:var(--text3);text-decoration:none;margin-top:8px;padding:5px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;width:fit-content;transition:all 0.15s" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='var(--text3)';this.style.borderColor='var(--border)'">
+    <a id="panelSFLink" href="#" target="_blank" rel="noopener" style="display:none;align-items:center;gap:5px;font-size:12px;color:var(--accent);text-decoration:none;margin-top:8px;padding:5px 10px;background:color-mix(in srgb, var(--accent) 12%, transparent);border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);border-radius:6px;width:fit-content;transition:opacity 0.15s" onmouseover="this.style.opacity='0.75'" onmouseout="this.style.opacity='1'">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       View in Salesforce
     </a>
@@ -689,11 +689,11 @@ function applyFilters() {
 
 function updateStats() {
   const active = filteredDeals.filter(d => d.stage !== 'Lost' && d.stage !== 'Closed Won');
-  const totalRate = active.reduce((s, d) => s + (parseFloat(d.asm_flat_rate)||0), 0);
+  const totalRate = filteredDeals.reduce((s, d) => s + (parseFloat(d.total_flat_rate)||0), 0);
   document.getElementById('statsBar').innerHTML = `
     <div class="stat-chip"><div class="stat-dot" style="background:var(--accent)"></div><strong>${filteredDeals.length}</strong> deals</div>
     <div class="stat-chip"><div class="stat-dot" style="background:var(--accent2)"></div><strong>${active.length}</strong> active</div>
-    <div class="stat-chip"><div class="stat-dot" style="background:var(--gold)"></div><strong>$${totalRate.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0})}</strong> pipeline rate</div>
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--gold)"></div><strong>$${totalRate.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0})}</strong> total flat rate</div>
   `;
 }
 
