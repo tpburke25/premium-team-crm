@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premium Team CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f11;
+  --surface: #1a1a1f;
+  --surface2: #222228;
+  --surface3: #2a2a32;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0f0f2;
+  --text2: #9090a0;
+  --text3: #606070;
+  --accent: #6c63ff;
+  --accent2: #4ecdc4;
+  --gold: #f5c842;
+  --red: #ff6b6b;
+  --green: #5ce65c;
+  --orange: #ff9f43;
+  --radius: 10px;
+  --radius-lg: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+/* HEADER */
+.header { display: flex; align-items: center; justify-content: space-between; padding: 16px 28px; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 100; }
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark { width: 30px; height: 30px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #fff; }
+.logo-text { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+.logo-sub { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.sync-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
+.sync-btn:hover { background: var(--surface2); color: var(--text); }
+.sync-btn.syncing { color: var(--accent); border-color: var(--accent); }
+.user-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--surface2); border-radius: 20px; border: 1px solid var(--border); }
+.user-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; }
+.user-name { font-size: 13px; color: var(--text2); }
+
+/* TOOLBAR */
+.toolbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-bottom: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
+.toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.search-wrap { position: relative; }
+.search-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px 8px 34px; font-size: 13px; color: var(--text); font-family: 'DM Sans', sans-serif; width: 220px; outline: none; transition: border 0.15s; }
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: var(--text3); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; }
+.filter-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--text2); font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; }
+.filter-select:focus { border-color: var(--accent); }
+.tab-group { display: flex; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; }
+.tab-btn { padding: 7px 16px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: none; background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+.tab-btn.active { background: var(--accent); color: #fff; }
+.stats-bar { display: flex; gap: 16px; flex-wrap: wrap; }
+.stat-chip { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text3); }
+.stat-chip strong { color: var(--text); font-weight: 500; }
+.stat-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* STAGE COLORS */
+.stage-sql      { --sc: #6c63ff; }
+.stage-value    { --sc: #4ecdc4; }
+.stage-enrolling{ --sc: #f5c842; }
+.stage-lost     { --sc: #ff6b6b; }
+.stage-won      { --sc: #5ce65c; }
+
+/* KANBAN */
+.kanban-wrap { padding: 20px 28px; overflow-x: auto; }
+.kanban-board { display: flex; gap: 14px; align-items: flex-start; width: 100%; }
+.kanban-col { flex: 1; min-width: 180px; }
+.col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 0 4px; }
+.col-title { display: flex; align-items: center; gap: 8px; }
+.col-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sc); }
+.col-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.col-count { font-size: 11px; font-family: 'DM Mono', monospace; background: var(--surface2); color: var(--text3); padding: 2px 7px; border-radius: 10px; border: 1px solid var(--border); }
+.col-value { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text3); }
+.col-cards { display: flex; flex-direction: column; gap: 8px; min-height: 100px; }
+
+/* DEAL CARD */
+.deal-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px; cursor: pointer; transition: all 0.15s; position: relative; overflow: hidden; }
+.deal-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--sc); }
+.deal-card:hover { border-color: var(--border2); background: var(--surface2); transform: translateY(-1px); }
+.card-account { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 10px; line-height: 1.3; padding-left: 4px; }
+.card-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.card-field { background: var(--surface2); border-radius: 6px; padding: 6px 8px; }
+.field-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
+.field-value { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.field-value.warn { color: var(--orange); }
+.field-value.danger { color: var(--red); }
+.field-value.good { color: var(--green); }
+.card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+.card-owner { font-size: 11px; color: var(--text3); }
+.card-stage-pill { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: color-mix(in srgb, var(--sc) 15%, transparent); color: var(--sc); font-weight: 500; border: 1px solid color-mix(in srgb, var(--sc) 30%, transparent); }
+
+/* LIST VIEW */
+.list-wrap { padding: 20px 28px; }
+.list-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.list-table thead tr { border-bottom: 1px solid var(--border2); }
+.list-table th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); cursor: pointer; white-space: nowrap; user-select: none; }
+.list-table th:hover { color: var(--text2); }
+.list-table th.sorted { color: var(--accent); }
+.list-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; cursor: pointer; }
+.list-table tbody tr:hover { background: var(--surface2); }
+.list-table td { padding: 11px 14px; color: var(--text2); }
+.list-table td.primary { color: var(--text); font-weight: 500; }
+.stage-badge { display: inline-block; font-size: 11px; padding: 3px 9px; border-radius: 10px; font-weight: 500; background: color-mix(in srgb, var(--sc) 15%, transparent); color: var(--sc); border: 1px solid color-mix(in srgb, var(--sc) 25%, transparent); white-space: nowrap; }
+.mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+.days-warn { color: var(--orange); }
+.days-danger { color: var(--red); }
+.sort-arrow { margin-left: 4px; opacity: 0.5; }
+.clear-btn { padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text3); font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.clear-btn:hover { background: var(--surface2); color: var(--red); border-color: var(--red); }
+.date-filter-wrap { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 4px 6px; }
+.date-filter-wrap select { background: transparent; border: none; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; padding: 4px 2px; }
+.date-filter-wrap select:focus { color: var(--text); }
+.date-inputs { display: flex; align-items: center; gap: 4px; }
+.date-sep { font-size: 11px; color: var(--text3); }
+.date-input { background: transparent; border: none; border-bottom: 1px solid var(--border2); color: var(--text2); font-size: 12px; font-family: 'DM Mono', monospace; outline: none; width: 100px; padding: 2px 4px; cursor: pointer; }
+.date-input:focus { border-bottom-color: var(--accent); color: var(--text); }
+.date-input::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+
+/* DETAIL PANEL */
+.panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.panel-overlay.open { opacity: 1; pointer-events: all; }
+.detail-panel { position: fixed; right: 0; top: 0; bottom: 0; width: 420px; background: var(--surface); border-left: 1px solid var(--border2); z-index: 201; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.16,1,0.3,1); overflow-y: auto; }
+.detail-panel.open { transform: translateX(0); }
+.panel-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 10; }
+.panel-close { position: absolute; right: 20px; top: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--text3); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+.panel-close:hover { color: var(--text); }
+.panel-account { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 4px; line-height: 1.3; padding-right: 36px; }
+.panel-opp { font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; }
+.panel-body { padding: 20px 24px; }
+.panel-section { margin-bottom: 22px; }
+.panel-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 10px; font-weight: 500; }
+.panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.panel-field { background: var(--surface2); border-radius: 8px; padding: 10px 12px; border: 1px solid var(--border); }
+.panel-field.full { grid-column: 1 / -1; }
+.pf-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.pf-value { font-size: 13px; color: var(--text); line-height: 1.4; }
+.pf-value.mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+.enrich-input { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 8px 10px; font-size: 13px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-top: 4px; transition: border 0.15s; }
+.enrich-input:focus { border-color: var(--accent); }
+textarea.enrich-input { resize: vertical; min-height: 80px; }
+.save-btn { margin-top: 10px; padding: 8px 18px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
+.save-btn:hover { opacity: 0.85; }
+.save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.save-msg { font-size: 12px; color: var(--green); margin-left: 10px; }
+
+/* EMPTY / LOADING */
+.loading { text-align: center; padding: 80px 20px; color: var(--text3); }
+.spinner { width: 28px; height: 28px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 14px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty-col { text-align: center; padding: 24px 10px; color: var(--text3); font-size: 12px; border: 1px dashed var(--border); border-radius: var(--radius); }
+
+.hidden { display: none !important; }
+.login-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+.login-box { width: 100%; max-width: 380px; padding: 2rem; }
+.login-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; }
+.login-logo-mark { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #fff; }
+.login-logo-text { font-size: 18px; font-weight: 600; }
+.login-logo-sub { font-size: 12px; color: var(--text3); }
+.login-title { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+.login-sub { font-size: 14px; color: var(--text3); margin-bottom: 2rem; }
+.login-field { margin-bottom: 14px; }
+.login-label { font-size: 12px; color: var(--text3); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.04em; }
+.login-input { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 11px 14px; font-size: 14px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; transition: border 0.15s; }
+.login-input:focus { border-color: var(--accent); }
+.login-input::placeholder { color: var(--text3); }
+.login-submit { width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 6px; transition: opacity 0.15s; }
+.login-submit:hover { opacity: 0.85; }
+.login-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+.login-error { font-size: 13px; color: var(--red); margin-top: 10px; text-align: center; min-height: 20px; }
+.login-footer { font-size: 12px; color: var(--text3); text-align: center; margin-top: 1.5rem; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-mark">P</div>
+      <div>
+        <div class="login-logo-text">Premium Team CRM</div>
+        <div class="login-logo-sub">Sales Portal</div>
+      </div>
+    </div>
+    <div class="login-title">Welcome back</div>
+    <div class="login-sub">Sign in to access your pipeline</div>
+    <div class="login-field">
+      <label class="login-label">Email</label>
+      <input class="login-input" id="loginEmail" type="email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field">
+      <label class="login-label">Password</label>
+      <input class="login-input" id="loginPassword" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-submit" id="loginBtn" onclick="doLogin()">Sign in</button>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-footer">Premium Team CRM · Powered by Supabase</div>
+  </div>
+</div>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-mark">P</div>
+    <div>
+      <div class="logo-text">Premium Team CRM</div>
+      <div class="logo-sub">Pipeline</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="sync-btn" id="syncStatusBtn" onclick="loadData()">
+      <span id="syncIcon">↻</span>
+      <span id="syncLabel">Refresh</span>
+    </button>
+    <div class="user-chip">
+      <div class="user-avatar" id="userAvatar">T</div>
+      <span class="user-name" id="userName">Tom Burke</span>
+    </div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="toolbar-left">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input class="search-input" id="searchInput" placeholder="Search accounts, FTS ID, contact..." oninput="applyFilters()">
+    </div>
+    <select class="filter-select" id="stageFilter" onchange="applyFilters()">
+      <option value="">All stages</option>
+      <option value="__open__">Open</option>
+      <option value="__closed__">Closed</option>
+      <option value="Sales Qualified Lead (SQL)">— SQL</option>
+      <option value="Value Selling">— Value Selling</option>
+      <option value="Enrolling">— Enrolling</option>
+      <option value="Lost">— Lost</option>
+      <option value="Closed Won">— Closed Won</option>
+    </select>
+    <select class="filter-select" id="ownerFilter" onchange="applyFilters()">
+      <option value="">All reps</option>
+    </select>
+    <div class="date-filter-wrap">
+      <select id="datePreset" onchange="applyDatePreset()">
+        <option value="">All dates</option>
+        <option value="this_month">This Month</option>
+        <option value="last_30">Last 30 Days</option>
+        <option value="last_60">Last 60 Days</option>
+        <option value="last_90">Last 90 Days</option>
+        <option value="this_quarter">This Quarter</option>
+        <option value="this_year">This Year</option>
+        <option value="custom">Custom range...</option>
+      </select>
+      <div class="date-inputs" id="customDateInputs" style="display:none">
+        <span class="date-sep">from</span>
+        <input type="date" class="date-input" id="dateFrom" onchange="applyFilters()">
+        <span class="date-sep">to</span>
+        <input type="date" class="date-input" id="dateTo" onchange="applyFilters()">
+      </div>
+    </div>
+    <div class="tab-group">
+      <button class="tab-btn active" id="tabKanban" onclick="switchView('kanban')">⊞ Board</button>
+      <button class="tab-btn" id="tabList" onclick="switchView('list')">≡ List</button>
+    </div>
+    <button class="clear-btn" id="clearBtn" onclick="clearFilters()" style="display:none">✕ Clear filters</button>
+  </div>
+  <div class="stats-bar" id="statsBar"></div>
+</div>
+
+<div id="kanbanView">
+  <div class="kanban-wrap">
+    <div class="kanban-board" id="kanbanBoard">
+      <div class="loading"><div class="spinner"></div>Loading pipeline...</div>
+    </div>
+  </div>
+</div>
+
+<div id="listView" class="hidden">
+  <div class="list-wrap">
+    <table class="list-table">
+      <thead>
+        <tr>
+          <th onclick="sortList('account_name')">Account <span class="sort-arrow" id="sort-account_name"></span></th>
+          <th onclick="sortList('stage')">Stage <span class="sort-arrow" id="sort-stage"></span></th>
+          <th onclick="sortList('close_date')">Close Date <span class="sort-arrow" id="sort-close_date"></span></th>
+          <th onclick="sortList('asm_flat_rate')">ASM Rate <span class="sort-arrow" id="sort-asm_flat_rate"></span></th>
+          <th onclick="sortList('num_locations')"># Locs <span class="sort-arrow" id="sort-num_locations"></span></th>
+          <th onclick="sortList('days_since_activity')">Days Since Activity <span class="sort-arrow" id="sort-days_since_activity"></span></th>
+          <th onclick="sortList('opportunity_owner')">Owner <span class="sort-arrow" id="sort-opportunity_owner"></span></th>
+        </tr>
+      </thead>
+      <tbody id="listBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Detail panel -->
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+<div class="detail-panel" id="detailPanel">
+  <div class="panel-header">
+    <div class="panel-account" id="panelAccount"></div>
+    <div class="panel-opp" id="panelOpp"></div>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://idbnpxedwpjrflsqweyh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYm5weGVkd3BqcmZsc3F3ZXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNTY3MDYsImV4cCI6MjA5MjkzMjcwNn0.PL7ftdQbTtkCnfFa3Mwo2H3w_uPXuTh_0o75cu3_FLU';
+
+const STAGES = [
+  { key: 'Sales Qualified Lead (SQL)', label: 'SQL',          cls: 'stage-sql'       },
+  { key: 'Value Selling',              label: 'Value Selling', cls: 'stage-value'     },
+  { key: 'Enrolling',                  label: 'Enrolling',     cls: 'stage-enrolling' },
+  { key: 'Lost',                       label: 'Lost',          cls: 'stage-lost'      },
+  { key: 'Closed Won',                 label: 'Closed Won',    cls: 'stage-won'       },
+];
+
+let allDeals = [];
+let filteredDeals = [];
+let currentView = 'kanban';
+let sortCol = 'close_date';
+let sortDir = 1;
+let openDeal = null;
+
+async function loadData() {
+  const btn = document.getElementById('syncStatusBtn');
+  const label = document.getElementById('syncLabel');
+  btn.classList.add('syncing');
+  label.textContent = 'Loading...';
+
+  try {
+    let all = [], page = 0, pageSize = 1000;
+    while (true) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/tbl_opportunities?select=*&order=close_date.asc&limit=${pageSize}&offset=${page * pageSize}`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      const data = await res.json();
+      all = all.concat(data);
+      if (data.length < pageSize) break;
+      page++;
+    }
+    allDeals = all;
+    populateOwnerFilter();
+    applyFilters();
+  } catch(e) {
+    document.getElementById('kanbanBoard').innerHTML = `<div class="loading" style="color:var(--red)">Failed to load: ${e.message}</div>`;
+  }
+
+  btn.classList.remove('syncing');
+  label.textContent = 'Refresh';
+}
+
+function populateOwnerFilter() {
+  const owners = [...new Set(allDeals.map(d => d.opportunity_owner).filter(Boolean))].sort();
+  const sel = document.getElementById('ownerFilter');
+  sel.innerHTML = '<option value="">All reps</option>' + owners.map(o => `<option>${o}</option>`).join('');
+}
+
+function clearFilters() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('stageFilter').value = '';
+  document.getElementById('ownerFilter').value = '';
+  document.getElementById('datePreset').value = '';
+  document.getElementById('dateFrom').value = '';
+  document.getElementById('dateTo').value = '';
+  document.getElementById('customDateInputs').style.display = 'none';
+  window._dateFrom = null;
+  window._dateTo = null;
+  applyFilters();
+}
+
+function applyDatePreset() {
+  const preset = document.getElementById('datePreset').value;
+  const customInputs = document.getElementById('customDateInputs');
+  const now = new Date();
+  let from = null, to = null;
+
+  if (preset === 'custom') {
+    customInputs.style.display = 'flex';
+    return;
+  }
+  customInputs.style.display = 'none';
+  document.getElementById('dateFrom').value = '';
+  document.getElementById('dateTo').value = '';
+
+  if (preset === 'this_month') {
+    from = new Date(now.getFullYear(), now.getMonth(), 1);
+    to   = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  } else if (preset === 'last_30') {
+    from = new Date(now - 30 * 864e5);
+    to   = now;
+  } else if (preset === 'last_60') {
+    from = new Date(now - 60 * 864e5);
+    to   = now;
+  } else if (preset === 'last_90') {
+    from = new Date(now - 90 * 864e5);
+    to   = now;
+  } else if (preset === 'this_quarter') {
+    const q = Math.floor(now.getMonth() / 3);
+    from = new Date(now.getFullYear(), q * 3, 1);
+    to   = new Date(now.getFullYear(), q * 3 + 3, 0);
+  } else if (preset === 'this_year') {
+    from = new Date(now.getFullYear(), 0, 1);
+    to   = new Date(now.getFullYear(), 11, 31);
+  }
+
+  // Store computed dates for applyFilters to use
+  window._dateFrom = from;
+  window._dateTo   = to;
+  applyFilters();
+}
+
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const stage  = document.getElementById('stageFilter').value;
+  const owner  = document.getElementById('ownerFilter').value;
+  const preset = document.getElementById('datePreset').value;
+
+  // Resolve date range
+  let dateFrom = null, dateTo = null;
+  if (preset === 'custom') {
+    const f = document.getElementById('dateFrom').value;
+    const t = document.getElementById('dateTo').value;
+    if (f) dateFrom = new Date(f);
+    if (t) dateTo   = new Date(t + 'T23:59:59');
+  } else if (preset && window._dateFrom) {
+    dateFrom = window._dateFrom;
+    dateTo   = window._dateTo;
+  }
+
+  const closedStages = ['Lost', 'Closed Won'];
+  const openStages   = ['Sales Qualified Lead (SQL)', 'Value Selling', 'Enrolling'];
+
+  filteredDeals = allDeals.filter(d => {
+    if (search) {
+      const hay = [
+        d.account_name, d.opportunity_name, d.fts_id,
+        d.contact_name, d.contact_email, d.contact_phone,
+        d.opportunity_owner, d.additional_rep, d.industry,
+        d.accounting_package, d.city, d.state, d.product_name,
+        d.lead_source, d.closed_reason, d.description
+      ].map(v => (v||'').toLowerCase()).join(' ');
+      const notes = (d._notes||'').toLowerCase();
+      if (!hay.includes(search) && !notes.includes(search)) return false;
+    }
+    if (stage === '__open__'   && !openStages.includes(d.stage))   return false;
+    if (stage === '__closed__' && !closedStages.includes(d.stage)) return false;
+    if (stage && stage !== '__open__' && stage !== '__closed__' && d.stage !== stage) return false;
+    if (owner && d.opportunity_owner !== owner) return false;
+    if (dateFrom || dateTo) {
+      const cd = d.close_date ? new Date(d.close_date) : null;
+      if (!cd) return false;
+      if (dateFrom && cd < dateFrom) return false;
+      if (dateTo   && cd > dateTo)   return false;
+    }
+    return true;
+  });
+
+  // Show/hide clear button
+  const hasFilter = search || stage || owner || preset;
+  document.getElementById('clearBtn').style.display = hasFilter ? 'inline-block' : 'none';
+
+  updateStats();
+  if (currentView === 'kanban') renderKanban();
+  else renderList();
+}
+
+function updateStats() {
+  const active = filteredDeals.filter(d => d.stage !== 'Lost' && d.stage !== 'Closed Won');
+  const totalRate = active.reduce((s, d) => s + (parseFloat(d.asm_flat_rate)||0), 0);
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--accent)"></div><strong>${filteredDeals.length}</strong> deals</div>
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--accent2)"></div><strong>${active.length}</strong> active</div>
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--gold)"></div><strong>$${totalRate.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0})}</strong> pipeline rate</div>
+  `;
+}
+
+function stageClass(stage) {
+  if (!stage) return '';
+  const s = stage.toLowerCase();
+  if (s.includes('sql') || s.includes('qualified')) return 'stage-sql';
+  if (s.includes('value')) return 'stage-value';
+  if (s.includes('enroll')) return 'stage-enrolling';
+  if (s.includes('lost')) return 'stage-lost';
+  if (s.includes('won')) return 'stage-won';
+  return '';
+}
+
+function fmt(val, type) {
+  if (val === null || val === undefined || val === '') return '—';
+  if (type === 'currency') return '$' + parseFloat(val).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  if (type === 'date') return new Date(val).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'2-digit'});
+  return val;
+}
+
+function daysClass(d) {
+  if (!d && d !== 0) return '';
+  if (d > 14) return 'danger';
+  if (d > 7) return 'warn';
+  return 'good';
+}
+
+function renderKanban() {
+  const board = document.getElementById('kanbanBoard');
+  const activeStages = STAGES.filter(stage => filteredDeals.some(d => d.stage === stage.key));
+  const stagesToShow = activeStages.length > 0 ? activeStages : STAGES;
+  board.innerHTML = stagesToShow.map(stage => {
+    const cards = filteredDeals.filter(d => d.stage === stage.key);
+    const total = cards.reduce((s,d) => s + (parseFloat(d.asm_flat_rate)||0), 0);
+    return `
+    <div class="kanban-col ${stage.cls}">
+      <div class="col-header">
+        <div class="col-title">
+          <div class="col-dot"></div>
+          <div class="col-name">${stage.label}</div>
+          <div class="col-count">${cards.length}</div>
+        </div>
+        <div class="col-value">${total > 0 ? '$'+total.toLocaleString('en-US',{maximumFractionDigits:0}) : ''}</div>
+      </div>
+      <div class="col-cards">
+        ${cards.length === 0 ? '<div class="empty-col">No deals</div>' : cards.map(d => dealCard(d, stage.cls)).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function dealCard(d, stageCls) {
+  const days = d.days_since_activity;
+  const dc = daysClass(days);
+  return `
+  <div class="deal-card ${stageCls}" onclick="openDetail('${d.opportunity_id}')">
+    <div class="card-account">${d.account_name || '—'}</div>
+    <div class="card-fields">
+      <div class="card-field">
+        <div class="field-label">Close Date</div>
+        <div class="field-value">${fmt(d.close_date, 'date')}</div>
+      </div>
+      <div class="card-field">
+        <div class="field-label">ASM Rate</div>
+        <div class="field-value">${d.asm_flat_rate ? '$'+parseFloat(d.asm_flat_rate).toLocaleString() : '—'}</div>
+      </div>
+      <div class="card-field">
+        <div class="field-label"># Locations</div>
+        <div class="field-value">${d.num_locations || '—'}</div>
+      </div>
+      <div class="card-field">
+        <div class="field-label">Days Since Act.</div>
+        <div class="field-value ${dc}">${days !== null && days !== undefined ? days+'d' : '—'}</div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <div class="card-owner">${d.opportunity_owner || '—'}</div>
+      <div class="card-stage-pill">${d.stage || '—'}</div>
+    </div>
+  </div>`;
+}
+
+function renderList() {
+  const sorted = [...filteredDeals].sort((a,b) => {
+    let av = a[sortCol] ?? '', bv = b[sortCol] ?? '';
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    return av < bv ? -sortDir : av > bv ? sortDir : 0;
+  });
+
+  document.getElementById('listBody').innerHTML = sorted.map(d => {
+    const sc = stageClass(d.stage);
+    const dc = daysClass(d.days_since_activity);
+    return `
+    <tr onclick="openDetail('${d.opportunity_id}')">
+      <td class="primary">${d.account_name || '—'}</td>
+      <td><span class="stage-badge ${sc}">${d.stage || '—'}</span></td>
+      <td class="mono">${fmt(d.close_date,'date')}</td>
+      <td class="mono">${d.asm_flat_rate ? '$'+parseFloat(d.asm_flat_rate).toLocaleString() : '—'}</td>
+      <td class="mono">${d.num_locations || '—'}</td>
+      <td class="mono ${dc === 'danger' ? 'days-danger' : dc === 'warn' ? 'days-warn' : ''}">${d.days_since_activity !== null && d.days_since_activity !== undefined ? d.days_since_activity+'d' : '—'}</td>
+      <td>${d.opportunity_owner || '—'}</td>
+    </tr>`;
+  }).join('');
+
+  document.querySelectorAll('[id^="sort-"]').forEach(el => el.textContent = '');
+  const arrow = document.getElementById(`sort-${sortCol}`);
+  if (arrow) arrow.textContent = sortDir === 1 ? '↑' : '↓';
+}
+
+function sortList(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = 1; }
+  renderList();
+}
+
+function switchView(view) {
+  currentView = view;
+  document.getElementById('kanbanView').classList.toggle('hidden', view !== 'kanban');
+  document.getElementById('listView').classList.toggle('hidden', view !== 'list');
+  document.getElementById('tabKanban').classList.toggle('active', view === 'kanban');
+  document.getElementById('tabList').classList.toggle('active', view === 'list');
+  if (view === 'list') renderList();
+}
+
+function openDetail(id) {
+  const d = allDeals.find(x => x.opportunity_id === id);
+  if (!d) return;
+  openDeal = d;
+  document.getElementById('panelAccount').textContent = d.account_name || '—';
+  document.getElementById('panelOpp').textContent = d.opportunity_name || '';
+
+  const sc = stageClass(d.stage);
+  document.getElementById('panelBody').innerHTML = `
+    <div class="panel-section">
+      <div class="panel-section-title">Pipeline</div>
+      <div class="panel-grid">
+        <div class="panel-field"><div class="pf-label">Stage</div><div class="pf-value"><span class="stage-badge ${sc}">${d.stage||'—'}</span></div></div>
+        <div class="panel-field"><div class="pf-label">Close Date</div><div class="pf-value mono">${fmt(d.close_date,'date')}</div></div>
+        <div class="panel-field"><div class="pf-label">ASM / Flat Rate</div><div class="pf-value mono">${fmt(d.asm_flat_rate,'currency')}</div></div>
+        <div class="panel-field"><div class="pf-label">Total Flat Rate</div><div class="pf-value mono">${fmt(d.total_flat_rate,'currency')}</div></div>
+        <div class="panel-field"><div class="pf-label">Setup Amount</div><div class="pf-value mono">${fmt(d.setup_amount,'currency')}</div></div>
+        <div class="panel-field"><div class="pf-label">Total Setup</div><div class="pf-value mono">${fmt(d.total_setup_amount,'currency')}</div></div>
+        <div class="panel-field"><div class="pf-label"># Locations</div><div class="pf-value mono">${d.num_locations||'—'}</div></div>
+        <div class="panel-field"><div class="pf-label">Days Since Activity</div><div class="pf-value mono">${d.days_since_activity !== null ? d.days_since_activity+'d' : '—'}</div></div>
+        <div class="panel-field full"><div class="pf-label">Closed Reason</div><div class="pf-value">${d.closed_reason||'—'}</div></div>
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-title">Account</div>
+      <div class="panel-grid">
+        <div class="panel-field"><div class="pf-label">Owner</div><div class="pf-value">${d.opportunity_owner||'—'}</div></div>
+        <div class="panel-field"><div class="pf-label">Additional Rep</div><div class="pf-value">${d.additional_rep||'—'}</div></div>
+        <div class="panel-field"><div class="pf-label">Industry</div><div class="pf-value">${d.industry||'—'}</div></div>
+        <div class="panel-field"><div class="pf-label">Accounting Pkg</div><div class="pf-value">${d.accounting_package||'—'}</div></div>
+        <div class="panel-field"><div class="pf-label">Lead Source</div><div class="pf-value">${d.lead_source||'—'}</div></div>
+        <div class="panel-field"><div class="pf-label">Product</div><div class="pf-value">${d.product_name||'—'}</div></div>
+        <div class="panel-field full"><div class="pf-label">Location</div><div class="pf-value">${[d.city,d.state,d.zip].filter(Boolean).join(', ')||'—'}</div></div>
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-title">Contact</div>
+      <div class="panel-grid">
+        <div class="panel-field"><div class="pf-label">Name</div><div class="pf-value">${d.contact_name||'—'}</div></div>
+        <div class="panel-field"><div class="pf-label">Title</div><div class="pf-value">${d.contact_title||'—'}</div></div>
+        <div class="panel-field"><div class="pf-label">Phone</div><div class="pf-value mono">${d.contact_phone||'—'}</div></div>
+        <div class="panel-field"><div class="pf-label">Email</div><div class="pf-value">${d.contact_email||'—'}</div></div>
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-title">Notes & Enrichment</div>
+      <div class="panel-grid">
+        <div class="panel-field full">
+          <div class="pf-label">Current Price</div>
+          <input class="enrich-input" id="enrichPrice" type="number" step="0.01" placeholder="Enter current price..." value="">
+        </div>
+        <div class="panel-field full">
+          <div class="pf-label">Notes</div>
+          <textarea class="enrich-input" id="enrichNotes" placeholder="Add notes..."></textarea>
+        </div>
+      </div>
+      <button class="save-btn" id="saveEnrichBtn" onclick="saveEnrichment()">Save</button>
+      <span class="save-msg hidden" id="saveMsg">Saved ✓</span>
+    </div>
+    ${d.description ? `<div class="panel-section"><div class="panel-section-title">Description</div><div class="panel-field" style="grid-column:1/-1"><div class="pf-value" style="white-space:pre-wrap;font-size:12px;color:var(--text2);line-height:1.6">${d.description}</div></div></div>` : ''}
+  `;
+
+  loadEnrichment((d.fts_id || d.account_id || '').toString().trim());
+  document.getElementById('panelOverlay').classList.add('open');
+  document.getElementById('detailPanel').classList.add('open');
+}
+
+async function loadEnrichment(key) {
+  if (!key) return;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/tbl_enrichment?or=(fts_id.eq.${encodeURIComponent(key)},opportunity_id.eq.${encodeURIComponent(openDeal ? openDeal.opportunity_id : key)})&select=*`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    const data = await res.json();
+    if (data && data[0]) {
+      document.getElementById('enrichPrice').value = data[0].current_price || '';
+      document.getElementById('enrichNotes').value = data[0].notes || '';
+      // Cache notes on deal object so search can find them
+      if (openDeal) openDeal._notes = data[0].notes || '';
+      const deal = allDeals.find(x => x.opportunity_id === (openDeal ? openDeal.opportunity_id : ''));
+      if (deal) deal._notes = data[0].notes || '';
+    }
+  } catch(e) {}
+}
+
+async function saveEnrichment() {
+  const btn = document.getElementById('saveEnrichBtn');
+  const msg = document.getElementById('saveMsg');
+  btn.disabled = true;
+  const key = (openDeal.fts_id || openDeal.account_id || '').toString().trim();
+  const payload = {
+    fts_id: key,
+    account_id: openDeal.account_id,
+    opportunity_id: openDeal.opportunity_id,
+    current_price: parseFloat(document.getElementById('enrichPrice').value) || null,
+    notes: document.getElementById('enrichNotes').value || null,
+    updated_at: new Date().toISOString(),
+    updated_by: 'Tom Burke'
+  };
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/tbl_enrichment`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify(payload)
+    });
+    msg.classList.remove('hidden');
+    setTimeout(() => msg.classList.add('hidden'), 2500);
+  } catch(e) { alert('Save failed: ' + e.message); }
+  btn.disabled = false;
+}
+
+function closePanel() {
+  document.getElementById('panelOverlay').classList.remove('open');
+  document.getElementById('detailPanel').classList.remove('open');
+  openDeal = null;
+}
+
+// ── AUTH ──────────────────────────────────────────
+let currentUser = null;
+
+async function doLogin() {
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn      = document.getElementById('loginBtn');
+  const errEl    = document.getElementById('loginError');
+  errEl.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || data.msg || 'Login failed');
+
+    // Store session
+    currentUser = { email, token: data.access_token };
+
+    // Look up user profile from tbl_users
+    const profileRes = await fetch(`${SUPABASE_URL}/rest/v1/tbl_users?email=eq.${encodeURIComponent(email)}&select=*`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${data.access_token}` }
+    });
+    const profiles = await profileRes.json();
+    if (!profiles || profiles.length === 0) throw new Error('User profile not found. Contact your admin.');
+
+    const profile = profiles[0];
+    currentUser.sfName  = profile.sf_owner_name;
+    currentUser.role    = profile.role;
+    currentUser.display = profile.sf_owner_name;
+
+    // Update UI
+    document.getElementById('userAvatar').textContent = profile.sf_owner_name.charAt(0).toUpperCase();
+    document.getElementById('userName').textContent   = profile.sf_owner_name;
+
+    // Hide login, show portal
+    document.getElementById('loginOverlay').style.display = 'none';
+
+    // Load data — admin sees all, rep sees own deals
+    await loadData();
+
+  } catch(e) {
+    errEl.textContent = e.message;
+    btn.disabled = false;
+    btn.textContent = 'Sign in';
+  }
+}
+
+async function loadData() {
+  const btn   = document.getElementById('syncStatusBtn');
+  const label = document.getElementById('syncLabel');
+  btn.classList.add('syncing');
+  label.textContent = 'Loading...';
+
+  const headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${currentUser ? currentUser.token : SUPABASE_KEY}`
+  };
+
+  // Build owner filter for reps
+  const ownerParam = (currentUser && currentUser.role === 'rep')
+    ? `&opportunity_owner=eq.${encodeURIComponent(currentUser.sfName)}`
+    : '';
+
+  try {
+    let all = [], page = 0, pageSize = 1000;
+    while (true) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/tbl_opportunities?select=*&order=close_date.asc&limit=${pageSize}&offset=${page * pageSize}${ownerParam}`, { headers });
+      const data = await res.json();
+      all = all.concat(data);
+      if (data.length < pageSize) break;
+      page++;
+    }
+    allDeals = all;
+
+    // Hide owner filter for reps — they only see their own deals
+    if (currentUser && currentUser.role === 'rep') {
+      document.getElementById('ownerFilter').parentElement.style.display = 'none';
+    }
+
+    populateOwnerFilter();
+    applyFilters();
+  } catch(e) {
+    document.getElementById('kanbanBoard').innerHTML = `<div class="loading" style="color:var(--red)">Failed to load: ${e.message}</div>`;
+  }
+
+  btn.classList.remove('syncing');
+  label.textContent = 'Refresh';
+}
+</script>
+</body>
+</html>
