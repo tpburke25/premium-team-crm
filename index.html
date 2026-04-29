@@ -416,6 +416,10 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
   <div class="panel-header">
     <div class="panel-account" id="panelAccount"></div>
     <div class="panel-opp" id="panelOpp"></div>
+    <a id="panelSFLink" href="#" target="_blank" rel="noopener" style="display:none;align-items:center;gap:5px;font-size:12px;color:var(--text3);text-decoration:none;margin-top:8px;padding:5px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;width:fit-content;transition:all 0.15s" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='var(--text3)';this.style.borderColor='var(--border)'">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      View in Salesforce
+    </a>
     <button class="panel-close" onclick="closePanel()">✕</button>
   </div>
   <div class="panel-body" id="panelBody"></div>
@@ -824,6 +828,13 @@ function openDetail(id) {
   openDeal = d;
   document.getElementById('panelAccount').textContent = d.account_name || '—';
   document.getElementById('panelOpp').textContent = d.opportunity_name || '';
+  const sfLink = document.getElementById('panelSFLink');
+  if (d.account_id) {
+    sfLink.href = `https://fintech.lightning.force.com/lightning/r/Account/${d.account_id}/view`;
+    sfLink.style.display = 'inline-flex';
+  } else {
+    sfLink.style.display = 'none';
+  }
 
   const sc = stageClass(d.stage);
   document.getElementById('panelBody').innerHTML = `
