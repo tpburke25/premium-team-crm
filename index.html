@@ -174,6 +174,11 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
 .login-submit:disabled { opacity: 0.4; cursor: not-allowed; }
 .login-error { font-size: 13px; color: var(--red); margin-top: 10px; text-align: center; min-height: 20px; }
 .login-footer { font-size: 12px; color: var(--text3); text-align: center; margin-top: 1.5rem; }
+.forgot-link { display: block; text-align: center; margin-top: 14px; font-size: 13px; color: var(--text3); cursor: pointer; text-decoration: none; transition: color 0.15s; }
+.forgot-link:hover { color: var(--accent); }
+.login-back { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text3); cursor: pointer; margin-bottom: 1.5rem; transition: color 0.15s; border: none; background: none; font-family: 'DM Sans', sans-serif; padding: 0; }
+.login-back:hover { color: var(--text); }
+.success-box { background: color-mix(in srgb, var(--green) 12%, transparent); border: 1px solid color-mix(in srgb, var(--green) 30%, transparent); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--green); margin-top: 10px; text-align: center; line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -201,6 +206,38 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
     <button class="login-submit" id="loginBtn" onclick="doLogin()">Sign in</button>
     <div class="login-error" id="loginError"></div>
     <div class="login-footer">Premium Team CRM · Powered by Supabase</div>
+    <a class="forgot-link" onclick="showForgot()">Forgot your password?</a>
+  </div>
+
+  <!-- FORGOT PASSWORD SCREEN -->
+  <div id="forgotScreen" style="display:none; width:100%; max-width:380px; padding:2rem;">
+    <button class="login-back" onclick="showLogin()">← Back to sign in</button>
+    <div class="login-title">Reset password</div>
+    <div class="login-sub" style="margin-bottom:1.5rem;">Enter your email and we'll send you a reset link.</div>
+    <div class="login-field">
+      <label class="login-label">Email</label>
+      <input class="login-input" id="forgotEmail" type="email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')doForgot()">
+    </div>
+    <button class="login-submit" id="forgotBtn" onclick="doForgot()">Send reset link</button>
+    <div class="login-error" id="forgotError"></div>
+    <div class="success-box" id="forgotSuccess" style="display:none">Check your email for a password reset link. It may take a minute to arrive.</div>
+  </div>
+
+  <!-- RESET PASSWORD SCREEN (shown when redirected from email link) -->
+  <div id="resetScreen" style="display:none; width:100%; max-width:380px; padding:2rem;">
+    <div class="login-title">Set new password</div>
+    <div class="login-sub" style="margin-bottom:1.5rem;">Choose a strong password for your account.</div>
+    <div class="login-field">
+      <label class="login-label">New Password</label>
+      <input class="login-input" id="newPassword" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doReset()">
+    </div>
+    <div class="login-field">
+      <label class="login-label">Confirm Password</label>
+      <input class="login-input" id="confirmPassword" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doReset()">
+    </div>
+    <button class="login-submit" id="resetBtn" onclick="doReset()">Update password</button>
+    <div class="login-error" id="resetError"></div>
+    <div class="success-box" id="resetSuccess" style="display:none">Password updated successfully! Redirecting to sign in...</div>
   </div>
 </div>
 
@@ -721,6 +758,102 @@ function closePanel() {
   document.getElementById('panelOverlay').classList.remove('open');
   document.getElementById('detailPanel').classList.remove('open');
   openDeal = null;
+}
+
+// ── AUTH ──────────────────────────────────────────
+
+// Check if this is a password reset redirect
+(function checkResetRedirect() {
+  const hash = window.location.hash;
+  if (hash && hash.includes('type=recovery')) {
+    const params = new URLSearchParams(hash.replace('#', '?'));
+    const accessToken = params.get('access_token');
+    if (accessToken) {
+      window._resetToken = accessToken;
+      showReset();
+    }
+  }
+})();
+
+function showLogin() {
+  document.querySelector('.login-box').style.display = 'block';
+  document.getElementById('forgotScreen').style.display = 'none';
+  document.getElementById('resetScreen').style.display = 'none';
+}
+
+function showForgot() {
+  document.querySelector('.login-box').style.display = 'none';
+  document.getElementById('forgotScreen').style.display = 'block';
+  document.getElementById('resetScreen').style.display = 'none';
+}
+
+function showReset() {
+  document.querySelector('.login-box').style.display = 'none';
+  document.getElementById('forgotScreen').style.display = 'none';
+  document.getElementById('resetScreen').style.display = 'block';
+}
+
+async function doForgot() {
+  const email  = document.getElementById('forgotEmail').value.trim();
+  const btn    = document.getElementById('forgotBtn');
+  const errEl  = document.getElementById('forgotError');
+  const succEl = document.getElementById('forgotSuccess');
+  errEl.textContent = '';
+  succEl.style.display = 'none';
+  if (!email) { errEl.textContent = 'Please enter your email.'; return; }
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+      body: JSON.stringify({ email, redirect_to: 'https://tpburke25.github.io/premium-team-crm/' })
+    });
+    if (!res.ok) {
+      const d = await res.json();
+      throw new Error(d.msg || d.error_description || 'Failed to send reset email');
+    }
+    succEl.style.display = 'block';
+  } catch(e) {
+    errEl.textContent = e.message;
+  }
+  btn.disabled = false;
+  btn.textContent = 'Send reset link';
+}
+
+async function doReset() {
+  const newPw  = document.getElementById('newPassword').value;
+  const confPw = document.getElementById('confirmPassword').value;
+  const btn    = document.getElementById('resetBtn');
+  const errEl  = document.getElementById('resetError');
+  const succEl = document.getElementById('resetSuccess');
+  errEl.textContent = '';
+  if (!newPw) { errEl.textContent = 'Please enter a new password.'; return; }
+  if (newPw !== confPw) { errEl.textContent = 'Passwords do not match.'; return; }
+  if (newPw.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  btn.disabled = true;
+  btn.textContent = 'Updating...';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${window._resetToken}`
+      },
+      body: JSON.stringify({ password: newPw })
+    });
+    if (!res.ok) {
+      const d = await res.json();
+      throw new Error(d.msg || d.error_description || 'Failed to update password');
+    }
+    succEl.style.display = 'block';
+    setTimeout(() => { showLogin(); succEl.style.display = 'none'; }, 2500);
+  } catch(e) {
+    errEl.textContent = e.message;
+  }
+  btn.disabled = false;
+  btn.textContent = 'Update password';
 }
 
 // ── AUTH ──────────────────────────────────────────
