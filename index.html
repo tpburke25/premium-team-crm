@@ -126,6 +126,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .days-warn { color: var(--orange); }
 .days-danger { color: var(--red); }
 .sort-arrow { margin-left: 4px; opacity: 0.5; }
+.sort-wrap { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; }
+.sort-wrap label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+.sort-wrap select { background: transparent; border: none; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; padding: 0; }
+.sort-wrap select option { background: var(--surface2); color: var(--text); }
+.sort-dir-btn { background: transparent; border: none; color: var(--text3); cursor: pointer; font-size: 14px; padding: 0 2px; line-height: 1; transition: color 0.15s; }
+.sort-dir-btn:hover { color: var(--text); }
 .clear-btn { padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text3); font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
 .clear-btn:hover { background: var(--surface2); color: var(--red); border-color: var(--red); }
 .date-filter-wrap { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; }
@@ -358,6 +364,16 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
         <input type="date" class="date-input" id="dateTo" onchange="applyFilters()">
       </div>
     </div>
+    <div class="sort-wrap">
+      <label>Sort</label>
+      <select id="sortSelect" onchange="applySort()">
+        <option value="close_date">Close Date</option>
+        <option value="created_date">Created Date</option>
+        <option value="days_since_activity">Days Since Activity</option>
+        <option value="num_locations"># Locations</option>
+      </select>
+      <button class="sort-dir-btn" id="sortDirBtn" onclick="toggleSortDir()" title="Toggle direction">↑</button>
+    </div>
     <div class="tab-group">
       <button class="tab-btn active" id="tabKanban" onclick="switchView('kanban')">⊞ Board</button>
       <button class="tab-btn" id="tabList" onclick="switchView('list')">≡ List</button>
@@ -423,6 +439,8 @@ let filteredDeals = [];
 let currentView = 'kanban';
 let sortCol = 'close_date';
 let sortDir = 1;
+let globalSortCol = 'close_date';
+let globalSortDir = 1; // 1 = asc, -1 = desc
 let openDeal = null;
 let selectedStages = new Set();
 let selectedOwners = new Set();
@@ -536,6 +554,39 @@ function renderOwnerChecks() {
   else if (selectedOwners.size === 1) btn.innerHTML = [...selectedOwners][0].split(' ')[0];
   else btn.innerHTML = `Reps <span class="ms-badge">${selectedOwners.size}</span>`;
   document.getElementById('ownerBtn').classList.toggle('active', selectedOwners.size > 0);
+}
+
+function applySort() {
+  globalSortCol = document.getElementById('sortSelect').value;
+  applyFilters();
+  if (currentView === 'list') renderList();
+}
+
+function toggleSortDir() {
+  globalSortDir *= -1;
+  document.getElementById('sortDirBtn').textContent = globalSortDir === 1 ? '↑' : '↓';
+  applyFilters();
+  if (currentView === 'list') renderList();
+}
+
+function sortDeals(deals) {
+  return [...deals].sort((a, b) => {
+    let av = a[globalSortCol];
+    let bv = b[globalSortCol];
+    // Handle nulls — push to end regardless of direction
+    if (av === null || av === undefined) return 1;
+    if (bv === null || bv === undefined) return -1;
+    // Numeric fields
+    if (['days_since_activity', 'num_locations', 'asm_flat_rate'].includes(globalSortCol)) {
+      return (parseFloat(av) - parseFloat(bv)) * globalSortDir;
+    }
+    // Date fields
+    if (['close_date', 'created_date'].includes(globalSortCol)) {
+      return (new Date(av) - new Date(bv)) * globalSortDir;
+    }
+    // Text
+    return av.toString().toLowerCase().localeCompare(bv.toString().toLowerCase()) * globalSortDir;
+  });
 }
 
 function applyDatePreset() {
@@ -672,7 +723,7 @@ function renderKanban() {
   const activeStages = STAGES.filter(stage => filteredDeals.some(d => d.stage === stage.key));
   const stagesToShow = activeStages.length > 0 ? activeStages : STAGES;
   board.innerHTML = stagesToShow.map(stage => {
-    const cards = filteredDeals.filter(d => d.stage === stage.key);
+    const cards = sortDeals(filteredDeals.filter(d => d.stage === stage.key));
     const total = cards.reduce((s,d) => s + (parseFloat(d.asm_flat_rate)||0), 0);
     return `
     <div class="kanban-col ${stage.cls}">
@@ -723,12 +774,7 @@ function dealCard(d, stageCls) {
 }
 
 function renderList() {
-  const sorted = [...filteredDeals].sort((a,b) => {
-    let av = a[sortCol] ?? '', bv = b[sortCol] ?? '';
-    if (typeof av === 'string') av = av.toLowerCase();
-    if (typeof bv === 'string') bv = bv.toLowerCase();
-    return av < bv ? -sortDir : av > bv ? sortDir : 0;
-  });
+  const sorted = sortDeals(filteredDeals);
 
   document.getElementById('listBody').innerHTML = sorted.map(d => {
     const sc = stageClass(d.stage);
@@ -746,13 +792,20 @@ function renderList() {
   }).join('');
 
   document.querySelectorAll('[id^="sort-"]').forEach(el => el.textContent = '');
-  const arrow = document.getElementById(`sort-${sortCol}`);
-  if (arrow) arrow.textContent = sortDir === 1 ? '↑' : '↓';
+  const arrow = document.getElementById(`sort-${globalSortCol}`);
+  if (arrow) arrow.textContent = globalSortDir === 1 ? '↑' : '↓';
 }
 
 function sortList(col) {
-  if (sortCol === col) sortDir *= -1;
-  else { sortCol = col; sortDir = 1; }
+  if (globalSortCol === col) {
+    globalSortDir *= -1;
+    document.getElementById('sortDirBtn').textContent = globalSortDir === 1 ? '↑' : '↓';
+  } else {
+    globalSortCol = col;
+    globalSortDir = 1;
+    document.getElementById('sortSelect').value = col;
+    document.getElementById('sortDirBtn').textContent = '↑';
+  }
   renderList();
 }
 
