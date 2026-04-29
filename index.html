@@ -52,6 +52,21 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; }
 .filter-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--text2); font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; }
 .filter-select:focus { border-color: var(--accent); }
+.ms-wrap { position: relative; }
+.ms-btn { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; font-size: 13px; color: var(--text2); font-family: 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap; user-select: none; min-width: 120px; justify-content: space-between; transition: border 0.15s; }
+.ms-btn:hover, .ms-btn.open { border-color: var(--border2); color: var(--text); }
+.ms-btn.active { border-color: var(--accent); color: var(--accent); }
+.ms-arrow { font-size: 10px; opacity: 0.5; margin-left: 4px; }
+.ms-badge { background: var(--accent); color: #fff; border-radius: 10px; font-size: 10px; padding: 1px 6px; margin-left: 2px; font-weight: 600; }
+.ms-dropdown { position: absolute; top: calc(100% + 6px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 6px; min-width: 200px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.ms-wrap.open .ms-dropdown { display: block; }
+.ms-option { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; transition: background 0.1s; }
+.ms-option:hover { background: var(--surface3); color: var(--text); }
+.ms-option.selected { color: var(--text); }
+.ms-check { width: 15px; height: 15px; border: 1px solid var(--border2); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; transition: all 0.1s; }
+.ms-option.selected .ms-check { background: var(--accent); border-color: var(--accent); color: #fff; }
+.ms-divider { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+.ms-group-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); padding: 4px 10px 2px; }
 .tab-group { display: flex; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; }
 .tab-btn { padding: 7px 16px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: none; background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
 .tab-btn.active { background: var(--accent); color: #fff; }
@@ -113,9 +128,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .sort-arrow { margin-left: 4px; opacity: 0.5; }
 .clear-btn { padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text3); font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
 .clear-btn:hover { background: var(--surface2); color: var(--red); border-color: var(--red); }
-.date-filter-wrap { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 4px 6px; }
-.date-filter-wrap select { background: transparent; border: none; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; padding: 4px 2px; }
+.date-filter-wrap { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; }
+.date-filter-wrap select { background: transparent; border: none; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; padding: 0; }
 .date-filter-wrap select:focus { color: var(--text); }
+.date-filter-wrap select option { background: var(--surface2); color: var(--text); }
 .date-inputs { display: flex; align-items: center; gap: 4px; }
 .date-sep { font-size: 11px; color: var(--text3); }
 .date-input { background: transparent; border: none; border-bottom: 1px solid var(--border2); color: var(--text2); font-size: 12px; font-family: 'DM Mono', monospace; outline: none; width: 100px; padding: 2px 4px; cursor: pointer; }
@@ -284,19 +300,46 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
       <span class="search-icon">⌕</span>
       <input class="search-input" id="searchInput" placeholder="Search accounts, FTS ID, contact..." oninput="applyFilters()">
     </div>
-    <select class="filter-select" id="stageFilter" onchange="applyFilters()">
-      <option value="">All stages</option>
-      <option value="__open__">Open</option>
-      <option value="__closed__">Closed</option>
-      <option value="Sales Qualified Lead (SQL)">— SQL</option>
-      <option value="Value Selling">— Value Selling</option>
-      <option value="Enrolling">— Enrolling</option>
-      <option value="Lost">— Lost</option>
-      <option value="Closed Won">— Closed Won</option>
-    </select>
-    <select class="filter-select" id="ownerFilter" onchange="applyFilters()">
-      <option value="">All reps</option>
-    </select>
+    <!-- Stage multiselect -->
+    <div class="ms-wrap" id="stageWrap">
+      <div class="ms-btn" id="stageBtn" onclick="toggleMs('stageWrap')">
+        <span id="stageBtnLabel">All stages</span><span class="ms-arrow">▾</span>
+      </div>
+      <div class="ms-dropdown" id="stageDropdown">
+        <div class="ms-group-label">Quick select</div>
+        <div class="ms-option" id="ms-stage-__open__" onclick="toggleStageGroup('open')">
+          <div class="ms-check" id="chk-stage-__open__"></div>Open
+        </div>
+        <div class="ms-option" id="ms-stage-__closed__" onclick="toggleStageGroup('closed')">
+          <div class="ms-check" id="chk-stage-__closed__"></div>Closed
+        </div>
+        <hr class="ms-divider">
+        <div class="ms-group-label">Individual stages</div>
+        <div class="ms-option" onclick="toggleStage('Sales Qualified Lead (SQL)')">
+          <div class="ms-check" id="chk-stage-sql"></div>SQL
+        </div>
+        <div class="ms-option" onclick="toggleStage('Value Selling')">
+          <div class="ms-check" id="chk-stage-vs"></div>Value Selling
+        </div>
+        <div class="ms-option" onclick="toggleStage('Enrolling')">
+          <div class="ms-check" id="chk-stage-enr"></div>Enrolling
+        </div>
+        <div class="ms-option" onclick="toggleStage('Lost')">
+          <div class="ms-check" id="chk-stage-lost"></div>Lost
+        </div>
+        <div class="ms-option" onclick="toggleStage('Closed Won')">
+          <div class="ms-check" id="chk-stage-won"></div>Closed Won
+        </div>
+      </div>
+    </div>
+
+    <!-- Owner multiselect -->
+    <div class="ms-wrap" id="ownerWrap">
+      <div class="ms-btn" id="ownerBtn" onclick="toggleMs('ownerWrap')">
+        <span id="ownerBtnLabel">All reps</span><span class="ms-arrow">▾</span>
+      </div>
+      <div class="ms-dropdown" id="ownerDropdown"></div>
+    </div>
     <div class="date-filter-wrap">
       <select id="datePreset" onchange="applyDatePreset()">
         <option value="">All dates</option>
@@ -386,21 +429,113 @@ let openDeal = null;
 
 function populateOwnerFilter() {
   const owners = [...new Set(allDeals.map(d => d.opportunity_owner).filter(Boolean))].sort();
-  const sel = document.getElementById('ownerFilter');
-  sel.innerHTML = '<option value="">All reps</option>' + owners.map(o => `<option>${o}</option>`).join('');
+  const dd = document.getElementById('ownerDropdown');
+  dd.innerHTML = owners.map(o => `
+    <div class="ms-option ms-owner-opt" data-owner="${o}" onclick="toggleOwner('${o}')">
+      <div class="ms-check"></div>${o}
+    </div>`).join('');
+  renderOwnerChecks();
 }
 
 function clearFilters() {
   document.getElementById('searchInput').value = '';
-  document.getElementById('stageFilter').value = '';
-  document.getElementById('ownerFilter').value = '';
   document.getElementById('datePreset').value = '';
   document.getElementById('dateFrom').value = '';
   document.getElementById('dateTo').value = '';
   document.getElementById('customDateInputs').style.display = 'none';
   window._dateFrom = null;
   window._dateTo = null;
+  selectedStages.clear();
+  selectedOwners.clear();
+  renderStageChecks();
+  renderOwnerChecks();
   applyFilters();
+}
+
+// ── MULTISELECT STATE ─────────────────────────────
+const OPEN_STAGES   = ['Sales Qualified Lead (SQL)', 'Value Selling', 'Enrolling'];
+const CLOSED_STAGES = ['Lost', 'Closed Won'];
+let selectedStages = new Set();
+let selectedOwners = new Set();
+
+function toggleMs(wrapId) {
+  const wrap = document.getElementById(wrapId);
+  const isOpen = wrap.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.ms-wrap.open').forEach(w => w.classList.remove('open'));
+  if (!isOpen) wrap.classList.add('open');
+}
+
+document.addEventListener('click', function(e) {
+  document.querySelectorAll('.ms-wrap').forEach(w => {
+    if (!w.contains(e.target)) w.classList.remove('open');
+  });
+});
+
+function toggleStage(stage) {
+  if (selectedStages.has(stage)) selectedStages.delete(stage);
+  else selectedStages.add(stage);
+  renderStageChecks();
+  applyFilters();
+}
+
+function toggleStageGroup(group) {
+  const stages = group === 'open' ? OPEN_STAGES : CLOSED_STAGES;
+  const allSelected = stages.every(s => selectedStages.has(s));
+  if (allSelected) stages.forEach(s => selectedStages.delete(s));
+  else stages.forEach(s => selectedStages.add(s));
+  renderStageChecks();
+  applyFilters();
+}
+
+function renderStageChecks() {
+  const stageMap = {
+    'Sales Qualified Lead (SQL)': 'sql',
+    'Value Selling': 'vs',
+    'Enrolling': 'enr',
+    'Lost': 'lost',
+    'Closed Won': 'won'
+  };
+  Object.entries(stageMap).forEach(([stage, key]) => {
+    const el = document.getElementById(`chk-stage-${key}`);
+    const opt = el ? el.closest('.ms-option') : null;
+    if (el) el.textContent = selectedStages.has(stage) ? '✓' : '';
+    if (opt) opt.classList.toggle('selected', selectedStages.has(stage));
+  });
+  const openSel = OPEN_STAGES.every(s => selectedStages.has(s));
+  const closedSel = CLOSED_STAGES.every(s => selectedStages.has(s));
+  const openEl = document.getElementById('chk-stage-__open__');
+  const closedEl = document.getElementById('chk-stage-__closed__');
+  if (openEl) { openEl.textContent = openSel ? '✓' : ''; openEl.closest('.ms-option').classList.toggle('selected', openSel); }
+  if (closedEl) { closedEl.textContent = closedSel ? '✓' : ''; closedEl.closest('.ms-option').classList.toggle('selected', closedSel); }
+  // Update button label
+  const btn = document.getElementById('stageBtnLabel');
+  if (selectedStages.size === 0) btn.innerHTML = 'All stages';
+  else if (selectedStages.size === 1) btn.innerHTML = [...selectedStages][0].replace('Sales Qualified Lead (SQL)', 'SQL');
+  else btn.innerHTML = `Stages <span class="ms-badge">${selectedStages.size}</span>`;
+  document.getElementById('stageBtn').classList.toggle('active', selectedStages.size > 0);
+}
+
+function toggleOwner(owner) {
+  if (selectedOwners.has(owner)) selectedOwners.delete(owner);
+  else selectedOwners.add(owner);
+  renderOwnerChecks();
+  applyFilters();
+}
+
+function renderOwnerChecks() {
+  document.querySelectorAll('.ms-owner-opt').forEach(el => {
+    const owner = el.dataset.owner;
+    const chk = el.querySelector('.ms-check');
+    const sel = selectedOwners.has(owner);
+    if (chk) chk.textContent = sel ? '✓' : '';
+    el.classList.toggle('selected', sel);
+  });
+  const btn = document.getElementById('ownerBtnLabel');
+  if (selectedOwners.size === 0) btn.innerHTML = 'All reps';
+  else if (selectedOwners.size === 1) btn.innerHTML = [...selectedOwners][0].split(' ')[0];
+  else btn.innerHTML = `Reps <span class="ms-badge">${selectedOwners.size}</span>`;
+  document.getElementById('ownerBtn').classList.toggle('active', selectedOwners.size > 0);
 }
 
 function applyDatePreset() {
@@ -446,8 +581,8 @@ function applyDatePreset() {
 
 function applyFilters() {
   const search = document.getElementById('searchInput').value.toLowerCase();
-  const stage  = document.getElementById('stageFilter').value;
-  const owner  = document.getElementById('ownerFilter').value;
+  const stage  = null; // handled by selectedStages
+  const owner  = null; // handled by selectedOwners
   const preset = document.getElementById('datePreset').value;
 
   // Resolve date range
@@ -477,10 +612,8 @@ function applyFilters() {
       const notes = (d._notes||'').toLowerCase();
       if (!hay.includes(search) && !notes.includes(search)) return false;
     }
-    if (stage === '__open__'   && !openStages.includes(d.stage))   return false;
-    if (stage === '__closed__' && !closedStages.includes(d.stage)) return false;
-    if (stage && stage !== '__open__' && stage !== '__closed__' && d.stage !== stage) return false;
-    if (owner && d.opportunity_owner !== owner) return false;
+    if (selectedStages.size > 0 && !selectedStages.has(d.stage)) return false;
+    if (selectedOwners.size > 0 && !selectedOwners.has(d.opportunity_owner)) return false;
     if (dateFrom || dateTo) {
       const cd = d.close_date ? new Date(d.close_date) : null;
       if (!cd) return false;
@@ -491,7 +624,7 @@ function applyFilters() {
   });
 
   // Show/hide clear button
-  const hasFilter = search || stage || owner || preset;
+  const hasFilter = search || selectedStages.size > 0 || selectedOwners.size > 0 || preset;
   document.getElementById('clearBtn').style.display = hasFilter ? 'inline-block' : 'none';
 
   updateStats();
@@ -898,7 +1031,8 @@ function doLogout() {
   document.getElementById('loginPassword').value = '';
   document.getElementById('loginError').textContent = '';
   document.getElementById('statsBar').innerHTML = '';
-  document.getElementById('ownerFilter').parentElement.style.display = '';
+  selectedStages.clear();
+  selectedOwners.clear();
   showLogin();
 }
 
