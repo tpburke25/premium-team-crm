@@ -779,6 +779,33 @@ function closePanel() {
 
 // ── AUTH ──────────────────────────────────────────
 
+// Restore session from localStorage on page load
+(function restoreSession() {
+  const saved = localStorage.getItem('crm_session');
+  if (!saved) return;
+  try {
+    const session = JSON.parse(saved);
+    if (!session.token) return;
+    currentUser = {
+      token: session.token,
+      email: session.email,
+      sfName: session.sfName,
+      role: session.role,
+      display: session.sfName
+    };
+    // Update UI
+    document.getElementById('userAvatar').textContent = session.sfName.charAt(0).toUpperCase();
+    document.getElementById('userName').textContent   = session.sfName;
+    document.getElementById('dropdownEmail').textContent = session.email;
+    document.getElementById('dropdownRole').textContent  = session.role === 'admin' ? 'Administrator' : 'Sales Rep';
+    // Hide login and load data
+    document.getElementById('loginOverlay').style.display = 'none';
+    loadData();
+  } catch(e) {
+    localStorage.removeItem('crm_session');
+  }
+})();
+
 // Check if this is a password reset redirect
 (function checkResetRedirect() {
   const hash = window.location.hash;
@@ -890,6 +917,7 @@ function doLogout() {
   currentUser = null;
   allDeals = [];
   filteredDeals = [];
+  localStorage.removeItem('crm_session');
   document.getElementById('loginOverlay').style.display = 'flex';
   document.getElementById('kanbanBoard').innerHTML = '<div class="loading"><div class="spinner"></div>Loading pipeline...</div>';
   document.getElementById('loginEmail').value = '';
@@ -938,6 +966,15 @@ async function doLogin() {
     document.getElementById('userName').textContent   = profile.sf_owner_name;
     document.getElementById('dropdownEmail').textContent = email;
     document.getElementById('dropdownRole').textContent  = profile.role === 'admin' ? 'Administrator' : 'Sales Rep';
+
+    // Persist session
+    localStorage.setItem('crm_session', JSON.stringify({
+      token: data.access_token,
+      refresh_token: data.refresh_token,
+      email,
+      sfName: profile.sf_owner_name,
+      role: profile.role
+    }));
 
     // Hide login, show portal
     document.getElementById('loginOverlay').style.display = 'none';
