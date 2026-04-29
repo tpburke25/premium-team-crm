@@ -424,6 +424,8 @@ let currentView = 'kanban';
 let sortCol = 'close_date';
 let sortDir = 1;
 let openDeal = null;
+let selectedStages = new Set();
+let selectedOwners = new Set();
 
 
 
@@ -455,8 +457,6 @@ function clearFilters() {
 // ── MULTISELECT STATE ─────────────────────────────
 const OPEN_STAGES   = ['Sales Qualified Lead (SQL)', 'Value Selling', 'Enrolling'];
 const CLOSED_STAGES = ['Lost', 'Closed Won'];
-let selectedStages = new Set();
-let selectedOwners = new Set();
 
 function toggleMs(wrapId) {
   const wrap = document.getElementById(wrapId);
