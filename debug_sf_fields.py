@@ -1,16 +1,13 @@
 """
-Debug script — prints raw Salesforce Opportunity field names
-Run this once to confirm correct API field names
+Debug script — prints Salesforce Account custom fields related to FTS/Activity/Accounting
 """
 
 import os
 import sys
-import json
 import requests
 
 SF_USERNAME     = os.environ['SF_USERNAME']
 SF_PASSWORD     = os.environ['SF_PASSWORD']
-SF_INSTANCE_URL = os.environ['SF_INSTANCE_URL']
 SF_LOGIN_URL    = 'https://login.salesforce.com'
 
 def sf_login():
@@ -24,7 +21,6 @@ def sf_login():
     if res.ok:
         data = res.json()
         return data['access_token'], data['instance_url']
-    # SOAP fallback
     import xml.etree.ElementTree as ET
     res = requests.post(f"{SF_LOGIN_URL}/services/Soap/u/57.0",
         headers={'Content-Type': 'text/xml', 'SOAPAction': 'login'},
@@ -44,33 +40,31 @@ def sf_login():
     instance = root.find('.//sf:serverUrl', ns).text.split('/services')[0]
     return token, instance
 
+def describe_object(token, instance, obj_name, keywords):
+    headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
+    res = requests.get(f"{instance}/services/data/v57.0/sobjects/{obj_name}/describe", headers=headers)
+    if not res.ok:
+        print(f"Failed to describe {obj_name}: {res.text}")
+        return
+    fields = res.json().get('fields', [])
+    print(f"\n=== {obj_name} CUSTOM FIELDS (filtered) ===")
+    custom = [f for f in fields if f['name'].endswith('__c') and
+              any(k in f['name'].lower() or k in f['label'].lower() for k in keywords)]
+    for f in sorted(custom, key=lambda x: x['name']):
+        print(f"  API Name: {f['name']:<50} Label: {f['label']}")
+    if not custom:
+        print("  No matching fields found — printing ALL custom fields:")
+        for f in sorted([f for f in fields if f['name'].endswith('__c')], key=lambda x: x['name']):
+            print(f"  API Name: {f['name']:<50} Label: {f['label']}")
+
 def main():
-    print("Logging in to Salesforce...")
+    print("Logging in...")
     token, instance = sf_login()
     print(f"Connected to {instance}")
 
-    # Get field metadata for Opportunity object
-    headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
-    res = requests.get(f"{instance}/services/data/v57.0/sobjects/Opportunity/describe", headers=headers)
-    
-    if not res.ok:
-        print(f"Failed to get metadata: {res.text}")
-        sys.exit(1)
-
-    fields = res.json().get('fields', [])
-    
-    # Print all custom fields (ending in __c) and key standard fields
-    print("\n=== CUSTOM FIELDS ON OPPORTUNITY ===")
-    custom = [f for f in fields if f['name'].endswith('__c')]
-    for f in sorted(custom, key=lambda x: x['name']):
-        print(f"  API Name: {f['name']:<40} Label: {f['label']}")
-
-    print("\n=== KEY STANDARD FIELDS ===")
-    key_standard = ['Id', 'AccountId', 'Name', 'StageName', 'CloseDate', 
-                    'CreatedDate', 'OwnerId', 'LeadSource', 'Description']
-    for f in fields:
-        if f['name'] in key_standard:
-            print(f"  API Name: {f['name']:<40} Label: {f['label']}")
+    # Account fields — looking for FTS ID, Days Since Activity, Accounting Package
+    describe_object(token, instance, 'Account', 
+        ['fts', 'days', 'activity', 'accounting', 'package', 'custom'])
 
 if __name__ == '__main__':
     main()
