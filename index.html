@@ -138,6 +138,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .list-table td.primary { color: var(--text); font-weight: 500; }
 .stage-badge { display: inline-block; font-size: 11px; padding: 3px 9px; border-radius: 10px; font-weight: 500; background: color-mix(in srgb, var(--sc) 15%, transparent); color: var(--sc); border: 1px solid color-mix(in srgb, var(--sc) 25%, transparent); white-space: nowrap; }
 .mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+.days-good { color: var(--green); }
 .days-warn { color: var(--orange); }
 .days-danger { color: var(--red); }
 .sort-arrow { margin-left: 4px; opacity: 0.5; }
@@ -986,7 +987,7 @@ function renderList() {
       <td class="mono">${fmt(d.created_date,'date')}</td>
       <td class="mono" style="${isPastDue ? 'color:var(--red);font-weight:500' : ''}">${closeDateStr}</td>
       <td>${d.lead_source || '—'}</td>
-      <td class="mono ${dc === 'danger' ? 'days-danger' : dc === 'warn' ? 'days-warn' : ''}">${d.days_since_activity !== null && d.days_since_activity !== undefined ? d.days_since_activity+'d' : '—'}</td>
+      <td class="mono ${dc === 'danger' ? 'days-danger' : dc === 'warn' ? 'days-warn' : dc === 'good' ? 'days-good' : ''}">${d.days_since_activity !== null && d.days_since_activity !== undefined ? d.days_since_activity+'d' : '—'}</td>
       <td class="mono">${d.asm_flat_rate ? '$'+parseFloat(d.asm_flat_rate).toLocaleString() : '—'}</td>
     </tr>`;
   }).join('');
