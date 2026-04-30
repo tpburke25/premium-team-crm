@@ -714,10 +714,12 @@ function applyFilters() {
 function updateStats() {
   const active = filteredDeals.filter(d => d.stage !== 'Lost' && d.stage !== 'Closed Won');
   const totalRate = filteredDeals.reduce((s, d) => s + (parseFloat(d.total_flat_rate)||0), 0);
+  const totalLocs = filteredDeals.reduce((s, d) => s + (parseInt(d.num_locations)||0), 0);
   document.getElementById('statsBar').innerHTML = `
     <div class="stat-chip"><div class="stat-dot" style="background:var(--accent)"></div><strong>${filteredDeals.length}</strong> deals</div>
     <div class="stat-chip"><div class="stat-dot" style="background:var(--accent2)"></div><strong>${active.length}</strong> active</div>
-    <div class="stat-chip"><div class="stat-dot" style="background:var(--gold)"></div><strong>$${totalRate.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0})}</strong> total flat rate</div>
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--gold)"></div><strong>${totalLocs.toLocaleString()}</strong> locations</div>
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--green)"></div><strong>$${totalRate.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0})}</strong> total flat rate</div>
   `;
 }
 
