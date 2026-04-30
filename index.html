@@ -762,7 +762,10 @@ function renderKanban() {
           <div class="col-count">${cards.length} deals</div>
           <div class="col-count">${cards.reduce((s,d) => s + (parseInt(d.num_locations)||0), 0)} locs</div>
         </div>
-        <div class="col-value">${total > 0 ? '$'+total.toLocaleString('en-US',{maximumFractionDigits:0}) : ''}</div>
+        <div class="col-value" style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+          <span>${total > 0 ? '$'+total.toLocaleString('en-US',{maximumFractionDigits:0}) : ''}</span>
+          <span style="font-size:10px">${cards.reduce((s,d) => s + (parseInt(d.num_locations)||0), 0)} locations</span>
+        </div>
       </div>
       <div class="col-cards">
         ${cards.length === 0 ? '<div class="empty-col">No deals</div>' : cards.map(d => dealCard(d, stage.cls)).join('')}
