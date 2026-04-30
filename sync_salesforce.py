@@ -6,13 +6,12 @@ Runs via GitHub Actions on a schedule
 
 import os
 import sys
-import json
 import requests
 from datetime import datetime, timezone
 
 # ── CONFIG ────────────────────────────────────────────
 SF_USERNAME     = os.environ['SF_USERNAME']
-SF_PASSWORD     = os.environ['SF_PASSWORD']  # password + security token appended
+SF_PASSWORD     = os.environ['SF_PASSWORD']
 SF_INSTANCE_URL = os.environ['SF_INSTANCE_URL']
 SUPABASE_URL    = os.environ['SUPABASE_URL']
 SUPABASE_KEY    = os.environ['SUPABASE_KEY']
@@ -30,11 +29,16 @@ def sf_login():
         'username':      SF_USERNAME,
         'password':      SF_PASSWORD,
     })
-    if not res.ok:
-        # Try without client_id/secret (some orgs allow this)
-        res = requests.post(f"{SF_LOGIN_URL}/services/Soap/u/57.0", 
-            headers={'Content-Type': 'text/xml', 'SOAPAction': 'login'},
-            data=f"""<?xml version="1.0" encoding="utf-8"?>
+    if res.ok:
+        data = res.json()
+        print(f"Logged in via OAuth to {data['instance_url']}")
+        return data['access_token'], data['instance_url']
+
+    # SOAP fallback
+    import xml.etree.ElementTree as ET
+    res = requests.post(f"{SF_LOGIN_URL}/services/Soap/u/57.0",
+        headers={'Content-Type': 'text/xml', 'SOAPAction': 'login'},
+        data=f"""<?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
     xmlns:urn="urn:partner.soap.sforce.com">
   <soapenv:Body>
@@ -44,34 +48,22 @@ def sf_login():
     </urn:login>
   </soapenv:Body>
 </soapenv:Envelope>""")
-        if not res.ok:
-            print(f"Login failed: {res.text}")
-            sys.exit(1)
-        # Parse SOAP response
-        import xml.etree.ElementTree as ET
-        root = ET.fromstring(res.text)
-        ns = {'sf': 'urn:partner.soap.sforce.com'}
-        token = root.find('.//sf:sessionId', ns).text
-        instance = root.find('.//sf:serverUrl', ns).text.split('/services')[0]
-        print(f"Logged in via SOAP to {instance}")
-        return token, instance
-
-    data = res.json()
-    token    = data['access_token']
-    instance = data['instance_url']
-    print(f"Logged in via OAuth to {instance}")
+    if not res.ok:
+        print(f"Login failed: {res.text}")
+        sys.exit(1)
+    root = ET.fromstring(res.text)
+    ns = {'sf': 'urn:partner.soap.sforce.com'}
+    token    = root.find('.//sf:sessionId', ns).text
+    instance = root.find('.//sf:serverUrl', ns).text.split('/services')[0]
+    print(f"Logged in via SOAP to {instance}")
     return token, instance
 
 
 def sf_query(token, instance, soql):
-    """Run a SOQL query, handling pagination automatically."""
-    headers = {
-        'Authorization': f'Bearer {token}',
-        'Content-Type':  'application/json'
-    }
-    url  = f"{instance}/services/data/v57.0/query"
-    rows = []
-    params = {'q': soql}
+    headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
+    url     = f"{instance}/services/data/v57.0/query"
+    rows    = []
+    params  = {'q': soql}
     while True:
         res = requests.get(url, headers=headers, params=params)
         if not res.ok:
@@ -81,7 +73,6 @@ def sf_query(token, instance, soql):
         rows.extend(data.get('records', []))
         if data.get('done', True):
             break
-        # Next page
         url    = instance + data['nextRecordsUrl']
         params = {}
     return rows
@@ -92,7 +83,6 @@ def supabase_upsert(table, rows):
     if not rows:
         print(f"  No rows to upsert for {table}")
         return 0
-
     headers = {
         'apikey':        SUPABASE_KEY,
         'Authorization': f'Bearer {SUPABASE_KEY}',
@@ -109,32 +99,26 @@ def supabase_upsert(table, rows):
         )
         if res.ok:
             upserted += len(batch)
+            print(f"  Batch {i//BATCH_SIZE + 1}: {len(batch)} rows upserted ✓")
         else:
-            print(f"  Batch {i//BATCH_SIZE + 1} error: {res.text[:200]}")
+            print(f"  Batch {i//BATCH_SIZE + 1} error: {res.text[:300]}")
     return upserted
 
 
-# ── FIELD HELPERS ─────────────────────────────────────
+# ── HELPERS ───────────────────────────────────────────
 def clean_date(val):
-    if not val:
-        return None
+    if not val: return None
     return str(val)[:10]
 
 def clean_num(val):
-    if val is None:
-        return None
-    try:
-        return float(val)
-    except:
-        return None
+    if val is None: return None
+    try: return float(val)
+    except: return None
 
 def clean_int(val):
-    if val is None:
-        return None
-    try:
-        return int(val)
-    except:
-        return None
+    if val is None: return None
+    try: return int(float(val))
+    except: return None
 
 def now_iso():
     return datetime.now(timezone.utc).isoformat()
@@ -144,37 +128,42 @@ def now_iso():
 def sync_opportunities(token, instance):
     print("\nSyncing Opportunities...")
     soql = """
-        SELECT 
-            Id, AccountId, Account.Name, Account.ParentId, Account.Parent.Name,
-            Name, Owner.Name, StageName, CreatedDate, CloseDate,
-            Description, LeadSource, Opportunity_Owner__c,
-            Days_Since_Activity__c, Closed_Reason__c,
-            Num_Locations__c, Product_Name__c, Additional_Rep__c,
+        SELECT
+            Id, AccountId, Name, StageName, CloseDate, CreatedDate,
+            LeadSource, Description, Closed_Reason__c,
+            Owner.Name, Additional_Rep__c,
+            Account.Name, Account.ParentId, Account.Parent.Name,
             Account.Industry, Account.BillingCity, Account.BillingState,
-            Account.BillingPostalCode, Accounting_Package__c,
-            ASM_Flat_Rate__c, Total_Flat_Rate__c,
-            Setup_Amount__c, Total_Setup_Amount__c, Total_Setup_and_Flat_Rate__c,
-            FTS_ID__c
+            Account.BillingPostalCode,
+            Account.FTS_ID__c,
+            Account.Days_Since_Activity__c,
+            Account.Accounting_Package__c,
+            ASM__c,
+            Total_Flat_Rate__c,
+            Setup_Amount__c,
+            Total_Setup_Amount__c,
+            Total_of_Setup_and_ASM__c,
+            Loc__c,
+            Product_Interests__c
         FROM Opportunity
         WHERE IsDeleted = false
         ORDER BY CloseDate ASC
     """
     records = sf_query(token, instance, soql)
-    print(f"  Pulled {len(records)} opportunities from Salesforce")
+    print(f"  Pulled {len(records)} records from Salesforce")
 
-    # Deduplicate by Id
     seen = set()
     rows = []
     for r in records:
         if r['Id'] in seen:
             continue
         seen.add(r['Id'])
-        acc = r.get('Account') or {}
+        acc    = r.get('Account') or {}
         parent = acc.get('Parent') or {}
         rows.append({
             'opportunity_id':       r.get('Id'),
             'account_id':           r.get('AccountId'),
-            'fts_id':               r.get('FTS_ID__c'),
+            'fts_id':               acc.get('FTS_ID__c'),
             'parent_account_id':    acc.get('ParentId'),
             'account_name':         acc.get('Name'),
             'parent_account':       parent.get('Name'),
@@ -184,22 +173,22 @@ def sync_opportunities(token, instance):
             'stage':                r.get('StageName'),
             'created_date':         clean_date(r.get('CreatedDate')),
             'close_date':           clean_date(r.get('CloseDate')),
-            'days_since_activity':  clean_int(r.get('Days_Since_Activity__c')),
+            'days_since_activity':  clean_int(acc.get('Days_Since_Activity__c')),
             'closed_reason':        r.get('Closed_Reason__c'),
             'description':          r.get('Description'),
             'lead_source':          r.get('LeadSource'),
-            'num_locations':        clean_int(r.get('Num_Locations__c')),
-            'product_name':         r.get('Product_Name__c'),
+            'num_locations':        clean_int(r.get('Loc__c')),
+            'product_name':         r.get('Product_Interests__c'),
             'industry':             acc.get('Industry'),
-            'accounting_package':   r.get('Accounting_Package__c'),
+            'accounting_package':   acc.get('Accounting_Package__c'),
             'city':                 acc.get('BillingCity'),
             'state':                acc.get('BillingState'),
             'zip':                  acc.get('BillingPostalCode'),
-            'asm_flat_rate':        clean_num(r.get('ASM_Flat_Rate__c')),
+            'asm_flat_rate':        clean_num(r.get('ASM__c')),
             'total_flat_rate':      clean_num(r.get('Total_Flat_Rate__c')),
             'setup_amount':         clean_num(r.get('Setup_Amount__c')),
             'total_setup_amount':   clean_num(r.get('Total_Setup_Amount__c')),
-            'total_setup_and_flat': clean_num(r.get('Total_Setup_and_Flat_Rate__c')),
+            'total_setup_and_flat': clean_num(r.get('Total_of_Setup_and_ASM__c')),
             'synced_at':            now_iso(),
         })
 
@@ -213,12 +202,13 @@ def sync_tasks(token, instance):
     print("\nSyncing Tasks...")
     soql = """
         SELECT
-            Id, AccountId, Account.Name, WhoId, Who.Name,
+            Id, AccountId, WhoId, Who.Name,
             Subject, Type, Status, Priority,
             ActivityDate, CreatedDate,
             Owner.Name, Description,
-            Account.Industry, Accounting_Package__c,
-            FTS_ID__c
+            Account.Name, Account.Industry,
+            Account.FTS_ID__c,
+            Account.Accounting_Package__c
         FROM Task
         WHERE IsDeleted = false
         AND ActivityDate >= LAST_N_DAYS:365
@@ -232,22 +222,22 @@ def sync_tasks(token, instance):
         acc = r.get('Account') or {}
         who = r.get('Who') or {}
         rows.append({
-            'activity_id':       r.get('Id'),
-            'account_id':        r.get('AccountId'),
-            'fts_id':            r.get('FTS_ID__c'),
-            'account_name':      acc.get('Name'),
-            'subject':           r.get('Subject'),
-            'type':              r.get('Type'),
-            'status':            r.get('Status'),
-            'priority':          r.get('Priority'),
-            'due_date':          clean_date(r.get('ActivityDate')),
-            'created_date':      clean_date(r.get('CreatedDate')),
-            'assigned_to':       (r.get('Owner') or {}).get('Name'),
-            'comments':          r.get('Description'),
-            'industry':          acc.get('Industry'),
-            'accounting_package': r.get('Accounting_Package__c'),
-            'contact_name':      who.get('Name') if r.get('WhoId', '').startswith('003') else None,
-            'synced_at':         now_iso(),
+            'activity_id':        r.get('Id'),
+            'account_id':         r.get('AccountId'),
+            'fts_id':             acc.get('FTS_ID__c'),
+            'account_name':       acc.get('Name'),
+            'subject':            r.get('Subject'),
+            'type':               r.get('Type'),
+            'status':             r.get('Status'),
+            'priority':           r.get('Priority'),
+            'due_date':           clean_date(r.get('ActivityDate')),
+            'created_date':       clean_date(r.get('CreatedDate')),
+            'assigned_to':        (r.get('Owner') or {}).get('Name'),
+            'comments':           r.get('Description'),
+            'industry':           acc.get('Industry'),
+            'accounting_package': acc.get('Accounting_Package__c'),
+            'contact_name':       who.get('Name') if (r.get('WhoId') or '').startswith('003') else None,
+            'synced_at':          now_iso(),
         })
 
     upserted = supabase_upsert('tbl_tasks', rows)
@@ -263,14 +253,11 @@ def main():
     print("=" * 50)
 
     token, instance = sf_login()
-
     results = {}
 
-    # Sync Opportunities
     pulled, upserted = sync_opportunities(token, instance)
     results['opportunities'] = {'pulled': pulled, 'upserted': upserted}
 
-    # Sync Tasks
     pulled, upserted = sync_tasks(token, instance)
     results['tasks'] = {'pulled': pulled, 'upserted': upserted}
 
@@ -280,7 +267,6 @@ def main():
         print(f"  {obj}: {counts['pulled']} pulled, {counts['upserted']} upserted")
     print(f"Finished: {now_iso()}")
     print("=" * 50)
-
 
 if __name__ == '__main__':
     main()
