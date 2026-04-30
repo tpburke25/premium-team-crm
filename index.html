@@ -25,6 +25,21 @@
   --radius: 10px;
   --radius-lg: 14px;
 }
+body.light {
+  --bg: #f4f4f6;
+  --surface: #ffffff;
+  --surface2: #f0f0f3;
+  --surface3: #e5e5ea;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --text: #111113;
+  --text2: #4a4a58;
+  --text3: #8a8a98;
+  --red: #d93025;
+  --green: #1a7f37;
+  --orange: #cc7a00;
+  --gold: #b08800;
+}
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
@@ -126,6 +141,18 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .days-warn { color: var(--orange); }
 .days-danger { color: var(--red); }
 .sort-arrow { margin-left: 4px; opacity: 0.5; }
+.col-filter-wrap { position: relative; white-space: nowrap; }
+.col-filter-btn { margin-left: 4px; opacity: 0.5; cursor: pointer; font-size: 10px; }
+.col-filter-btn:hover { opacity: 1; color: var(--accent); }
+.col-filter-dropdown { position: absolute; top: calc(100% + 4px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 12px; min-width: 200px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.3); display: none; }
+.col-filter-dropdown.open { display: block; }
+.cf-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); margin-bottom: 8px; }
+.cf-op { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 13px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 6px; }
+.cf-val { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 13px; color: var(--text); font-family: 'DM Mono', monospace; outline: none; margin-bottom: 8px; }
+.cf-val:focus, .cf-op:focus { border-color: var(--accent); }
+.cf-apply { padding: 6px 14px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-right: 6px; }
+.cf-clear { padding: 6px 14px; background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.th-filtered { color: var(--accent) !important; }
 .sort-wrap { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; }
 .sort-wrap label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
 .sort-wrap select { background: transparent; border: none; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; padding: 0; }
@@ -294,6 +321,7 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
           <div class="dropdown-email" id="dropdownEmail">—</div>
           <div class="dropdown-role" id="dropdownRole">—</div>
         </div>
+        <button class="dropdown-item" onclick="toggleTheme()" id="themeToggleBtn">☀ Light mode</button>
         <button class="dropdown-item danger" onclick="doLogout()">⎋ Sign out</button>
       </div>
     </div>
@@ -405,13 +433,14 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
     <table class="list-table">
       <thead>
         <tr>
-          <th onclick="sortList('account_name')">Account <span class="sort-arrow" id="sort-account_name"></span></th>
-          <th onclick="sortList('stage')">Stage <span class="sort-arrow" id="sort-stage"></span></th>
-          <th onclick="sortList('close_date')">Close Date <span class="sort-arrow" id="sort-close_date"></span></th>
-          <th onclick="sortList('asm_flat_rate')">ASM Rate <span class="sort-arrow" id="sort-asm_flat_rate"></span></th>
-          <th onclick="sortList('num_locations')"># Locs <span class="sort-arrow" id="sort-num_locations"></span></th>
-          <th onclick="sortList('days_since_activity')">Days Since Activity <span class="sort-arrow" id="sort-days_since_activity"></span></th>
           <th onclick="sortList('opportunity_owner')">Owner <span class="sort-arrow" id="sort-opportunity_owner"></span></th>
+          <th onclick="sortList('account_name')">Account <span class="sort-arrow" id="sort-account_name"></span></th>
+          <th onclick="sortList('num_locations')" class="col-filter-wrap"># Locs <span class="sort-arrow" id="sort-num_locations"></span><span class="col-filter-btn" onclick="event.stopPropagation();toggleColFilter('num_locations')" title="Filter">▾</span><div class="col-filter-dropdown" id="colfilter-num_locations"><div class="cf-title"># Locations filter</div><select class="cf-op" id="cfop-num_locations"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">Greater than or equal</option><option value="lt">Less than</option><option value="lte">Less than or equal</option><option value="eq">Equal to</option></select><input class="cf-val" id="cfval-num_locations" type="number" min="0" placeholder="e.g. 5"><button class="cf-apply" onclick="applyColFilter('num_locations')">Apply</button><button class="cf-clear" onclick="clearColFilter('num_locations')">Clear</button></div></th>
+          <th onclick="sortList('stage')">Stage <span class="sort-arrow" id="sort-stage"></span></th>
+          <th onclick="sortList('created_date')">Create Date <span class="sort-arrow" id="sort-created_date"></span></th>
+          <th onclick="sortList('close_date')">Close Date <span class="sort-arrow" id="sort-close_date"></span></th>
+          <th onclick="sortList('lead_source')">Lead Source <span class="sort-arrow" id="sort-lead_source"></span></th>
+          <th onclick="sortList('asm_flat_rate')">ASM Rate <span class="sort-arrow" id="sort-asm_flat_rate"></span></th>
         </tr>
       </thead>
       <tbody id="listBody"></tbody>
@@ -482,6 +511,7 @@ function clearFilters() {
   selectedOwners.clear();
   renderStageChecks();
   renderOwnerChecks();
+  Object.keys(colFilters).forEach(col => clearColFilter(col));
   applyFilters();
 }
 
@@ -602,6 +632,74 @@ function sortDeals(deals) {
   });
 }
 
+// ── COLUMN FILTERS ────────────────────────────────
+const colFilters = {};
+
+function toggleColFilter(col) {
+  const dd = document.getElementById(`colfilter-${col}`);
+  const isOpen = dd.classList.contains('open');
+  document.querySelectorAll('.col-filter-dropdown.open').forEach(d => d.classList.remove('open'));
+  if (!isOpen) dd.classList.add('open');
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.col-filter-wrap')) {
+    document.querySelectorAll('.col-filter-dropdown.open').forEach(d => d.classList.remove('open'));
+  }
+});
+
+function applyColFilter(col) {
+  const op  = document.getElementById(`cfop-${col}`).value;
+  const val = parseFloat(document.getElementById(`cfval-${col}`).value);
+  if (!op || isNaN(val)) { clearColFilter(col); return; }
+  colFilters[col] = { op, val };
+  document.getElementById(`colfilter-${col}`).classList.remove('open');
+  // Mark header as filtered
+  const th = document.getElementById(`colfilter-${col}`).closest('th');
+  if (th) th.classList.add('th-filtered');
+  applyFilters();
+}
+
+function clearColFilter(col) {
+  delete colFilters[col];
+  document.getElementById(`cfop-${col}`).value = '';
+  document.getElementById(`cfval-${col}`).value = '';
+  document.getElementById(`colfilter-${col}`).classList.remove('open');
+  const th = document.getElementById(`colfilter-${col}`).closest('th');
+  if (th) th.classList.remove('th-filtered');
+  applyFilters();
+}
+
+function passesColFilters(d) {
+  for (const [col, filter] of Object.entries(colFilters)) {
+    const val = parseFloat(d[col]);
+    if (isNaN(val)) return false;
+    if (filter.op === 'gt'  && !(val >  filter.val)) return false;
+    if (filter.op === 'gte' && !(val >= filter.val)) return false;
+    if (filter.op === 'lt'  && !(val <  filter.val)) return false;
+    if (filter.op === 'lte' && !(val <= filter.val)) return false;
+    if (filter.op === 'eq'  && !(val === filter.val)) return false;
+  }
+  return true;
+}
+
+// ── THEME TOGGLE ───────────────────────────────────
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  localStorage.setItem('crm_theme', isLight ? 'light' : 'dark');
+  document.getElementById('themeToggleBtn').textContent = isLight ? '🌙 Dark mode' : '☀ Light mode';
+}
+
+// Restore theme on load
+(function restoreTheme() {
+  const saved = localStorage.getItem('crm_theme');
+  if (saved === 'light') {
+    document.body.classList.add('light');
+    const btn = document.getElementById('themeToggleBtn');
+    if (btn) btn.textContent = '🌙 Dark mode';
+  }
+})();
+
 function applyDatePreset() {
   const preset = document.getElementById('datePreset').value;
   const customInputs = document.getElementById('customDateInputs');
@@ -699,6 +797,7 @@ function applyFilters() {
       if (dateFrom && cd < dateFrom) return false;
       if (dateTo   && cd > dateTo)   return false;
     }
+    if (!passesColFilters(d)) return false;
     return true;
   });
 
@@ -737,14 +836,14 @@ function stageClass(stage) {
 function fmt(val, type) {
   if (val === null || val === undefined || val === '') return '—';
   if (type === 'currency') return '$' + parseFloat(val).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-  if (type === 'date') return new Date(val).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'2-digit'});
+  if (type === 'date') { const d = new Date(val); return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCFullYear()).slice(-2)}`; }
   return val;
 }
 
 function daysClass(d) {
-  if (!d && d !== 0) return '';
-  if (d > 14) return 'danger';
-  if (d > 7) return 'warn';
+  if (d === null || d === undefined || d === '') return '';
+  if (d > 30) return 'danger';
+  if (d > 14) return 'warn';
   return 'good';
 }
 
@@ -785,7 +884,7 @@ function dealCard(d, stageCls) {
     <div class="card-fields">
       <div class="card-field">
         <div class="field-label">Close Date</div>
-        <div class="field-value">${fmt(d.close_date, 'date')}</div>
+        <div class="field-value" style="${d.close_date && new Date(d.close_date) < new Date() && d.stage !== 'Closed Won' && d.stage !== 'Lost' ? 'color:var(--red)' : ''}">${fmt(d.close_date, 'date')}</div>
       </div>
       <div class="card-field">
         <div class="field-label">ASM Rate</div>
@@ -813,15 +912,18 @@ function renderList() {
   document.getElementById('listBody').innerHTML = sorted.map(d => {
     const sc = stageClass(d.stage);
     const dc = daysClass(d.days_since_activity);
+    const closeDateStr = fmt(d.close_date,'date');
+    const isPastDue = d.close_date && new Date(d.close_date) < new Date() && d.stage !== 'Closed Won' && d.stage !== 'Lost';
     return `
     <tr onclick="openDetail('${d.opportunity_id}')">
-      <td class="primary">${d.account_name || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px;font-weight:400">${d.fts_id || ''}</span></td>
-      <td><span class="stage-badge ${sc}">${d.stage || '—'}</span></td>
-      <td class="mono">${fmt(d.close_date,'date')}</td>
-      <td class="mono">${d.asm_flat_rate ? '$'+parseFloat(d.asm_flat_rate).toLocaleString() : '—'}</td>
-      <td class="mono">${d.num_locations || '—'}</td>
-      <td class="mono ${dc === 'danger' ? 'days-danger' : dc === 'warn' ? 'days-warn' : ''}">${d.days_since_activity !== null && d.days_since_activity !== undefined ? d.days_since_activity+'d' : '—'}</td>
       <td>${d.opportunity_owner || '—'}</td>
+      <td class="primary">${d.account_name || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px;font-weight:400">${d.fts_id || ''}</span></td>
+      <td class="mono">${d.num_locations || '—'}</td>
+      <td><span class="stage-badge ${sc}">${d.stage || '—'}</span></td>
+      <td class="mono">${fmt(d.created_date,'date')}</td>
+      <td class="mono" style="${isPastDue ? 'color:var(--red);font-weight:500' : ''}">${closeDateStr}</td>
+      <td>${d.lead_source || '—'}</td>
+      <td class="mono">${d.asm_flat_rate ? '$'+parseFloat(d.asm_flat_rate).toLocaleString() : '—'}</td>
     </tr>`;
   }).join('');
 
