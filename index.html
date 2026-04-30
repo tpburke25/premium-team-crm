@@ -153,6 +153,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .cf-apply { padding: 6px 14px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-right: 6px; }
 .cf-clear { padding: 6px 14px; background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
 .th-filtered { color: var(--accent) !important; }
+.cf-search { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 6px; }
+.cf-search:focus { border-color: var(--accent); }
+.cf-checklist { max-height: 180px; overflow-y: auto; margin-bottom: 8px; }
+.cf-check-item { display: flex; align-items: center; gap: 8px; padding: 5px 4px; border-radius: 4px; cursor: pointer; font-size: 13px; color: var(--text2); transition: background 0.1s; }
+.cf-check-item:hover { background: var(--surface3); color: var(--text); }
+.cf-check-item input { accent-color: var(--accent); cursor: pointer; width: 14px; height: 14px; flex-shrink: 0; }
+.cf-select-all { font-size: 11px; color: var(--text3); cursor: pointer; margin-bottom: 6px; display: block; }
+.cf-select-all:hover { color: var(--accent); }
 .sort-wrap { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; }
 .sort-wrap label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
 .sort-wrap select { background: transparent; border: none; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; padding: 0; }
@@ -439,7 +447,7 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
           <th onclick="sortList('stage')">Stage <span class="sort-arrow" id="sort-stage"></span></th>
           <th onclick="sortList('created_date')">Create Date <span class="sort-arrow" id="sort-created_date"></span></th>
           <th onclick="sortList('close_date')">Close Date <span class="sort-arrow" id="sort-close_date"></span></th>
-          <th onclick="sortList('lead_source')">Lead Source <span class="sort-arrow" id="sort-lead_source"></span></th>
+          <th onclick="sortList('lead_source')" class="col-filter-wrap">Lead Source <span class="sort-arrow" id="sort-lead_source"></span><span class="col-filter-btn" onclick="event.stopPropagation();openLeadFilter()" title="Filter">▾</span><div class="col-filter-dropdown" id="colfilter-lead_source" style="min-width:220px"><div class="cf-title">Lead Source filter</div><input class="cf-search" id="cf-lead-search" placeholder="Search..." oninput="renderLeadOptions()"><span class="cf-select-all" onclick="toggleAllLeadSources()">Select / Deselect all</span><div class="cf-checklist" id="cf-lead-list"></div><div style="display:flex;gap:6px"><button class="cf-apply" onclick="applyLeadFilter()">Apply</button><button class="cf-clear" onclick="clearLeadFilter()">Clear</button></div></div></th>
           <th onclick="sortList('asm_flat_rate')">ASM Rate <span class="sort-arrow" id="sort-asm_flat_rate"></span></th>
         </tr>
       </thead>
@@ -512,6 +520,7 @@ function clearFilters() {
   renderStageChecks();
   renderOwnerChecks();
   Object.keys(colFilters).forEach(col => clearColFilter(col));
+  clearLeadFilter();
   applyFilters();
 }
 
@@ -630,6 +639,58 @@ function sortDeals(deals) {
     // Text
     return av.toString().toLowerCase().localeCompare(bv.toString().toLowerCase()) * globalSortDir;
   });
+}
+
+// ── LEAD SOURCE FILTER ────────────────────────────
+let selectedLeadSources = new Set();
+let allLeadSources = [];
+
+function openLeadFilter() {
+  // Build list from current data
+  allLeadSources = [...new Set(allDeals.map(d => d.lead_source).filter(Boolean))].sort();
+  renderLeadOptions();
+  toggleColFilter('lead_source');
+}
+
+function renderLeadOptions() {
+  const search = (document.getElementById('cf-lead-search').value || '').toLowerCase();
+  const list = document.getElementById('cf-lead-list');
+  const filtered = allLeadSources.filter(s => s.toLowerCase().includes(search));
+  list.innerHTML = filtered.map(s => `
+    <label class="cf-check-item">
+      <input type="checkbox" value="${s}" ${selectedLeadSources.has(s) ? 'checked' : ''} onchange="toggleLeadSource('${s}', this.checked)">
+      ${s}
+    </label>`).join('');
+}
+
+function toggleLeadSource(source, checked) {
+  if (checked) selectedLeadSources.add(source);
+  else selectedLeadSources.delete(source);
+}
+
+function toggleAllLeadSources() {
+  const search = (document.getElementById('cf-lead-search').value || '').toLowerCase();
+  const visible = allLeadSources.filter(s => s.toLowerCase().includes(search));
+  const allChecked = visible.every(s => selectedLeadSources.has(s));
+  visible.forEach(s => allChecked ? selectedLeadSources.delete(s) : selectedLeadSources.add(s));
+  renderLeadOptions();
+}
+
+function applyLeadFilter() {
+  document.getElementById('colfilter-lead_source').classList.remove('open');
+  const th = document.getElementById('colfilter-lead_source').closest('th');
+  if (th) th.classList.toggle('th-filtered', selectedLeadSources.size > 0);
+  applyFilters();
+}
+
+function clearLeadFilter() {
+  selectedLeadSources.clear();
+  document.getElementById('cf-lead-search').value = '';
+  renderLeadOptions();
+  const th = document.getElementById('colfilter-lead_source').closest('th');
+  if (th) th.classList.remove('th-filtered');
+  document.getElementById('colfilter-lead_source').classList.remove('open');
+  applyFilters();
 }
 
 // ── COLUMN FILTERS ────────────────────────────────
@@ -798,11 +859,12 @@ function applyFilters() {
       if (dateTo   && cd > dateTo)   return false;
     }
     if (!passesColFilters(d)) return false;
+    if (selectedLeadSources.size > 0 && !selectedLeadSources.has(d.lead_source)) return false;
     return true;
   });
 
   // Show/hide clear button
-  const hasFilter = search || selectedStages.size > 0 || selectedOwners.size > 0 || preset;
+  const hasFilter = search || selectedStages.size > 0 || selectedOwners.size > 0 || preset || selectedLeadSources.size > 0 || Object.keys(colFilters).length > 0;
   document.getElementById('clearBtn').style.display = hasFilter ? 'inline-block' : 'none';
 
   updateStats();
@@ -836,7 +898,7 @@ function stageClass(stage) {
 function fmt(val, type) {
   if (val === null || val === undefined || val === '') return '—';
   if (type === 'currency') return '$' + parseFloat(val).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-  if (type === 'date') { const d = new Date(val); return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCFullYear()).slice(-2)}`; }
+  if (type === 'date') { const d = new Date(val); return `${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCFullYear()).slice(-2)}`; }
   return val;
 }
 
