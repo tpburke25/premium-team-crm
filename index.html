@@ -349,12 +349,21 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
     <div class="date-filter-wrap">
       <select id="datePreset" onchange="applyDatePreset()">
         <option value="">All dates</option>
+        <optgroup label="Past">
         <option value="this_month">This Month</option>
         <option value="last_30">Last 30 Days</option>
         <option value="last_60">Last 60 Days</option>
         <option value="last_90">Last 90 Days</option>
         <option value="this_quarter">This Quarter</option>
         <option value="this_year">This Year</option>
+        </optgroup>
+        <optgroup label="Future">
+        <option value="next_month">Next Month</option>
+        <option value="next_30">Next 30 Days</option>
+        <option value="next_60">Next 60 Days</option>
+        <option value="next_90">Next 90 Days</option>
+        <option value="future_all">All Future</option>
+        </optgroup>
         <option value="custom">Custom range...</option>
       </select>
       <div class="date-inputs" id="customDateInputs" style="display:none">
@@ -626,6 +635,21 @@ function applyDatePreset() {
   } else if (preset === 'this_year') {
     from = new Date(now.getFullYear(), 0, 1);
     to   = new Date(now.getFullYear(), 11, 31);
+  } else if (preset === 'next_month') {
+    from = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    to   = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+  } else if (preset === 'next_30') {
+    from = now;
+    to   = new Date(now.getTime() + 30 * 864e5);
+  } else if (preset === 'next_60') {
+    from = now;
+    to   = new Date(now.getTime() + 60 * 864e5);
+  } else if (preset === 'next_90') {
+    from = now;
+    to   = new Date(now.getTime() + 90 * 864e5);
+  } else if (preset === 'future_all') {
+    from = now;
+    to   = null;
   }
 
   // Store computed dates for applyFilters to use
@@ -735,7 +759,8 @@ function renderKanban() {
         <div class="col-title">
           <div class="col-dot"></div>
           <div class="col-name">${stage.label}</div>
-          <div class="col-count">${cards.length}</div>
+          <div class="col-count">${cards.length} deals</div>
+          <div class="col-count">${cards.reduce((s,d) => s + (parseInt(d.num_locations)||0), 0)} locs</div>
         </div>
         <div class="col-value">${total > 0 ? '$'+total.toLocaleString('en-US',{maximumFractionDigits:0}) : ''}</div>
       </div>
