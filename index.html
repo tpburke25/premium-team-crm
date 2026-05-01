@@ -141,6 +141,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .days-good { color: var(--green); }
 .days-warn { color: var(--orange); }
 .days-danger { color: var(--red); }
+.loc-mid { color: #4ade80; }
+.loc-high { color: #16a34a; }
+body.light .loc-mid { color: #15803d; }
+body.light .loc-high { color: #14532d; }
+.close-warn { color: var(--gold); font-weight: 500; }
 .sort-arrow { margin-left: 4px; opacity: 0.5; }
 .col-filter-wrap { position: relative; white-space: nowrap; }
 .col-filter-btn { margin-left: 4px; opacity: 0.5; cursor: pointer; font-size: 10px; }
@@ -174,6 +179,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .date-filter-wrap select { background: transparent; border: none; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; padding: 0; }
 .date-filter-wrap select:focus { color: var(--text); }
 .date-filter-wrap select option { background: var(--surface2); color: var(--text); }
+.date-filter-wrap select optgroup { background: var(--surface2); color: var(--accent); font-size: 11px; font-weight: 600; letter-spacing: 0.05em; }
 .date-inputs { display: flex; align-items: center; gap: 4px; }
 .date-sep { font-size: 11px; color: var(--text3); }
 .date-input { background: transparent; border: none; border-bottom: 1px solid var(--border2); color: var(--text2); font-size: 12px; font-family: 'DM Mono', monospace; outline: none; width: 100px; padding: 2px 4px; cursor: pointer; }
@@ -911,6 +917,13 @@ function daysClass(d) {
   return 'good';
 }
 
+function locClass(n) {
+  if (!n && n !== 0) return '';
+  if (n >= 11) return 'loc-high';
+  if (n >= 6)  return 'loc-mid';
+  return '';
+}
+
 function renderKanban() {
   const board = document.getElementById('kanbanBoard');
   const activeStages = STAGES.filter(stage => filteredDeals.some(d => d.stage === stage.key));
@@ -941,14 +954,22 @@ function renderKanban() {
 
 function dealCard(d, stageCls) {
   const days = d.days_since_activity;
-  const dc = daysClass(days);
+  const isClosed = d.stage === 'Closed Won' || d.stage === 'Lost';
+  const dc = !isClosed ? daysClass(days) : '';
   return `
   <div class="deal-card ${stageCls}" onclick="openDetail('${d.opportunity_id}')">
     <div class="card-account">${d.account_name || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px;font-weight:400">${d.fts_id || ''}</span></div>
     <div class="card-fields">
       <div class="card-field">
         <div class="field-label">Close Date</div>
-        <div class="field-value" style="${d.close_date && new Date(d.close_date) < new Date() && d.stage !== 'Closed Won' && d.stage !== 'Lost' ? 'color:var(--red)' : ''}">${fmt(d.close_date, 'date')}</div>
+        <div class="field-value" style="${(() => { 
+          if (!d.close_date || d.stage === 'Closed Won' || d.stage === 'Lost') return '';
+          const cd = new Date(d.close_date); const today = new Date(); 
+          const cdDate = cd.toISOString().slice(0,10); const todayDate = today.toISOString().slice(0,10);
+          if (cdDate === todayDate) return 'color:var(--gold);font-weight:500';
+          if (cd < today) return 'color:var(--red);font-weight:500';
+          return '';
+        })()}">${fmt(d.close_date, 'date')}</div>
       </div>
       <div class="card-field">
         <div class="field-label">ASM Rate</div>
@@ -975,17 +996,22 @@ function renderList() {
 
   document.getElementById('listBody').innerHTML = sorted.map(d => {
     const sc = stageClass(d.stage);
-    const dc = daysClass(d.days_since_activity);
     const closeDateStr = fmt(d.close_date,'date');
-    const isPastDue = d.close_date && new Date(d.close_date) < new Date() && d.stage !== 'Closed Won' && d.stage !== 'Lost';
+    const cdDate = d.close_date ? new Date(d.close_date).toISOString().slice(0,10) : null;
+    const todayDate = new Date().toISOString().slice(0,10);
+    const isClosed  = d.stage === 'Closed Won' || d.stage === 'Lost';
+    const isPastDue = cdDate && cdDate < todayDate && !isClosed;
+    const isToday   = cdDate && cdDate === todayDate && !isClosed;
+    const dc        = !isClosed ? daysClass(d.days_since_activity) : '';
+    const lc        = !isClosed ? locClass(d.num_locations) : '';
     return `
     <tr onclick="openDetail('${d.opportunity_id}')">
       <td>${d.opportunity_owner || '—'}</td>
       <td class="primary">${d.account_name || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px;font-weight:400">${d.fts_id || ''}</span></td>
-      <td class="mono">${d.num_locations || '—'}</td>
+      <td class="mono ${lc}">${d.num_locations || '—'}</td>
       <td><span class="stage-badge ${sc}">${d.stage || '—'}</span></td>
       <td class="mono">${fmt(d.created_date,'date')}</td>
-      <td class="mono" style="${isPastDue ? 'color:var(--red);font-weight:500' : ''}">${closeDateStr}</td>
+      <td class="mono" style="${isPastDue ? 'color:var(--red);font-weight:500' : isToday ? 'color:var(--gold);font-weight:500' : ''}">${closeDateStr}</td>
       <td>${d.lead_source || '—'}</td>
       <td class="mono ${dc === 'danger' ? 'days-danger' : dc === 'warn' ? 'days-warn' : dc === 'good' ? 'days-good' : ''}">${d.days_since_activity !== null && d.days_since_activity !== undefined ? d.days_since_activity+'d' : '—'}</td>
       <td class="mono">${d.asm_flat_rate ? '$'+parseFloat(d.asm_flat_rate).toLocaleString() : '—'}</td>
