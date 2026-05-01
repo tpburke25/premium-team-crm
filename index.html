@@ -911,16 +911,18 @@ function fmt(val, type) {
 }
 
 function daysClass(d) {
-  if (d === null || d === undefined || d === '') return '';
-  if (d > 30) return 'danger';
-  if (d > 14) return 'warn';
+  const v = parseFloat(d);
+  if (isNaN(v)) return '';
+  if (v > 30) return 'danger';
+  if (v > 14) return 'warn';
   return 'good';
 }
 
 function locClass(n) {
-  if (!n && n !== 0) return '';
-  if (n >= 11) return 'loc-high';
-  if (n >= 6)  return 'loc-mid';
+  const v = parseFloat(n);
+  if (isNaN(v)) return '';
+  if (v >= 11) return 'loc-high';
+  if (v >= 6)  return 'loc-mid';
   return '';
 }
 
