@@ -1010,12 +1010,12 @@ function renderList() {
     <tr onclick="openDetail('${d.opportunity_id}')">
       <td>${d.opportunity_owner || '—'}</td>
       <td class="primary">${d.account_name || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px;font-weight:400">${d.fts_id || ''}</span></td>
-      <td class="mono ${lc}">${d.num_locations || '—'}</td>
+      <td class="mono" style="${lc === 'loc-high' ? 'color:#16a34a;font-weight:500' : lc === 'loc-mid' ? 'color:#4ade80' : ''}">${d.num_locations || '—'}</td>
       <td><span class="stage-badge ${sc}">${d.stage || '—'}</span></td>
       <td class="mono">${fmt(d.created_date,'date')}</td>
       <td class="mono" style="${isPastDue ? 'color:var(--red);font-weight:500' : isToday ? 'color:var(--gold);font-weight:500' : ''}">${closeDateStr}</td>
       <td>${d.lead_source || '—'}</td>
-      <td class="mono ${dc === 'danger' ? 'days-danger' : dc === 'warn' ? 'days-warn' : dc === 'good' ? 'days-good' : ''}">${d.days_since_activity !== null && d.days_since_activity !== undefined ? d.days_since_activity+'d' : '—'}</td>
+      <td class="mono" style="${dc === 'danger' ? 'color:var(--red)' : dc === 'warn' ? 'color:var(--orange)' : dc === 'good' ? 'color:var(--green)' : ''}">${d.days_since_activity !== null && d.days_since_activity !== undefined ? d.days_since_activity+'d' : '—'}</td>
       <td class="mono">${d.asm_flat_rate ? '$'+parseFloat(d.asm_flat_rate).toLocaleString() : '—'}</td>
     </tr>`;
   }).join('');
