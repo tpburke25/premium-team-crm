@@ -212,7 +212,7 @@ def sync_tasks(token, instance):
             Account.Accounting_Package__c
         FROM Task
         WHERE IsDeleted = false
-        AND ActivityDate >= LAST_N_DAYS:365
+        AND Owner.LastName IN ('Burke', 'Adcock', 'Pottle', 'Cuellar', 'Behymer')
         ORDER BY ActivityDate DESC
     """
     records = sf_query(token, instance, soql)
@@ -259,10 +259,8 @@ def main():
     pulled, upserted = sync_opportunities(token, instance)
     results['opportunities'] = {'pulled': pulled, 'upserted': upserted}
 
-    # Tasks sync disabled until Tasks tab is built
-    # pulled, upserted = sync_tasks(token, instance)
-    # results['tasks'] = {'pulled': pulled, 'upserted': upserted}
-    print("\nTasks sync skipped — will enable when Tasks tab is ready")
+    pulled, upserted = sync_tasks(token, instance)
+    results['tasks'] = {'pulled': pulled, 'upserted': upserted}
 
     print("\n" + "=" * 50)
     print("Sync Summary:")
