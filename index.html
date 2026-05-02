@@ -1232,6 +1232,8 @@ function closePanel() {
     document.getElementById('userName').textContent   = session.sfName;
     document.getElementById('dropdownEmail').textContent = session.email;
     document.getElementById('dropdownRole').textContent  = session.role === 'admin' ? 'Administrator' : 'Sales Rep';
+    const sfBtn = document.getElementById('sfSyncBtn');
+    if (sfBtn) sfBtn.style.display = session.role === 'admin' ? 'flex' : 'none';
     document.getElementById('loginOverlay').style.display = 'none';
     loadData();
   } catch(e) {
@@ -1350,6 +1352,8 @@ function doLogout() {
   allDeals = [];
   filteredDeals = [];
   localStorage.removeItem('crm_session');
+  const sfBtn = document.getElementById('sfSyncBtn');
+  if (sfBtn) sfBtn.style.display = 'none';
   document.getElementById('loginOverlay').style.display = 'flex';
   document.getElementById('kanbanBoard').innerHTML = '<div class="loading"><div class="spinner"></div>Loading pipeline...</div>';
   document.getElementById('loginEmail').value = '';
@@ -1409,6 +1413,10 @@ async function doLogin() {
       role: profile.role
     }));
 
+    // Show/hide sync button based on role
+    const sfBtn = document.getElementById('sfSyncBtn');
+    if (sfBtn) sfBtn.style.display = profile.role === 'admin' ? 'flex' : 'none';
+
     // Hide login, show portal
     document.getElementById('loginOverlay').style.display = 'none';
 
@@ -1427,10 +1435,10 @@ const GH_OWNER    = 'tpburke25';
 const GH_REPO     = 'premium-team-crm';
 const GH_WORKFLOW = 'sync.yml';
 function getGHToken() {
-  let token = sessionStorage.getItem('gh_token');
+  let token = localStorage.getItem('gh_token');
   if (!token) {
-    token = prompt('Enter your GitHub token to enable Salesforce sync:');
-    if (token) sessionStorage.setItem('gh_token', token);
+    token = prompt('Enter your GitHub sync token (admin only, saved permanently):');
+    if (token) localStorage.setItem('gh_token', token.trim());
   }
   return token;
 }
@@ -1487,18 +1495,19 @@ async function triggerSFSync() {
 }
 
 async function pollSyncStatus() {
-  const btn   = document.getElementById('sfSyncBtn');
-  const icon  = document.getElementById('sfSyncIcon');
-  const label = document.getElementById('sfSyncLabel');
-  let attempts = 0;
-  const maxAttempts = 24; // 2 min max polling
+  const btn        = document.getElementById('sfSyncBtn');
+  const icon       = document.getElementById('sfSyncIcon');
+  const label      = document.getElementById('sfSyncLabel');
+  const triggeredAt = new Date(); // record when we triggered
+  let attempts     = 0;
+  const maxAttempts = 36; // 3 min max polling
 
   const poll = async () => {
     attempts++;
     try {
       const GH_TOKEN = getGHToken();
       const res = await fetch(
-        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_WORKFLOW}/runs?per_page=1`,
+        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_WORKFLOW}/runs?per_page=5`,
         {
           headers: {
             'Authorization': `Bearer ${GH_TOKEN}`,
@@ -1508,9 +1517,18 @@ async function pollSyncStatus() {
         }
       );
       const data = await res.json();
-      const run  = data.workflow_runs?.[0];
+      const runs = data.workflow_runs || [];
 
-      if (!run) { scheduleNext(); return; }
+      // Find a run that was created after we triggered
+      const run = runs.find(r => new Date(r.created_at) >= triggeredAt);
+
+      if (!run) {
+        // No matching run yet — keep waiting
+        const elapsed = Math.round(attempts * 5);
+        label.textContent = `Waiting for sync to start... (${elapsed}s)`;
+        scheduleNext();
+        return;
+      }
 
       if (run.status === 'completed') {
         if (run.conclusion === 'success') {
@@ -1524,7 +1542,7 @@ async function pollSyncStatus() {
           }, 1500);
         } else {
           icon.innerHTML = '✗';
-          label.textContent = `Sync ${run.conclusion}`;
+          label.textContent = `Sync ${run.conclusion} — check GitHub Actions`;
           setTimeout(() => {
             btn.disabled = false;
             icon.innerHTML = '⟳';
@@ -1534,7 +1552,7 @@ async function pollSyncStatus() {
         return;
       }
 
-      // Still running
+      // Run found but still in progress
       const elapsed = Math.round(attempts * 5);
       label.textContent = `Syncing... (${elapsed}s)`;
       scheduleNext();
