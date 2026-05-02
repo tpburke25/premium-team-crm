@@ -147,6 +147,7 @@ def sync_opportunities(token, instance):
             Product_Interests__c
         FROM Opportunity
         WHERE IsDeleted = false
+        AND Owner.LastName IN ('Burke', 'Adcock', 'Pottle', 'Cuellar', 'Behymer')
         ORDER BY CloseDate ASC
     """
     records = sf_query(token, instance, soql)
