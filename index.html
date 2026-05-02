@@ -1500,7 +1500,7 @@ async function pollSyncStatus() {
   const label      = document.getElementById('sfSyncLabel');
   const triggeredAt = new Date(); // record when we triggered
   let attempts     = 0;
-  const maxAttempts = 36; // 3 min max polling
+  const maxAttempts = 60; // 5 min max polling
 
   const poll = async () => {
     attempts++;
