@@ -17,7 +17,7 @@ SUPABASE_URL    = os.environ['SUPABASE_URL']
 SUPABASE_KEY    = os.environ['SUPABASE_KEY']
 
 SF_LOGIN_URL    = 'https://login.salesforce.com'
-BATCH_SIZE      = 200
+BATCH_SIZE      = 500
 
 # ── SALESFORCE AUTH ───────────────────────────────────
 def sf_login():
@@ -259,8 +259,10 @@ def main():
     pulled, upserted = sync_opportunities(token, instance)
     results['opportunities'] = {'pulled': pulled, 'upserted': upserted}
 
-    pulled, upserted = sync_tasks(token, instance)
-    results['tasks'] = {'pulled': pulled, 'upserted': upserted}
+    # Tasks sync disabled until Tasks tab is built
+    # pulled, upserted = sync_tasks(token, instance)
+    # results['tasks'] = {'pulled': pulled, 'upserted': upserted}
+    print("\nTasks sync skipped — will enable when Tasks tab is ready")
 
     print("\n" + "=" * 50)
     print("Sync Summary:")
