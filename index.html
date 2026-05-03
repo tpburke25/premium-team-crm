@@ -1545,11 +1545,12 @@ function renderTaskCalendar() {
   grid.innerHTML = html;
 }
 
-loadData();
   } catch(e) {
     localStorage.removeItem('crm_session');
   }
 })();
+
+loadData();
 
 // Check if this is a password reset redirect
 (function checkResetRedirect() {
