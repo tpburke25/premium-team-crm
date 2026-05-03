@@ -51,6 +51,30 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .logo-sub { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
 .header-right { display: flex; align-items: center; gap: 12px; }
 .sync-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
+.main-nav { display: flex; align-items: center; gap: 4px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; }
+.main-nav-btn { padding: 7px 18px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: none; background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; font-weight: 500; }
+.main-nav-btn.active { background: var(--accent); color: #fff; }
+.main-nav-btn:hover:not(.active) { color: var(--text); background: var(--surface3); }
+.task-priority-high { color: var(--red); font-weight: 500; }
+.task-priority-normal { color: var(--text2); }
+.task-priority-low { color: var(--text3); }
+.task-status-open { color: var(--accent); }
+.task-status-done { color: var(--green); }
+.task-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border-radius: var(--radius); overflow: hidden; }
+.task-cal-header { background: var(--surface2); text-align: center; padding: 8px 4px; font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
+.task-cal-day { background: var(--surface); min-height: 90px; padding: 6px; }
+.task-cal-day.other-month { background: var(--bg); }
+.task-cal-day.today { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+.task-cal-day-num { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text3); margin-bottom: 4px; }
+.task-cal-day.today .task-cal-day-num { color: var(--accent); font-weight: 600; }
+.task-cal-pill { font-size: 10px; padding: 2px 5px; border-radius: 4px; margin-bottom: 2px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent); }
+.task-cal-pill.priority-high { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); border-color: color-mix(in srgb, var(--red) 25%, transparent); }
+.task-cal-pill.overdue { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); border-color: color-mix(in srgb, var(--red) 25%, transparent); }
+.task-cal-more { font-size: 10px; color: var(--text3); padding: 2px 4px; }
+.cal-nav { display: flex; align-items: center; gap: 12px; }
+.cal-nav-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text2); padding: 5px 10px; cursor: pointer; font-size: 13px; transition: all 0.15s; }
+.cal-nav-btn:hover { background: var(--surface3); color: var(--text); }
+.cal-month-label { font-size: 15px; font-weight: 500; color: var(--text); min-width: 140px; text-align: center; }
 .sf-sync-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--accent); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
 .sf-sync-btn:hover { background: color-mix(in srgb, var(--accent) 20%, transparent); }
 .sf-sync-btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -324,9 +348,13 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
     <div class="logo-mark">P</div>
     <div>
       <div class="logo-text">Premium Team CRM</div>
-      <div class="logo-sub">Pipeline</div>
+      <div class="logo-sub" id="currentSection">Pipeline</div>
     </div>
   </div>
+  <div class="main-nav">
+      <button class="main-nav-btn active" id="navPipeline" onclick="switchSection('pipeline')">Pipeline</button>
+      <button class="main-nav-btn" id="navTasks" onclick="switchSection('tasks')">Tasks</button>
+    </div>
   <div class="header-right">
     <button class="sync-btn" id="syncStatusBtn" onclick="loadData()">
       <span id="syncIcon">↻</span>
@@ -470,6 +498,66 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
       </thead>
       <tbody id="listBody"></tbody>
     </table>
+  </div>
+</div>
+
+<!-- TASKS SECTION -->
+<div id="tasksSection" class="hidden">
+  <div class="toolbar" style="padding:14px 28px;">
+    <div class="toolbar-left">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input class="search-input" id="taskSearch" placeholder="Search tasks, accounts..." oninput="applyTaskFilters()">
+      </div>
+      <select class="filter-select" id="taskStatusFilter" onchange="applyTaskFilters()">
+        <option value="open">Open tasks</option>
+        <option value="">All tasks</option>
+        <option value="Completed">Completed</option>
+      </select>
+      <select class="filter-select" id="taskTypeFilter" onchange="applyTaskFilters()">
+        <option value="">All types</option>
+      </select>
+      <select class="filter-select" id="taskOwnerFilter" onchange="applyTaskFilters()">
+        <option value="">All reps</option>
+      </select>
+      <div class="tab-group">
+        <button class="tab-btn active" id="tabTaskList" onclick="switchTaskView('list')">≡ List</button>
+        <button class="tab-btn" id="tabTaskCal" onclick="switchTaskView('calendar')">📅 Calendar</button>
+      </div>
+    </div>
+    <div class="stats-bar" id="taskStatsBar"></div>
+  </div>
+
+  <!-- Task List View -->
+  <div id="taskListView" style="padding:0 28px 20px;">
+    <table class="list-table">
+      <thead>
+        <tr>
+          <th onclick="sortTasks('due_date')">Due Date <span class="sort-arrow" id="tsort-due_date"></span></th>
+          <th onclick="sortTasks('type')">Type <span class="sort-arrow" id="tsort-type"></span></th>
+          <th onclick="sortTasks('subject')">Subject <span class="sort-arrow" id="tsort-subject"></span></th>
+          <th onclick="sortTasks('account_name')">Account <span class="sort-arrow" id="tsort-account_name"></span></th>
+          <th onclick="sortTasks('contact_name')">Primary Contact <span class="sort-arrow" id="tsort-contact_name"></span></th>
+          <th onclick="sortTasks('priority')">Priority <span class="sort-arrow" id="tsort-priority"></span></th>
+          <th onclick="sortTasks('status')">Status <span class="sort-arrow" id="tsort-status"></span></th>
+          <th onclick="sortTasks('assigned_to')">Assigned To <span class="sort-arrow" id="tsort-assigned_to"></span></th>
+        </tr>
+      </thead>
+      <tbody id="taskListBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Task Calendar View -->
+  <div id="taskCalView" class="hidden" style="padding:0 28px 20px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="changeCalMonth(-1)">←</button>
+        <div class="cal-month-label" id="calMonthLabel"></div>
+        <button class="cal-nav-btn" onclick="changeCalMonth(1)">→</button>
+      </div>
+      <button class="cal-nav-btn" onclick="goToToday()">Today</button>
+    </div>
+    <div class="task-cal-grid" id="taskCalGrid"></div>
   </div>
 </div>
 
@@ -1235,7 +1323,229 @@ function closePanel() {
     const sfBtn = document.getElementById('sfSyncBtn');
     if (sfBtn) sfBtn.style.display = session.role === 'admin' ? 'flex' : 'none';
     document.getElementById('loginOverlay').style.display = 'none';
-    loadData();
+    // ── SECTION NAVIGATION ────────────────────────────
+function switchSection(section) {
+  const isPipeline = section === 'pipeline';
+  document.getElementById('kanbanView').classList.toggle('hidden', !isPipeline);
+  document.getElementById('listView').classList.toggle('hidden', !isPipeline || currentView !== 'list');
+  document.getElementById('tasksSection').classList.toggle('hidden', isPipeline);
+  document.getElementById('navPipeline').classList.toggle('active', isPipeline);
+  document.getElementById('navTasks').classList.toggle('active', !isPipeline);
+  document.getElementById('currentSection').textContent = isPipeline ? 'Pipeline' : 'Tasks';
+  // Show/hide pipeline toolbar
+  document.querySelector('.toolbar').style.display = isPipeline ? '' : 'none';
+  if (!isPipeline && allTasks.length === 0) loadTasks();
+}
+
+// ── TASKS DATA ─────────────────────────────────────
+let allTasks = [];
+let filteredTasks = [];
+let taskSortCol = 'due_date';
+let taskSortDir = 1;
+let calYear  = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+
+async function loadTasks() {
+  const headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${currentUser ? currentUser.token : SUPABASE_KEY}`
+  };
+  const ownerParam = (currentUser && currentUser.role === 'rep')
+    ? `&assigned_to=eq.${encodeURIComponent(currentUser.sfName)}` : '';
+
+  try {
+    let all = [], page = 0, pageSize = 1000;
+    while (true) {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/tbl_tasks?select=*&order=due_date.asc&limit=${pageSize}&offset=${page * pageSize}${ownerParam}`,
+        { headers }
+      );
+      if (res.status === 401) { localStorage.removeItem('crm_session'); location.reload(); return; }
+      const data = await res.json();
+      if (!Array.isArray(data)) break;
+      all = all.concat(data);
+      if (data.length < pageSize) break;
+      page++;
+    }
+    allTasks = all;
+    populateTaskFilters();
+    applyTaskFilters();
+  } catch(e) {
+    console.error('Tasks load error:', e);
+  }
+}
+
+function populateTaskFilters() {
+  const types  = [...new Set(allTasks.map(t => t.type).filter(Boolean))].sort();
+  const owners = [...new Set(allTasks.map(t => t.assigned_to).filter(Boolean))].sort();
+  document.getElementById('taskTypeFilter').innerHTML  = '<option value="">All types</option>'  + types.map(t => `<option>${t}</option>`).join('');
+  document.getElementById('taskOwnerFilter').innerHTML = '<option value="">All reps</option>' + owners.map(o => `<option>${o}</option>`).join('');
+}
+
+function applyTaskFilters() {
+  const search = document.getElementById('taskSearch').value.toLowerCase();
+  const status = document.getElementById('taskStatusFilter').value;
+  const type   = document.getElementById('taskTypeFilter').value;
+  const owner  = document.getElementById('taskOwnerFilter').value;
+
+  filteredTasks = allTasks.filter(t => {
+    if (search) {
+      const hay = [t.subject, t.account_name, t.contact_name, t.assigned_to, t.type, t.comments]
+        .map(v => (v||'').toLowerCase()).join(' ');
+      if (!hay.includes(search)) return false;
+    }
+    if (status === 'open' && t.status === 'Completed') return false;
+    if (status === 'Completed' && t.status !== 'Completed') return false;
+    if (type  && t.type  !== type)  return false;
+    if (owner && t.assigned_to !== owner) return false;
+    return true;
+  });
+
+  updateTaskStats();
+  renderTaskList();
+  renderTaskCalendar();
+}
+
+function updateTaskStats() {
+  const open = filteredTasks.filter(t => t.status !== 'Completed').length;
+  const overdue = filteredTasks.filter(t => {
+    if (!t.due_date || t.status === 'Completed') return false;
+    return new Date(t.due_date) < new Date();
+  }).length;
+  document.getElementById('taskStatsBar').innerHTML = `
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--accent)"></div><strong>${filteredTasks.length}</strong> tasks</div>
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--gold)"></div><strong>${open}</strong> open</div>
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--red)"></div><strong>${overdue}</strong> overdue</div>
+  `;
+}
+
+function priorityClass(p) {
+  if (!p) return '';
+  if (p === 'High') return 'task-priority-high';
+  if (p === 'Low') return 'task-priority-low';
+  return 'task-priority-normal';
+}
+
+function fmtTaskDate(val) {
+  if (!val) return '—';
+  const d = new Date(val);
+  return `${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCFullYear()).slice(-2)}`;
+}
+
+function taskDateColor(t) {
+  if (!t.due_date || t.status === 'Completed') return '';
+  const dd = new Date(t.due_date).toISOString().slice(0,10);
+  const td = new Date().toISOString().slice(0,10);
+  if (dd < td) return 'color:var(--red);font-weight:500';
+  if (dd === td) return 'color:var(--gold);font-weight:500';
+  return '';
+}
+
+function renderTaskList() {
+  const sorted = [...filteredTasks].sort((a,b) => {
+    let av = a[taskSortCol] ?? '', bv = b[taskSortCol] ?? '';
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    return av < bv ? -taskSortDir : av > bv ? taskSortDir : 0;
+  });
+
+  document.getElementById('taskListBody').innerHTML = sorted.map(t => `
+    <tr title="${(t.comments||'').replace(/"/g,'&quot;')}">
+      <td class="mono" style="${taskDateColor(t)}">${fmtTaskDate(t.due_date)}</td>
+      <td>${t.type || '—'}</td>
+      <td class="primary">${t.subject || '—'}</td>
+      <td>${t.account_name || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px">${t.fts_id||''}</span></td>
+      <td>${t.contact_name || '—'}</td>
+      <td class="${priorityClass(t.priority)}">${t.priority || '—'}</td>
+      <td style="${t.status === 'Completed' ? 'color:var(--green)' : 'color:var(--accent)'}">${t.status || '—'}</td>
+      <td>${t.assigned_to || '—'}</td>
+    </tr>`).join('');
+
+  document.querySelectorAll('[id^="tsort-"]').forEach(el => el.textContent = '');
+  const arrow = document.getElementById(`tsort-${taskSortCol}`);
+  if (arrow) arrow.textContent = taskSortDir === 1 ? '↑' : '↓';
+}
+
+function sortTasks(col) {
+  if (taskSortCol === col) taskSortDir *= -1;
+  else { taskSortCol = col; taskSortDir = 1; }
+  renderTaskList();
+}
+
+function switchTaskView(view) {
+  const isList = view === 'list';
+  document.getElementById('taskListView').classList.toggle('hidden', !isList);
+  document.getElementById('taskCalView').classList.toggle('hidden', isList);
+  document.getElementById('tabTaskList').classList.toggle('active', isList);
+  document.getElementById('tabTaskCal').classList.toggle('active', !isList);
+  if (!isList) renderTaskCalendar();
+}
+
+// ── CALENDAR ───────────────────────────────────────
+function changeCalMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  renderTaskCalendar();
+}
+
+function goToToday() {
+  calYear  = new Date().getFullYear();
+  calMonth = new Date().getMonth();
+  renderTaskCalendar();
+}
+
+function renderTaskCalendar() {
+  const label = document.getElementById('calMonthLabel');
+  if (!label) return;
+  label.textContent = new Date(calYear, calMonth, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  const grid  = document.getElementById('taskCalGrid');
+  const today = new Date().toISOString().slice(0,10);
+  const days  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let html    = days.map(d => `<div class="task-cal-header">${d}</div>`).join('');
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const lastDate = new Date(calYear, calMonth + 1, 0).getDate();
+
+  // Task lookup by date
+  const tasksByDate = {};
+  filteredTasks.forEach(t => {
+    if (!t.due_date || t.status === 'Completed') return;
+    const d = t.due_date.slice(0,10);
+    if (!tasksByDate[d]) tasksByDate[d] = [];
+    tasksByDate[d].push(t);
+  });
+
+  // Leading empty cells
+  for (let i = 0; i < firstDay; i++) {
+    html += `<div class="task-cal-day other-month"></div>`;
+  }
+
+  for (let d = 1; d <= lastDate; d++) {
+    const dateStr   = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday   = dateStr === today;
+    const dayTasks  = tasksByDate[dateStr] || [];
+    const isOverdue = dateStr < today;
+    const show      = dayTasks.slice(0,3);
+    const more      = dayTasks.length - show.length;
+
+    const pills = show.map(t => {
+      const cls = t.priority === 'High' ? 'priority-high' : isOverdue ? 'overdue' : '';
+      return `<div class="task-cal-pill ${cls}" title="${(t.subject||'').replace(/"/g,'&quot;')}">${t.subject||'Task'}</div>`;
+    }).join('');
+
+    html += `<div class="task-cal-day${isToday ? ' today' : ''}">
+      <div class="task-cal-day-num">${d}</div>
+      ${pills}
+      ${more > 0 ? `<div class="task-cal-more">+${more} more</div>` : ''}
+    </div>`;
+  }
+
+  grid.innerHTML = html;
+}
+
+loadData();
   } catch(e) {
     localStorage.removeItem('crm_session');
   }
