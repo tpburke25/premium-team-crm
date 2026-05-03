@@ -380,7 +380,7 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
   </div>
 </div>
 
-<div class="toolbar">
+<div class="toolbar" id="pipelineToolbar">
   <div class="toolbar-left">
     <div class="search-wrap">
       <span class="search-icon">⌕</span>
@@ -1333,7 +1333,7 @@ function switchSection(section) {
   document.getElementById('navTasks').classList.toggle('active', !isPipeline);
   document.getElementById('currentSection').textContent = isPipeline ? 'Pipeline' : 'Tasks';
   // Show/hide pipeline toolbar
-  document.querySelector('.toolbar').style.display = isPipeline ? '' : 'none';
+  document.getElementById('pipelineToolbar').style.display = isPipeline ? '' : 'none';
   if (!isPipeline && allTasks.length === 0) loadTasks();
 }
 
