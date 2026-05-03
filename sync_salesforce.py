@@ -212,6 +212,7 @@ def sync_tasks(token, instance):
             Account.Accounting_Package__c
         FROM Task
         WHERE IsDeleted = false
+        AND Status != 'Completed'
         AND Owner.LastName IN ('Burke', 'Adcock', 'Pottle', 'Cuellar', 'Behymer')
         ORDER BY ActivityDate DESC
     """
