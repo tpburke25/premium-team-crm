@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premium Team CRM — Tasks</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f11;
+  --surface: #1a1a1f;
+  --surface2: #222228;
+  --surface3: #2a2a32;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0f0f2;
+  --text2: #9090a0;
+  --text3: #606070;
+  --accent: #ff7a2f;
+  --accent2: #ffaa5c;
+  --gold: #f5c842;
+  --red: #ff6b6b;
+  --green: #5ce65c;
+  --orange: #ff9f43;
+  --radius: 10px;
+  --radius-lg: 14px;
+}
+body.light {
+  --bg: #f4f4f6;
+  --surface: #ffffff;
+  --surface2: #f0f0f3;
+  --surface3: #e5e5ea;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --text: #111113;
+  --text2: #4a4a58;
+  --text3: #8a8a98;
+  --red: #d93025;
+  --green: #1a7f37;
+  --orange: #cc7a00;
+  --gold: #b08800;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* HEADER */
+.header { display: flex; align-items: center; justify-content: space-between; padding: 16px 28px; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 100; }
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.logo-mark { width: 30px; height: 30px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #fff; }
+.logo-text { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; color: var(--text); }
+.logo-sub { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.nav-link { padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; text-decoration: none; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.nav-link:hover { background: var(--surface2); color: var(--text); }
+.nav-link.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.user-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--surface2); border-radius: 20px; border: 1px solid var(--border); position: relative; cursor: pointer; }
+.user-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; }
+.user-name { font-size: 13px; color: var(--text2); }
+.user-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 6px; min-width: 180px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.user-chip.open .user-dropdown { display: block; }
+.dropdown-header { padding: 8px 10px 6px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+.dropdown-email { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dropdown-role { font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+.dropdown-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; transition: all 0.15s; border: none; background: none; font-family: 'DM Sans', sans-serif; width: 100%; text-align: left; }
+.dropdown-item:hover { background: var(--surface3); color: var(--text); }
+.dropdown-item.danger:hover { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); }
+
+/* TOOLBAR */
+.toolbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-bottom: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
+.toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.search-wrap { position: relative; }
+.search-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px 8px 34px; font-size: 13px; color: var(--text); font-family: 'DM Sans', sans-serif; width: 220px; outline: none; transition: border 0.15s; }
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: var(--text3); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; }
+.filter-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--text2); font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; }
+.filter-select option { background: var(--surface2); color: var(--text); }
+.tab-group { display: flex; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; }
+.tab-btn { padding: 7px 16px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: none; background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; }
+.tab-btn.active { background: var(--accent); color: #fff; }
+.stats-bar { display: flex; gap: 16px; flex-wrap: wrap; }
+.stat-chip { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text3); }
+.stat-chip strong { color: var(--text); font-weight: 500; }
+.stat-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* LIST */
+.list-wrap { padding: 20px 28px; }
+.list-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.list-table thead tr { border-bottom: 1px solid var(--border2); }
+.list-table th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); cursor: pointer; white-space: nowrap; user-select: none; }
+.list-table th:hover { color: var(--text2); }
+.list-table th.sorted { color: var(--accent); }
+.list-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; cursor: default; }
+.list-table tbody tr:hover { background: var(--surface2); }
+.list-table td { padding: 11px 14px; color: var(--text2); }
+.list-table td.primary { color: var(--text); font-weight: 500; }
+.mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+.priority-high { color: var(--red); font-weight: 500; }
+.priority-low { color: var(--text3); }
+.sort-arrow { margin-left: 4px; opacity: 0.5; }
+
+/* CALENDAR */
+.cal-wrap { padding: 20px 28px; }
+.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.cal-nav { display: flex; align-items: center; gap: 10px; }
+.cal-nav-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text2); padding: 6px 12px; cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+.cal-nav-btn:hover { background: var(--surface3); color: var(--text); }
+.cal-month-label { font-size: 16px; font-weight: 500; color: var(--text); min-width: 160px; text-align: center; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border-radius: var(--radius); overflow: hidden; }
+.cal-day-header { background: var(--surface2); text-align: center; padding: 8px 4px; font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
+.cal-day { background: var(--surface); min-height: 100px; padding: 8px; }
+.cal-day.other-month { background: var(--bg); opacity: 0.5; }
+.cal-day.today { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+.cal-day-num { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text3); margin-bottom: 6px; }
+.cal-day.today .cal-day-num { color: var(--accent); font-weight: 600; }
+.cal-pill { font-size: 11px; padding: 3px 6px; border-radius: 4px; margin-bottom: 3px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent); line-height: 1.4; }
+.cal-pill.high { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); border-color: color-mix(in srgb, var(--red) 25%, transparent); }
+.cal-pill.overdue { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); border-color: color-mix(in srgb, var(--red) 25%, transparent); }
+.cal-more { font-size: 11px; color: var(--text3); padding: 2px 4px; }
+
+/* LOADING / LOGIN */
+.login-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+.login-box { width: 100%; max-width: 380px; padding: 2rem; }
+.login-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; }
+.login-logo-mark { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #fff; }
+.login-logo-text { font-size: 18px; font-weight: 600; color: var(--text); }
+.login-logo-sub { font-size: 12px; color: var(--text3); }
+.login-title { font-size: 22px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+.login-sub { font-size: 14px; color: var(--text3); margin-bottom: 2rem; }
+.login-field { margin-bottom: 14px; }
+.login-label { font-size: 12px; color: var(--text3); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.04em; }
+.login-input { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 11px 14px; font-size: 14px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; transition: border 0.15s; }
+.login-input:focus { border-color: var(--accent); }
+.login-input::placeholder { color: var(--text3); }
+.login-submit { width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: opacity 0.15s; }
+.login-submit:hover { opacity: 0.85; }
+.login-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+.login-error { font-size: 13px; color: var(--red); margin-top: 10px; text-align: center; min-height: 20px; }
+.loading { text-align: center; padding: 80px 20px; color: var(--text3); }
+.spinner { width: 28px; height: 28px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 14px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-mark">P</div>
+      <div>
+        <div class="login-logo-text">Premium Team CRM</div>
+        <div class="login-logo-sub">Tasks</div>
+      </div>
+    </div>
+    <div class="login-title">Welcome back</div>
+    <div class="login-sub">Sign in to access your tasks</div>
+    <div class="login-field">
+      <label class="login-label">Email</label>
+      <input class="login-input" id="loginEmail" type="email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field">
+      <label class="login-label">Password</label>
+      <input class="login-input" id="loginPassword" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-submit" id="loginBtn" onclick="doLogin()">Sign in</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <a class="logo" href="index.html">
+    <div class="logo-mark">P</div>
+    <div>
+      <div class="logo-text">Premium Team CRM</div>
+      <div class="logo-sub">Tasks</div>
+    </div>
+  </a>
+  <div class="header-right">
+    <a href="index.html" class="nav-link">← Pipeline</a>
+    <div class="user-chip" id="userChip" onclick="toggleUserMenu()">
+      <div class="user-avatar" id="userAvatar">T</div>
+      <span class="user-name" id="userName">Loading...</span>
+      <span style="font-size:10px;color:var(--text3);margin-left:2px;">▾</span>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="dropdown-header">
+          <div class="dropdown-email" id="dropdownEmail">—</div>
+          <div class="dropdown-role" id="dropdownRole">—</div>
+        </div>
+        <button class="dropdown-item" onclick="toggleTheme()" id="themeToggleBtn">☀ Light mode</button>
+        <button class="dropdown-item danger" onclick="doLogout()">⎋ Sign out</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="toolbar-left">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input class="search-input" id="taskSearch" placeholder="Search tasks, accounts..." oninput="applyFilters()">
+    </div>
+    <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+      <option value="open">Open tasks</option>
+      <option value="">All tasks</option>
+      <option value="Completed">Completed</option>
+    </select>
+    <select class="filter-select" id="typeFilter" onchange="applyFilters()">
+      <option value="">All types</option>
+    </select>
+    <select class="filter-select" id="ownerFilter" onchange="applyFilters()">
+      <option value="">All reps</option>
+    </select>
+    <div class="tab-group">
+      <button class="tab-btn active" id="tabList" onclick="switchView('list')">≡ List</button>
+      <button class="tab-btn" id="tabCal" onclick="switchView('calendar')">📅 Calendar</button>
+    </div>
+  </div>
+  <div class="stats-bar" id="statsBar"></div>
+</div>
+
+<!-- LIST VIEW -->
+<div class="list-wrap" id="listView">
+  <div class="loading" id="loadingMsg"><div class="spinner"></div>Loading tasks...</div>
+  <table class="list-table" id="taskTable" style="display:none">
+    <thead>
+      <tr>
+        <th onclick="sortBy('due_date')">Due Date <span class="sort-arrow" id="s-due_date"></span></th>
+        <th onclick="sortBy('type')">Type <span class="sort-arrow" id="s-type"></span></th>
+        <th onclick="sortBy('subject')">Subject <span class="sort-arrow" id="s-subject"></span></th>
+        <th onclick="sortBy('account_name')">Account <span class="sort-arrow" id="s-account_name"></span></th>
+        <th onclick="sortBy('contact_name')">Primary Contact <span class="sort-arrow" id="s-contact_name"></span></th>
+        <th onclick="sortBy('priority')">Priority <span class="sort-arrow" id="s-priority"></span></th>
+        <th onclick="sortBy('status')">Status <span class="sort-arrow" id="s-status"></span></th>
+        <th onclick="sortBy('assigned_to')">Assigned To <span class="sort-arrow" id="s-assigned_to"></span></th>
+      </tr>
+    </thead>
+    <tbody id="taskBody"></tbody>
+  </table>
+</div>
+
+<!-- CALENDAR VIEW -->
+<div class="cal-wrap hidden" id="calView">
+  <div class="cal-header">
+    <div class="cal-nav">
+      <button class="cal-nav-btn" onclick="changeMonth(-1)">←</button>
+      <div class="cal-month-label" id="calLabel"></div>
+      <button class="cal-nav-btn" onclick="changeMonth(1)">→</button>
+    </div>
+    <button class="cal-nav-btn" onclick="goToday()">Today</button>
+  </div>
+  <div class="cal-grid" id="calGrid"></div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://idbnpxedwpjrflsqweyh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYm5weGVkd3BqcmZsc3F3ZXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNTY3MDYsImV4cCI6MjA5MjkzMjcwNn0.PL7ftdQbTtkCnfFa3Mwo2H3w_uPXuTh_0o75cu3_FLU';
+
+let currentUser = null;
+let allTasks = [];
+let filteredTasks = [];
+let sortCol = 'due_date';
+let sortDir = 1;
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let currentView = 'list';
+
+// ── AUTH ──────────────────────────────────────────
+(async function restoreSession() {
+  const saved = localStorage.getItem('crm_session');
+  if (!saved) return;
+  try {
+    const session = JSON.parse(saved);
+    if (!session.token) return;
+    const check = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${session.token}` }
+    });
+    if (!check.ok) {
+      if (session.refresh_token) {
+        const ref = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+          body: JSON.stringify({ refresh_token: session.refresh_token })
+        });
+        if (ref.ok) {
+          const newSession = await ref.json();
+          session.token = newSession.access_token;
+          session.refresh_token = newSession.refresh_token;
+          localStorage.setItem('crm_session', JSON.stringify(session));
+        } else { localStorage.removeItem('crm_session'); return; }
+      } else { localStorage.removeItem('crm_session'); return; }
+    }
+    currentUser = { token: session.token, email: session.email, sfName: session.sfName, role: session.role };
+    setUserUI(session.sfName, session.email, session.role);
+    document.getElementById('loginOverlay').style.display = 'none';
+    if (session.role !== 'admin') {
+      document.getElementById('ownerFilter').style.display = 'none';
+    }
+    loadTasks();
+  } catch(e) { localStorage.removeItem('crm_session'); }
+})();
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || data.msg || 'Login failed');
+    currentUser = { email, token: data.access_token };
+    const profileRes = await fetch(`${SUPABASE_URL}/rest/v1/tbl_users?email=eq.${encodeURIComponent(email)}&select=*`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${data.access_token}` }
+    });
+    const profiles = await profileRes.json();
+    if (!profiles || profiles.length === 0) throw new Error('User profile not found.');
+    const profile = profiles[0];
+    currentUser.sfName = profile.sf_owner_name;
+    currentUser.role = profile.role;
+    localStorage.setItem('crm_session', JSON.stringify({
+      token: data.access_token, refresh_token: data.refresh_token,
+      email, sfName: profile.sf_owner_name, role: profile.role
+    }));
+    setUserUI(profile.sf_owner_name, email, profile.role);
+    document.getElementById('loginOverlay').style.display = 'none';
+    if (profile.role !== 'admin') document.getElementById('ownerFilter').style.display = 'none';
+    loadTasks();
+  } catch(e) {
+    errEl.textContent = e.message;
+    btn.disabled = false;
+    btn.textContent = 'Sign in';
+  }
+}
+
+function setUserUI(name, email, role) {
+  document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('userName').textContent = name;
+  document.getElementById('dropdownEmail').textContent = email;
+  document.getElementById('dropdownRole').textContent = role === 'admin' ? 'Administrator' : 'Sales Rep';
+}
+
+function toggleUserMenu() {
+  document.getElementById('userChip').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  const chip = document.getElementById('userChip');
+  if (chip && !chip.contains(e.target)) chip.classList.remove('open');
+});
+
+function doLogout() {
+  currentUser = null;
+  localStorage.removeItem('crm_session');
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+}
+
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  localStorage.setItem('crm_theme', isLight ? 'light' : 'dark');
+  document.getElementById('themeToggleBtn').textContent = isLight ? '🌙 Dark mode' : '☀ Light mode';
+}
+(function restoreTheme() {
+  if (localStorage.getItem('crm_theme') === 'light') {
+    document.body.classList.add('light');
+    const btn = document.getElementById('themeToggleBtn');
+    if (btn) btn.textContent = '🌙 Dark mode';
+  }
+})();
+
+// ── DATA ──────────────────────────────────────────
+async function loadTasks() {
+  const ownerParam = (currentUser && currentUser.role === 'rep')
+    ? `&assigned_to=eq.${encodeURIComponent(currentUser.sfName)}` : '';
+  try {
+    let all = [], page = 0, pageSize = 1000;
+    while (true) {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/tbl_tasks?select=*&order=due_date.asc&limit=${pageSize}&offset=${page * pageSize}${ownerParam}`,
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}` } }
+      );
+      if (!res.ok) break;
+      const data = await res.json();
+      if (!Array.isArray(data)) break;
+      all = all.concat(data);
+      if (data.length < pageSize) break;
+      page++;
+    }
+    allTasks = all;
+    document.getElementById('loadingMsg').style.display = 'none';
+    document.getElementById('taskTable').style.display = 'table';
+    populateFilters();
+    applyFilters();
+  } catch(e) { console.error('Tasks load error:', e); }
+}
+
+function populateFilters() {
+  const types  = [...new Set(allTasks.map(t => t.type).filter(Boolean))].sort();
+  const owners = [...new Set(allTasks.map(t => t.assigned_to).filter(Boolean))].sort();
+  document.getElementById('typeFilter').innerHTML  = '<option value="">All types</option>' + types.map(t => `<option>${t}</option>`).join('');
+  document.getElementById('ownerFilter').innerHTML = '<option value="">All reps</option>' + owners.map(o => `<option>${o}</option>`).join('');
+}
+
+function applyFilters() {
+  const search = document.getElementById('taskSearch').value.toLowerCase();
+  const status = document.getElementById('statusFilter').value;
+  const type   = document.getElementById('typeFilter').value;
+  const owner  = document.getElementById('ownerFilter').value;
+
+  filteredTasks = allTasks.filter(t => {
+    if (search) {
+      const hay = [t.subject, t.account_name, t.contact_name, t.assigned_to, t.type, t.comments]
+        .map(v => (v||'').toLowerCase()).join(' ');
+      if (!hay.includes(search)) return false;
+    }
+    if (status === 'open' && t.status === 'Completed') return false;
+    if (status === 'Completed' && t.status !== 'Completed') return false;
+    if (type  && t.type !== type)   return false;
+    if (owner && t.assigned_to !== owner) return false;
+    return true;
+  });
+
+  updateStats();
+  renderList();
+  if (currentView === 'calendar') renderCalendar();
+}
+
+function updateStats() {
+  const open = filteredTasks.filter(t => t.status !== 'Completed').length;
+  const overdue = filteredTasks.filter(t => {
+    if (!t.due_date || t.status === 'Completed') return false;
+    return t.due_date.slice(0,10) < new Date().toISOString().slice(0,10);
+  }).length;
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--accent)"></div><strong>${filteredTasks.length}</strong> tasks</div>
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--gold)"></div><strong>${open}</strong> open</div>
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--red)"></div><strong>${overdue}</strong> overdue</div>`;
+}
+
+function fmtDate(val) {
+  if (!val) return '—';
+  const d = new Date(val);
+  return `${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCFullYear()).slice(-2)}`;
+}
+
+function dateStyle(t) {
+  if (!t.due_date || t.status === 'Completed') return '';
+  const dd = t.due_date.slice(0,10);
+  const td = new Date().toISOString().slice(0,10);
+  if (dd < td) return 'color:var(--red);font-weight:500';
+  if (dd === td) return 'color:var(--gold);font-weight:500';
+  return '';
+}
+
+function renderList() {
+  const sorted = [...filteredTasks].sort((a,b) => {
+    let av = a[sortCol] ?? '', bv = b[sortCol] ?? '';
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    return av < bv ? -sortDir : av > bv ? sortDir : 0;
+  });
+
+  document.getElementById('taskBody').innerHTML = sorted.map(t => `
+    <tr title="${(t.comments||'').replace(/"/g,'&quot;')}">
+      <td class="mono" style="${dateStyle(t)}">${fmtDate(t.due_date)}</td>
+      <td>${t.type || '—'}</td>
+      <td class="primary">${t.subject || '—'}</td>
+      <td>${t.account_name || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px">${t.fts_id||''}</span></td>
+      <td>${t.contact_name || '—'}</td>
+      <td class="${t.priority === 'High' ? 'priority-high' : t.priority === 'Low' ? 'priority-low' : ''}">${t.priority || '—'}</td>
+      <td style="${t.status === 'Completed' ? 'color:var(--green)' : 'color:var(--accent)'}">${t.status || '—'}</td>
+      <td>${t.assigned_to || '—'}</td>
+    </tr>`).join('');
+
+  document.querySelectorAll('[id^="s-"]').forEach(el => el.textContent = '');
+  const arrow = document.getElementById(`s-${sortCol}`);
+  if (arrow) arrow.textContent = sortDir === 1 ? '↑' : '↓';
+}
+
+function sortBy(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = 1; }
+  renderList();
+}
+
+// ── VIEW SWITCH ────────────────────────────────────
+function switchView(view) {
+  currentView = view;
+  const isList = view === 'list';
+  document.getElementById('listView').classList.toggle('hidden', !isList);
+  document.getElementById('calView').classList.toggle('hidden', isList);
+  document.getElementById('tabList').classList.toggle('active', isList);
+  document.getElementById('tabCal').classList.toggle('active', !isList);
+  if (!isList) renderCalendar();
+}
+
+// ── CALENDAR ───────────────────────────────────────
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function goToday() {
+  calYear = new Date().getFullYear();
+  calMonth = new Date().getMonth();
+  renderCalendar();
+}
+
+function renderCalendar() {
+  document.getElementById('calLabel').textContent =
+    new Date(calYear, calMonth, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  const today = new Date().toISOString().slice(0,10);
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const lastDate = new Date(calYear, calMonth + 1, 0).getDate();
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  const tasksByDate = {};
+  filteredTasks.forEach(t => {
+    if (!t.due_date || t.status === 'Completed') return;
+    const d = t.due_date.slice(0,10);
+    if (!tasksByDate[d]) tasksByDate[d] = [];
+    tasksByDate[d].push(t);
+  });
+
+  let html = days.map(d => `<div class="cal-day-header">${d}</div>`).join('');
+  for (let i = 0; i < firstDay; i++) html += `<div class="cal-day other-month"></div>`;
+
+  for (let d = 1; d <= lastDate; d++) {
+    const dateStr  = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday  = dateStr === today;
+    const isOver   = dateStr < today;
+    const tasks    = tasksByDate[dateStr] || [];
+    const show     = tasks.slice(0, 3);
+    const more     = tasks.length - show.length;
+
+    const pills = show.map(t => {
+      const cls = t.priority === 'High' ? 'high' : isOver ? 'overdue' : '';
+      return `<div class="cal-pill ${cls}" title="${(t.subject||'').replace(/"/g,'&quot;')}">${t.subject||'Task'}</div>`;
+    }).join('');
+
+    html += `<div class="cal-day${isToday ? ' today' : ''}">
+      <div class="cal-day-num">${d}</div>
+      ${pills}
+      ${more > 0 ? `<div class="cal-more">+${more} more</div>` : ''}
+    </div>`;
+  }
+
+  document.getElementById('calGrid').innerHTML = html;
+}
+</script>
+</body>
+</html>
