@@ -1261,6 +1261,10 @@ function closePanel() {
     if (sfBtn) sfBtn.style.display = session.role === 'admin' ? 'flex' : 'none';
     document.getElementById('loginOverlay').style.display = 'none';
     loadData();
+  } catch(e) {
+    localStorage.removeItem('crm_session');
+  }
+})();
 
 // Check if this is a password reset redirect
 (function checkResetRedirect() {
