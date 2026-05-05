@@ -21,15 +21,13 @@ body.light {
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-/* HEADER */
 .header { display: flex; align-items: center; justify-content: space-between; padding: 16px 28px; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 100; }
 .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 .logo-mark { width: 30px; height: 30px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #fff; }
 .logo-text { font-size: 15px; font-weight: 600; color: var(--text); }
 .logo-sub { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
 .header-right { display: flex; align-items: center; gap: 12px; }
-.nav-link { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; text-decoration: none; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.nav-link { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; text-decoration: none; transition: all 0.15s; display: inline-flex; align-items: center; }
 .nav-link:hover { background: var(--surface2); color: var(--text); }
 .user-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--surface2); border-radius: 20px; border: 1px solid var(--border); position: relative; cursor: pointer; }
 .user-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; }
@@ -42,8 +40,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .dropdown-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; transition: all 0.15s; border: none; background: none; font-family: 'DM Sans', sans-serif; width: 100%; text-align: left; }
 .dropdown-item:hover { background: var(--surface3); color: var(--text); }
 .dropdown-item.danger:hover { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); }
-
-/* TOOLBAR */
 .toolbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-bottom: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
 .toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .search-wrap { position: relative; }
@@ -51,48 +47,35 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .search-input:focus { border-color: var(--accent); }
 .search-input::placeholder { color: var(--text3); }
 .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; }
-.filter-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--text2); font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; }
-.filter-select option { background: var(--surface2); color: var(--text); }
+.clear-btn { padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text3); font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
+.clear-btn:hover { background: var(--surface2); color: var(--red); border-color: var(--red); }
 .stats-bar { display: flex; gap: 16px; flex-wrap: wrap; }
 .stat-chip { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text3); }
 .stat-chip strong { color: var(--text); font-weight: 500; }
 .stat-dot { width: 8px; height: 8px; border-radius: 50%; }
-
-/* ACCOUNTS LIST */
 .list-wrap { padding: 20px 28px; }
 .list-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .list-table thead tr { border-bottom: 1px solid var(--border2); }
-.list-table th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); cursor: pointer; white-space: nowrap; user-select: none; }
+.list-table th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); cursor: pointer; white-space: nowrap; user-select: none; position: relative; }
 .list-table th:hover { color: var(--text2); }
+.list-table th.th-filtered { color: var(--accent); }
 .list-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; cursor: pointer; }
 .list-table tbody tr:hover { background: var(--surface2); }
 .list-table td { padding: 11px 14px; color: var(--text2); }
 .list-table td.primary { color: var(--text); font-weight: 500; }
 .mono { font-family: 'DM Mono', monospace; font-size: 12px; }
 .sort-arrow { margin-left: 4px; opacity: 0.5; }
-.clear-btn { padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text3); font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
-.clear-btn:hover { background: var(--surface2); color: var(--red); border-color: var(--red); }
-.ms-wrap { position: relative; }
-.ms-btn { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; font-size: 13px; color: var(--text2); cursor: pointer; white-space: nowrap; min-width: 110px; justify-content: space-between; transition: border 0.15s; }
-.ms-btn.active { border-color: var(--accent); color: var(--accent); }
-.ms-badge { background: var(--accent); color: #fff; border-radius: 10px; font-size: 10px; padding: 1px 6px; font-weight: 600; }
-.ms-dropdown { position: absolute; top: calc(100% + 6px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 6px; min-width: 180px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
-.ms-wrap.open .ms-dropdown { display: block; }
-.ms-option { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; }
-.ms-option:hover { background: var(--surface3); color: var(--text); }
-.ms-option.sel { color: var(--text); }
-.ms-chk { width: 15px; height: 15px; border: 1px solid var(--border2); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
-.ms-option.sel .ms-chk { background: var(--accent); border-color: var(--accent); color: #fff; }
-.cf-wrap { position: relative; white-space: nowrap; }
+.cf-wrap { position: relative; display: inline; }
 .cf-btn { margin-left: 3px; opacity: 0.4; cursor: pointer; font-size: 10px; }
 .cf-btn:hover { opacity: 1; color: var(--accent); }
 .cf-dd { position: absolute; top: calc(100% + 4px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 8px; min-width: 200px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
-.cf-wrap.open .cf-dd { display: block; }
+.cf-dd.open { display: block; }
 .cf-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); margin-bottom: 6px; font-weight: 500; }
 .cf-search { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 5px; }
 .cf-list { max-height: 160px; overflow-y: auto; margin-bottom: 6px; }
 .cf-item { display: flex; align-items: center; gap: 7px; padding: 5px 6px; border-radius: 4px; font-size: 12px; color: var(--text2); cursor: pointer; }
 .cf-item:hover { background: var(--surface3); color: var(--text); }
+.cf-item.sel { color: var(--text); }
 .cf-chk { width: 13px; height: 13px; border: 1px solid var(--border2); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; }
 .cf-item.sel .cf-chk { background: var(--accent); border-color: var(--accent); color: #fff; }
 .cf-sel-all { font-size: 11px; color: var(--text3); cursor: pointer; display: block; margin-bottom: 5px; }
@@ -101,10 +84,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .cf-num-val { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Mono', monospace; outline: none; margin-bottom: 8px; }
 .cf-btns { display: flex; gap: 6px; }
 .cf-apply { padding: 5px 12px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
-.cf-clear { padding: 5px 12px; background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
-.th-filtered { color: var(--accent) !important; }
-
-/* ACCOUNT DETAIL PAGE */
+.cf-clear-btn { padding: 5px 12px; background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
 .acct-detail { display: none; padding: 28px; max-width: 1100px; margin: 0 auto; }
 .acct-header { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px 28px; margin-bottom: 24px; display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
 .acct-header-left { flex: 1; }
@@ -132,8 +112,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .section-table tbody tr:hover { background: var(--surface2); }
 .stage-badge { display: inline-block; font-size: 11px; padding: 3px 8px; border-radius: 8px; font-weight: 500; white-space: nowrap; }
 .empty-section { padding: 24px; text-align: center; color: var(--text3); font-size: 13px; }
-
-/* LOGIN */
 .login-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center; }
 .login-box { width: 100%; max-width: 380px; padding: 2rem; }
 .login-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; }
@@ -159,22 +137,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 </head>
 <body>
 <script>
-if (localStorage.getItem('crm_session')) {
-  document.addEventListener('DOMContentLoaded', function() {
-    var o = document.getElementById('loginOverlay');
-    if (o) o.style.display = 'none';
-  });
-}
+if (localStorage.getItem('crm_session')) { document.addEventListener('DOMContentLoaded', function() { var o=document.getElementById('loginOverlay'); if(o) o.style.display='none'; }); }
 if (localStorage.getItem('crm_theme') === 'light') document.documentElement.style.background = '#f4f4f6';
 </script>
 
-<!-- LOGIN -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-box">
-    <div class="login-logo">
-      <div class="login-logo-mark">P</div>
-      <div><div class="login-logo-text">Premium Team CRM</div><div class="login-logo-sub">Accounts</div></div>
-    </div>
+    <div class="login-logo"><div class="login-logo-mark">P</div><div><div class="login-logo-text">Premium Team CRM</div><div class="login-logo-sub">Accounts</div></div></div>
     <div class="login-title">Welcome back</div>
     <div class="login-sub">Sign in to access your accounts</div>
     <div class="login-field"><label class="login-label">Email</label><input class="login-input" id="loginEmail" type="email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
@@ -184,24 +153,17 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
   </div>
 </div>
 
-<!-- HEADER -->
 <div class="header">
-  <a class="logo" href="index.html">
-    <div class="logo-mark">P</div>
-    <div><div class="logo-text">Premium Team CRM</div><div class="logo-sub" id="pageSubtitle">Accounts</div></div>
-  </a>
+  <a class="logo" href="index.html"><div class="logo-mark">P</div><div><div class="logo-text">Premium Team CRM</div><div class="logo-sub" id="pageSubtitle">Accounts</div></div></a>
   <div class="header-right">
     <a href="index.html" class="nav-link">← Pipeline</a>
     <a href="tasks.html" class="nav-link">📋 Tasks</a>
     <div class="user-chip" id="userChip" onclick="toggleUserMenu()">
       <div class="user-avatar" id="userAvatar">T</div>
-      <span class="user-name" id="userName">Loading...</span>
+      <span class="user-name" id="userName">...</span>
       <span style="font-size:10px;color:var(--text3);margin-left:2px;">▾</span>
       <div class="user-dropdown" id="userDropdown">
-        <div class="dropdown-header">
-          <div class="dropdown-email" id="dropdownEmail">—</div>
-          <div class="dropdown-role" id="dropdownRole">—</div>
-        </div>
+        <div class="dropdown-header"><div class="dropdown-email" id="dropdownEmail">—</div><div class="dropdown-role" id="dropdownRole">—</div></div>
         <button class="dropdown-item" onclick="toggleTheme()" id="themeToggleBtn">☀ Light mode</button>
         <button class="dropdown-item danger" onclick="doLogout()">⎋ Sign out</button>
       </div>
@@ -209,20 +171,10 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
   </div>
 </div>
 
-<!-- ACCOUNTS LIST VIEW -->
 <div id="listSection">
   <div class="toolbar">
     <div class="toolbar-left">
-      <div class="search-wrap">
-        <span class="search-icon">⌕</span>
-        <input class="search-input" id="searchInput" placeholder="Search accounts, FTS ID..." oninput="applyFilters()">
-      </div>
-      <div class="ms-wrap" id="ownerWrap" style="display:none" id="ownerWrapAdmin">
-        <div class="ms-btn" id="ownerBtn" onclick="toggleOwnerMs()">
-          <span id="ownerBtnLabel">All reps</span><span style="font-size:10px;opacity:0.5;margin-left:4px">▾</span>
-        </div>
-        <div class="ms-dropdown" id="ownerDropdown"></div>
-      </div>
+      <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" id="searchInput" placeholder="Search accounts, FTS ID..." oninput="applyFilters()"></div>
       <button class="clear-btn" id="clearBtn" onclick="clearAllFilters()" style="display:none">✕ Clear filters</button>
     </div>
     <div class="stats-bar" id="statsBar"></div>
@@ -230,45 +182,24 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
   <div class="list-wrap">
     <div class="loading" id="loadingMsg"><div class="spinner"></div>Loading accounts...</div>
     <table class="list-table" id="acctTable" style="display:none">
-      <thead>
-        <tr>
-          <th class="cf-wrap" onclick="sortBy('fts_id')">FTS ID <span class="sort-arrow" id="s-fts_id"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('fts_id','check')">▾</span>
-            <div class="cf-dd" id="cf-fts_id"><div class="cf-title">FTS ID filter</div><input class="cf-search" id="cfs-fts_id" placeholder="Search..." oninput="renderCFList('fts_id')"><span class="cf-sel-all" onclick="toggleAllCF('fts_id')">Select / Deselect all</span><div class="cf-list" id="cfl-fts_id"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('fts_id')">Apply</button><button class="cf-clear" onclick="clearCF('fts_id')">Clear</button></div></div>
-          </th>
-          <th class="cf-wrap" onclick="sortBy('account_name')">Account <span class="sort-arrow" id="s-account_name"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('account_name','check')">▾</span>
-            <div class="cf-dd" id="cf-account_name"><div class="cf-title">Account filter</div><input class="cf-search" id="cfs-account_name" placeholder="Search..." oninput="renderCFList('account_name')"><span class="cf-sel-all" onclick="toggleAllCF('account_name')">Select / Deselect all</span><div class="cf-list" id="cfl-account_name"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('account_name')">Apply</button><button class="cf-clear" onclick="clearCF('account_name')">Clear</button></div></div>
-          </th>
-          <th class="cf-wrap" onclick="sortBy('industry')">Industry <span class="sort-arrow" id="s-industry"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('industry','check')">▾</span>
-            <div class="cf-dd" id="cf-industry"><div class="cf-title">Industry filter</div><input class="cf-search" id="cfs-industry" placeholder="Search..." oninput="renderCFList('industry')"><span class="cf-sel-all" onclick="toggleAllCF('industry')">Select / Deselect all</span><div class="cf-list" id="cfl-industry"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('industry')">Apply</button><button class="cf-clear" onclick="clearCF('industry')">Clear</button></div></div>
-          </th>
-          <th class="cf-wrap" onclick="sortBy('accounting_package')">Accounting Pkg <span class="sort-arrow" id="s-accounting_package"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('accounting_package','check')">▾</span>
-            <div class="cf-dd" id="cf-accounting_package"><div class="cf-title">Accounting Package filter</div><input class="cf-search" id="cfs-accounting_package" placeholder="Search..." oninput="renderCFList('accounting_package')"><span class="cf-sel-all" onclick="toggleAllCF('accounting_package')">Select / Deselect all</span><div class="cf-list" id="cfl-accounting_package"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('accounting_package')">Apply</button><button class="cf-clear" onclick="clearCF('accounting_package')">Clear</button></div></div>
-          </th>
-          <th class="cf-wrap" onclick="sortBy('days_since_activity')">Days Since Act. <span class="sort-arrow" id="s-days_since_activity"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('days_since_activity','num')">▾</span>
-            <div class="cf-dd" id="cf-days_since_activity"><div class="cf-title">Days Since Activity</div><select class="cf-num-op" id="cfop-days_since_activity"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-days_since_activity" type="number" min="0" placeholder="e.g. 30"><div class="cf-btns"><button class="cf-apply" onclick="applyNumCF('days_since_activity')">Apply</button><button class="cf-clear" onclick="clearNumCF('days_since_activity')">Clear</button></div></div>
-          </th>
-          <th class="cf-wrap" onclick="sortBy('city')">City <span class="sort-arrow" id="s-city"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('city','check')">▾</span>
-            <div class="cf-dd" id="cf-city"><div class="cf-title">City filter</div><input class="cf-search" id="cfs-city" placeholder="Search..." oninput="renderCFList('city')"><span class="cf-sel-all" onclick="toggleAllCF('city')">Select / Deselect all</span><div class="cf-list" id="cfl-city"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('city')">Apply</button><button class="cf-clear" onclick="clearCF('city')">Clear</button></div></div>
-          </th>
-          <th class="cf-wrap" onclick="sortBy('state')">State <span class="sort-arrow" id="s-state"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('state','check')">▾</span>
-            <div class="cf-dd" id="cf-state"><div class="cf-title">State filter</div><input class="cf-search" id="cfs-state" placeholder="Search..." oninput="renderCFList('state')"><span class="cf-sel-all" onclick="toggleAllCF('state')">Select / Deselect all</span><div class="cf-list" id="cfl-state"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('state')">Apply</button><button class="cf-clear" onclick="clearCF('state')">Clear</button></div></div>
-          </th>
-          <th class="cf-wrap" onclick="sortBy('open_opps')">Open Opps <span class="sort-arrow" id="s-open_opps"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('open_opps','num')">▾</span>
-            <div class="cf-dd" id="cf-open_opps"><div class="cf-title">Open Opps</div><select class="cf-num-op" id="cfop-open_opps"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-open_opps" type="number" min="0" placeholder="e.g. 1"><div class="cf-btns"><button class="cf-apply" onclick="applyNumCF('open_opps')">Apply</button><button class="cf-clear" onclick="clearNumCF('open_opps')">Clear</button></div></div>
-          </th>
-          <th class="cf-wrap" onclick="sortBy('open_tasks')">Open Tasks <span class="sort-arrow" id="s-open_tasks"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('open_tasks','num')">▾</span>
-            <div class="cf-dd" id="cf-open_tasks"><div class="cf-title">Open Tasks</div><select class="cf-num-op" id="cfop-open_tasks"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-open_tasks" type="number" min="0" placeholder="e.g. 1"><div class="cf-btns"><button class="cf-apply" onclick="applyNumCF('open_tasks')">Apply</button><button class="cf-clear" onclick="clearNumCF('open_tasks')">Clear</button></div></div>
-          </th>
-        </tr>
-      </thead>
+      <thead><tr>
+        <th onclick="sortBy('fts_id')">FTS ID <span class="sort-arrow" id="s-fts_id"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('fts_id','check')">▾</span><div class="cf-dd" id="cf-fts_id"><div class="cf-title">FTS ID</div><input class="cf-search" id="cfs-fts_id" placeholder="Search..." oninput="renderCFList('fts_id')"><span class="cf-sel-all" onclick="toggleAllCF('fts_id')">Select/Deselect all</span><div class="cf-list" id="cfl-fts_id"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('fts_id')">Apply</button><button class="cf-clear-btn" onclick="clearCF('fts_id')">Clear</button></div></div></th>
+        <th onclick="sortBy('account_name')">Account <span class="sort-arrow" id="s-account_name"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('account_name','check')">▾</span><div class="cf-dd" id="cf-account_name"><div class="cf-title">Account</div><input class="cf-search" id="cfs-account_name" placeholder="Search..." oninput="renderCFList('account_name')"><span class="cf-sel-all" onclick="toggleAllCF('account_name')">Select/Deselect all</span><div class="cf-list" id="cfl-account_name"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('account_name')">Apply</button><button class="cf-clear-btn" onclick="clearCF('account_name')">Clear</button></div></div></th>
+        <th onclick="sortBy('industry')">Industry <span class="sort-arrow" id="s-industry"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('industry','check')">▾</span><div class="cf-dd" id="cf-industry"><div class="cf-title">Industry</div><input class="cf-search" id="cfs-industry" placeholder="Search..." oninput="renderCFList('industry')"><span class="cf-sel-all" onclick="toggleAllCF('industry')">Select/Deselect all</span><div class="cf-list" id="cfl-industry"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('industry')">Apply</button><button class="cf-clear-btn" onclick="clearCF('industry')">Clear</button></div></div></th>
+        <th onclick="sortBy('accounting_package')">Accounting Pkg <span class="sort-arrow" id="s-accounting_package"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('accounting_package','check')">▾</span><div class="cf-dd" id="cf-accounting_package"><div class="cf-title">Accounting Package</div><input class="cf-search" id="cfs-accounting_package" placeholder="Search..." oninput="renderCFList('accounting_package')"><span class="cf-sel-all" onclick="toggleAllCF('accounting_package')">Select/Deselect all</span><div class="cf-list" id="cfl-accounting_package"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('accounting_package')">Apply</button><button class="cf-clear-btn" onclick="clearCF('accounting_package')">Clear</button></div></div></th>
+        <th onclick="sortBy('days_since_activity')">Days Since Act. <span class="sort-arrow" id="s-days_since_activity"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('days_since_activity','num')">▾</span><div class="cf-dd" id="cf-days_since_activity"><div class="cf-title">Days Since Activity</div><select class="cf-num-op" id="cfop-days_since_activity"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-days_since_activity" type="number" min="0" placeholder="e.g. 30"><div class="cf-btns"><button class="cf-apply" onclick="applyNumCF('days_since_activity')">Apply</button><button class="cf-clear-btn" onclick="clearNumCF('days_since_activity')">Clear</button></div></div></th>
+        <th onclick="sortBy('city')">City <span class="sort-arrow" id="s-city"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('city','check')">▾</span><div class="cf-dd" id="cf-city"><div class="cf-title">City</div><input class="cf-search" id="cfs-city" placeholder="Search..." oninput="renderCFList('city')"><span class="cf-sel-all" onclick="toggleAllCF('city')">Select/Deselect all</span><div class="cf-list" id="cfl-city"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('city')">Apply</button><button class="cf-clear-btn" onclick="clearCF('city')">Clear</button></div></div></th>
+        <th onclick="sortBy('state')">State <span class="sort-arrow" id="s-state"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('state','check')">▾</span><div class="cf-dd" id="cf-state"><div class="cf-title">State</div><input class="cf-search" id="cfs-state" placeholder="Search..." oninput="renderCFList('state')"><span class="cf-sel-all" onclick="toggleAllCF('state')">Select/Deselect all</span><div class="cf-list" id="cfl-state"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('state')">Apply</button><button class="cf-clear-btn" onclick="clearCF('state')">Clear</button></div></div></th>
+        <th onclick="sortBy('open_opps')">Open Opps <span class="sort-arrow" id="s-open_opps"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('open_opps','num')">▾</span><div class="cf-dd" id="cf-open_opps"><div class="cf-title">Open Opps</div><select class="cf-num-op" id="cfop-open_opps"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-open_opps" type="number" min="0" placeholder="e.g. 1"><div class="cf-btns"><button class="cf-apply" onclick="applyNumCF('open_opps')">Apply</button><button class="cf-clear-btn" onclick="clearNumCF('open_opps')">Clear</button></div></div></th>
+        <th onclick="sortBy('open_tasks')">Open Tasks <span class="sort-arrow" id="s-open_tasks"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('open_tasks','num')">▾</span><div class="cf-dd" id="cf-open_tasks"><div class="cf-title">Open Tasks</div><select class="cf-num-op" id="cfop-open_tasks"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-open_tasks" type="number" min="0" placeholder="e.g. 1"><div class="cf-btns"><button class="cf-apply" onclick="applyNumCF('open_tasks')">Apply</button><button class="cf-clear-btn" onclick="clearNumCF('open_tasks')">Clear</button></div></div></th>
+      </tr></thead>
       <tbody id="acctBody"></tbody>
     </table>
   </div>
 </div>
 
-<!-- ACCOUNT DETAIL VIEW -->
 <div class="acct-detail" id="detailSection">
-  <div class="acct-header" id="acctHeader"></div>
+  <div id="acctHeader"></div>
   <div class="acct-stats" id="acctStats"></div>
   <div id="acctRelated"></div>
 </div>
@@ -278,79 +209,22 @@ const SUPABASE_URL = 'https://idbnpxedwpjrflsqweyh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYm5weGVkd3BqcmZsc3F3ZXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNTY3MDYsImV4cCI6MjA5MjkzMjcwNn0.PL7ftdQbTtkCnfFa3Mwo2H3w_uPXuTh_0o75cu3_FLU';
 
 let currentUser = null;
-let allAccounts = [];
-let filteredAccounts = [];
-let allOpps = [];
-let allTasks = [];
-let sortCol = 'account_name';
-let sortDir = 1;
+let allAccounts = [], filteredAccounts = [], allOpps = [], allTasks = [];
+let sortCol = 'account_name', sortDir = 1;
+const checkFilters = {}, numFilters = {}, cfValues = {};
 
-// ── AUTH ──────────────────────────────────────────
-async function restoreSession() {
-  const saved = localStorage.getItem('crm_session');
-  if (!saved) return;
-  try {
-    const session = JSON.parse(saved);
-    if (!session.token || !session.sfName) return;
-
-    // Try refresh token first if we have one — gets fresh token without network round trip to /user
-    if (session.refresh_token) {
-      try {
-        const ref = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-          body: JSON.stringify({ refresh_token: session.refresh_token })
-        });
-        if (ref.ok) {
-          const ns = await ref.json();
-          session.token = ns.access_token;
-          session.refresh_token = ns.refresh_token;
-          localStorage.setItem('crm_session', JSON.stringify(session));
-        }
-      } catch(e) { /* use existing token */ }
-    }
-
-    currentUser = { token: session.token, email: session.email, sfName: session.sfName, role: session.role };
-    setUserUI(session.sfName, session.email, session.role);
-    document.getElementById('loginOverlay').style.display = 'none';
-    document.getElementById('loginOverlay').style.display = 'none';
-    loadData();
-  } catch(e) {
-    console.warn('Session restore error:', e);
-    document.getElementById('loginOverlay').style.display = 'flex';
-  }
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  localStorage.setItem('crm_theme', isLight ? 'light' : 'dark');
+  document.getElementById('themeToggleBtn').textContent = isLight ? '🌙 Dark mode' : '☀ Light mode';
+}
+if (localStorage.getItem('crm_theme') === 'light') {
+  document.body.classList.add('light');
+  document.addEventListener('DOMContentLoaded', () => { const b=document.getElementById('themeToggleBtn'); if(b) b.textContent='🌙 Dark mode'; });
 }
 
-async function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  const btn = document.getElementById('loginBtn');
-  const errEl = document.getElementById('loginError');
-  errEl.textContent = ''; btn.disabled = true; btn.textContent = 'Signing in...';
-  try {
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-      body: JSON.stringify({ email, password })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error_description || 'Login failed');
-    currentUser = { email, token: data.access_token };
-    const pr = await fetch(`${SUPABASE_URL}/rest/v1/tbl_users?email=eq.${encodeURIComponent(email)}&select=*`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${data.access_token}` }
-    });
-    const profiles = await pr.json();
-    if (!profiles?.length) throw new Error('User profile not found.');
-    const profile = profiles[0];
-    currentUser.sfName = profile.sf_owner_name; currentUser.role = profile.role;
-    localStorage.setItem('crm_session', JSON.stringify({
-      token: data.access_token, refresh_token: data.refresh_token,
-      email, sfName: profile.sf_owner_name, role: profile.role
-    }));
-    setUserUI(profile.sf_owner_name, email, profile.role);
-    document.getElementById('loginOverlay').style.display = 'none';
-    loadData();
-  } catch(e) { errEl.textContent = e.message; btn.disabled = false; btn.textContent = 'Sign in'; }
-}
+function toggleUserMenu() { document.getElementById('userChip').classList.toggle('open'); }
+document.addEventListener('click', e => { const c=document.getElementById('userChip'); if(c&&!c.contains(e.target)) c.classList.remove('open'); });
 
 function setUserUI(name, email, role) {
   document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
@@ -359,493 +233,302 @@ function setUserUI(name, email, role) {
   document.getElementById('dropdownRole').textContent = role === 'admin' ? 'Administrator' : 'Sales Rep';
 }
 
-function toggleUserMenu() { document.getElementById('userChip').classList.toggle('open'); }
-document.addEventListener('click', e => { const c = document.getElementById('userChip'); if (c && !c.contains(e.target)) c.classList.remove('open'); });
-function doLogout() { currentUser = null; localStorage.removeItem('crm_session'); document.getElementById('loginOverlay').style.display = 'flex'; }
-function toggleTheme() {
-  const isLight = document.body.classList.toggle('light');
-  localStorage.setItem('crm_theme', isLight ? 'light' : 'dark');
-  document.getElementById('themeToggleBtn').textContent = isLight ? '🌙 Dark mode' : '☀ Light mode';
+function doLogout() {
+  currentUser = null; localStorage.removeItem('crm_session');
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('loginEmail').value = ''; document.getElementById('loginPassword').value = '';
 }
-(function() { if (localStorage.getItem('crm_theme') === 'light') { document.body.classList.add('light'); const b = document.getElementById('themeToggleBtn'); if(b) b.textContent = '🌙 Dark mode'; } })();
 
-// ── DATA LOAD ─────────────────────────────────────
+async function doLogin() {
+  const email=document.getElementById('loginEmail').value.trim(), password=document.getElementById('loginPassword').value;
+  const btn=document.getElementById('loginBtn'), errEl=document.getElementById('loginError');
+  errEl.textContent=''; btn.disabled=true; btn.textContent='Signing in...';
+  try {
+    const res=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify({email,password})});
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.error_description||'Login failed');
+    const pr=await fetch(`${SUPABASE_URL}/rest/v1/tbl_users?email=eq.${encodeURIComponent(email)}&select=*`,{headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${data.access_token}`}});
+    const profiles=await pr.json();
+    if(!profiles?.length) throw new Error('User profile not found.');
+    const profile=profiles[0];
+    currentUser={token:data.access_token,refresh_token:data.refresh_token,email,sfName:profile.sf_owner_name,role:profile.role};
+    localStorage.setItem('crm_session',JSON.stringify(currentUser));
+    setUserUI(profile.sf_owner_name,email,profile.role);
+    document.getElementById('loginOverlay').style.display='none';
+    loadData();
+  } catch(e) { errEl.textContent=e.message; btn.disabled=false; btn.textContent='Sign in'; }
+}
+
+async function restoreSession() {
+  const saved=localStorage.getItem('crm_session');
+  if(!saved) return;
+  try {
+    const session=JSON.parse(saved);
+    if(!session.token||!session.sfName) return;
+    if(session.refresh_token) {
+      try {
+        const ref=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify({refresh_token:session.refresh_token})});
+        if(ref.ok){const ns=await ref.json();session.token=ns.access_token;session.refresh_token=ns.refresh_token;localStorage.setItem('crm_session',JSON.stringify(session));}
+      } catch(e){}
+    }
+    currentUser={token:session.token,refresh_token:session.refresh_token,email:session.email,sfName:session.sfName,role:session.role};
+    setUserUI(session.sfName,session.email,session.role);
+    document.getElementById('loginOverlay').style.display='none';
+    loadData();
+  } catch(e) { console.warn('Session restore error:',e); document.getElementById('loginOverlay').style.display='flex'; }
+}
+
 async function fetchAll(table, ownerField) {
-  const ownerParam = (currentUser?.role === 'rep') ? `&${ownerField}=eq.${encodeURIComponent(currentUser.sfName)}` : '';
-  const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}` };
-  let all = [], page = 0, size = 1000;
-  while (true) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*&limit=${size}&offset=${page*size}${ownerParam}`, { headers });
-    if (!res.ok) break;
-    const data = await res.json();
-    if (!Array.isArray(data)) break;
-    all = all.concat(data);
-    if (data.length < size) break;
-    page++;
+  const ownerParam = currentUser?.role==='rep' ? `&${ownerField}=eq.${encodeURIComponent(currentUser.sfName)}` : '';
+  const headers = {'apikey':SUPABASE_KEY,'Authorization':`Bearer ${currentUser.token}`};
+  let all=[],page=0,size=1000;
+  while(true){
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*&limit=${size}&offset=${page*size}${ownerParam}`,{headers});
+    if(!res.ok) break;
+    const data=await res.json();
+    if(!Array.isArray(data)) break;
+    all=all.concat(data); if(data.length<size) break; page++;
   }
   return all;
 }
 
 async function loadData() {
   try {
-    const [opps, tasks] = await Promise.all([
-      fetchAll('tbl_opportunities', 'opportunity_owner'),
-      fetchAll('tbl_tasks', 'assigned_to')
-    ]);
-    allOpps  = opps;
-    allTasks = tasks;
+    const [opps,tasks] = await Promise.all([fetchAll('tbl_opportunities','opportunity_owner'),fetchAll('tbl_tasks','assigned_to')]);
+    allOpps=opps; allTasks=tasks;
     buildAccountList();
-  } catch(e) {
-    console.error('Load error:', e);
-  }
+  } catch(e) { console.error('Load error:',e); }
 }
 
 function buildAccountList() {
-  const accountMap = {};
-
-  // Build from opportunities
-  allOpps.forEach(o => {
-    if (!o.account_id) return;
-    if (!accountMap[o.account_id]) {
-      accountMap[o.account_id] = {
-        account_id: o.account_id, account_name: o.account_name, fts_id: o.fts_id,
-        industry: o.industry, accounting_package: o.accounting_package,
-        days_since_activity: o.days_since_activity, city: o.city, state: o.state,
-        parent_account: o.parent_account, open_opps: 0, open_tasks: 0, total_opps: 0
-      };
-    }
-    const a = accountMap[o.account_id];
-    a.total_opps++;
-    if (!['Lost', 'Closed Won'].includes(o.stage)) a.open_opps++;
-    // Fill in missing fields from opps
-    if (!a.fts_id && o.fts_id) a.fts_id = o.fts_id;
-    if (!a.industry && o.industry) a.industry = o.industry;
-    if (!a.accounting_package && o.accounting_package) a.accounting_package = o.accounting_package;
-    if (!a.city && o.city) a.city = o.city;
-    if (!a.state && o.state) a.state = o.state;
-    if (o.days_since_activity !== null) a.days_since_activity = o.days_since_activity;
+  const map={};
+  allOpps.forEach(o=>{
+    if(!o.account_id) return;
+    if(!map[o.account_id]) map[o.account_id]={account_id:o.account_id,account_name:o.account_name,fts_id:o.fts_id,industry:o.industry,accounting_package:o.accounting_package,days_since_activity:o.days_since_activity,city:o.city,state:o.state,parent_account:o.parent_account,open_opps:0,open_tasks:0,total_opps:0};
+    const a=map[o.account_id]; a.total_opps++;
+    if(!['Lost','Closed Won'].includes(o.stage)) a.open_opps++;
+    if(!a.fts_id&&o.fts_id) a.fts_id=o.fts_id;
+    if(!a.industry&&o.industry) a.industry=o.industry;
+    if(!a.accounting_package&&o.accounting_package) a.accounting_package=o.accounting_package;
+    if(!a.city&&o.city) a.city=o.city;
+    if(!a.state&&o.state) a.state=o.state;
+    if(o.days_since_activity!==null) a.days_since_activity=o.days_since_activity;
   });
-
-  // Merge from tasks
-  allTasks.forEach(t => {
-    if (!t.account_id) return;
-    if (!accountMap[t.account_id]) {
-      accountMap[t.account_id] = {
-        account_id: t.account_id, account_name: t.account_name, fts_id: t.fts_id,
-        industry: t.industry, accounting_package: t.accounting_package,
-        days_since_activity: t.days_since_activity, city: null, state: null,
-        parent_account: null, open_opps: 0, open_tasks: 0, total_opps: 0
-      };
-    }
-    accountMap[t.account_id].open_tasks++;
-    if (!accountMap[t.account_id].fts_id && t.fts_id) accountMap[t.account_id].fts_id = t.fts_id;
-    if (!accountMap[t.account_id].days_since_activity && t.days_since_activity)
-      accountMap[t.account_id].days_since_activity = t.days_since_activity;
+  allTasks.forEach(t=>{
+    if(!t.account_id) return;
+    if(!map[t.account_id]) map[t.account_id]={account_id:t.account_id,account_name:t.account_name,fts_id:t.fts_id,industry:t.industry,accounting_package:t.accounting_package,days_since_activity:t.days_since_activity,city:null,state:null,parent_account:null,open_opps:0,open_tasks:0,total_opps:0};
+    map[t.account_id].open_tasks++;
+    if(!map[t.account_id].fts_id&&t.fts_id) map[t.account_id].fts_id=t.fts_id;
   });
-
-  allAccounts = Object.values(accountMap).sort((a,b) => (a.account_name||'').localeCompare(b.account_name||''));
-  populateFilters();
-  populateOwnerFilter();
+  allAccounts=Object.values(map).sort((a,b)=>(a.account_name||'').localeCompare(b.account_name||''));
+  ['fts_id','account_name','industry','accounting_package','city','state'].forEach(col=>{
+    cfValues[col]=[...new Set(allAccounts.map(a=>a[col]).filter(Boolean))].sort();
+  });
   applyFilters();
-  document.getElementById('loadingMsg').style.display = 'none';
-  document.getElementById('acctTable').style.display = 'table';
+  document.getElementById('loadingMsg').style.display='none';
+  document.getElementById('acctTable').style.display='table';
 }
 
-// ── COLUMN FILTERS ────────────────────────────────
-const checkFilters = {}; // col -> Set of selected values
-const numFilters   = {}; // col -> {op, val}
-const cfValues     = {}; // col -> all unique values
-
-function populateFilters() {
-  ['fts_id','account_name','industry','accounting_package','city','state'].forEach(col => {
-    cfValues[col] = [...new Set(allAccounts.map(a => a[col]).filter(Boolean))].sort();
-  });
+function openCF(col,type){
+  document.querySelectorAll('.cf-dd.open').forEach(d=>d.classList.remove('open'));
+  const dd=document.getElementById('cf-'+col);
+  dd.classList.add('open');
+  if(type==='check') renderCFList(col);
 }
-
-function openCF(col, type) {
-  document.querySelectorAll('.cf-wrap.open').forEach(w => w.classList.remove('open'));
-  const wrap = document.getElementById('cf-' + col).closest('.cf-wrap');
-  wrap.classList.add('open');
-  if (type === 'check') renderCFList(col);
-}
-
-document.addEventListener('click', e => {
-  document.querySelectorAll('.cf-wrap.open').forEach(w => {
-    if (!w.contains(e.target)) w.classList.remove('open');
-  });
+document.addEventListener('click',e=>{
+  if(!e.target.closest('th')) document.querySelectorAll('.cf-dd.open').forEach(d=>d.classList.remove('open'));
 });
 
-function renderCFList(col) {
-  const search = (document.getElementById('cfs-' + col)?.value || '').toLowerCase();
-  const sel    = checkFilters[col] || new Set();
-  const vals   = (cfValues[col] || []).filter(v => v.toLowerCase().includes(search));
-  document.getElementById('cfl-' + col).innerHTML = vals.map(v => `
-    <div class="cf-item ${sel.has(v)?'sel':''}" onclick="toggleCFItem('${col}','${v.replace(/'/g,"\'")}')">
+function renderCFList(col){
+  const search=(document.getElementById('cfs-'+col)?.value||'').toLowerCase();
+  const sel=checkFilters[col]||new Set();
+  const vals=(cfValues[col]||[]).filter(v=>v.toLowerCase().includes(search));
+  document.getElementById('cfl-'+col).innerHTML=vals.map(v=>`
+    <div class="cf-item ${sel.has(v)?'sel':''}" onclick="toggleCFItem('${col}','${v.replace(/'/g,"\\'")}')">
       <div class="cf-chk">${sel.has(v)?'✓':''}</div>${v}
     </div>`).join('');
 }
 
-function toggleCFItem(col, val) {
-  if (!checkFilters[col]) checkFilters[col] = new Set();
-  if (checkFilters[col].has(val)) checkFilters[col].delete(val);
-  else checkFilters[col].add(val);
+function toggleCFItem(col,val){
+  if(!checkFilters[col]) checkFilters[col]=new Set();
+  if(checkFilters[col].has(val)) checkFilters[col].delete(val); else checkFilters[col].add(val);
   renderCFList(col);
 }
 
-function toggleAllCF(col) {
-  const search = (document.getElementById('cfs-' + col)?.value || '').toLowerCase();
-  const visible = (cfValues[col] || []).filter(v => v.toLowerCase().includes(search));
-  if (!checkFilters[col]) checkFilters[col] = new Set();
-  const allSel = visible.every(v => checkFilters[col].has(v));
-  visible.forEach(v => allSel ? checkFilters[col].delete(v) : checkFilters[col].add(v));
+function toggleAllCF(col){
+  const search=(document.getElementById('cfs-'+col)?.value||'').toLowerCase();
+  const visible=(cfValues[col]||[]).filter(v=>v.toLowerCase().includes(search));
+  if(!checkFilters[col]) checkFilters[col]=new Set();
+  const allSel=visible.every(v=>checkFilters[col].has(v));
+  visible.forEach(v=>allSel?checkFilters[col].delete(v):checkFilters[col].add(v));
   renderCFList(col);
 }
 
-function applyCF(col) {
-  const th = document.getElementById('cf-' + col).closest('th');
-  const hasFilter = checkFilters[col]?.size > 0;
-  if (th) th.classList.toggle('th-filtered', hasFilter);
-  document.querySelector('.cf-wrap.open')?.classList.remove('open');
+function applyCF(col){
+  const th=document.getElementById('cf-'+col).closest('th');
+  if(th) th.classList.toggle('th-filtered',checkFilters[col]?.size>0);
+  document.querySelectorAll('.cf-dd.open').forEach(d=>d.classList.remove('open'));
   applyFilters();
 }
 
-function clearCF(col) {
-  if (checkFilters[col]) checkFilters[col].clear();
-  const th = document.getElementById('cf-' + col).closest('th');
-  if (th) th.classList.remove('th-filtered');
+function clearCF(col){
+  if(checkFilters[col]) checkFilters[col].clear();
+  const th=document.getElementById('cf-'+col).closest('th');
+  if(th) th.classList.remove('th-filtered');
   renderCFList(col);
-  document.querySelector('.cf-wrap.open')?.classList.remove('open');
+  document.querySelectorAll('.cf-dd.open').forEach(d=>d.classList.remove('open'));
   applyFilters();
 }
 
-function applyNumCF(col) {
-  const op  = document.getElementById('cfop-' + col).value;
-  const val = parseFloat(document.getElementById('cfval-' + col).value);
-  if (op && !isNaN(val)) {
-    numFilters[col] = { op, val };
-    const th = document.getElementById('cf-' + col).closest('th');
-    if (th) th.classList.add('th-filtered');
-  }
-  document.querySelector('.cf-wrap.open')?.classList.remove('open');
+function applyNumCF(col){
+  const op=document.getElementById('cfop-'+col).value,val=parseFloat(document.getElementById('cfval-'+col).value);
+  if(op&&!isNaN(val)){numFilters[col]={op,val};const th=document.getElementById('cf-'+col).closest('th');if(th) th.classList.add('th-filtered');}
+  document.querySelectorAll('.cf-dd.open').forEach(d=>d.classList.remove('open'));
   applyFilters();
 }
 
-function clearNumCF(col) {
+function clearNumCF(col){
   delete numFilters[col];
-  document.getElementById('cfop-' + col).value = '';
-  document.getElementById('cfval-' + col).value = '';
-  const th = document.getElementById('cf-' + col).closest('th');
-  if (th) th.classList.remove('th-filtered');
-  document.querySelector('.cf-wrap.open')?.classList.remove('open');
+  document.getElementById('cfop-'+col).value=''; document.getElementById('cfval-'+col).value='';
+  const th=document.getElementById('cf-'+col).closest('th');
+  if(th) th.classList.remove('th-filtered');
+  document.querySelectorAll('.cf-dd.open').forEach(d=>d.classList.remove('open'));
   applyFilters();
 }
 
-function passesNumFilter(col, val) {
-  const f = numFilters[col];
-  if (!f) return true;
-  const v = parseFloat(val);
-  if (isNaN(v)) return false;
-  if (f.op === 'gt')  return v >  f.val;
-  if (f.op === 'gte') return v >= f.val;
-  if (f.op === 'lt')  return v <  f.val;
-  if (f.op === 'lte') return v <= f.val;
-  if (f.op === 'eq')  return v === f.val;
-  return true;
+function passesNum(col,val){
+  const f=numFilters[col]; if(!f) return true;
+  const v=parseFloat(val); if(isNaN(v)) return false;
+  if(f.op==='gt') return v>f.val; if(f.op==='gte') return v>=f.val;
+  if(f.op==='lt') return v<f.val; if(f.op==='lte') return v<=f.val;
+  if(f.op==='eq') return v===f.val; return true;
 }
 
-function clearAllFilters() {
-  document.getElementById('searchInput').value = '';
-  selectedOwners.clear();
-  updateOwnerBtn();
-  populateOwnerFilter();
-  ['fts_id','account_name','industry','accounting_package','city','state'].forEach(col => {
-    if (checkFilters[col]) checkFilters[col].clear();
-    const th = document.getElementById('cf-' + col)?.closest('th');
-    if (th) th.classList.remove('th-filtered');
+function clearAllFilters(){
+  document.getElementById('searchInput').value='';
+  ['fts_id','account_name','industry','accounting_package','city','state'].forEach(col=>{
+    if(checkFilters[col]) checkFilters[col].clear();
+    const th=document.getElementById('cf-'+col)?.closest('th'); if(th) th.classList.remove('th-filtered');
   });
-  ['days_since_activity','open_opps','open_tasks'].forEach(col => {
+  ['days_since_activity','open_opps','open_tasks'].forEach(col=>{
     delete numFilters[col];
-    const op = document.getElementById('cfop-' + col);
-    const vl = document.getElementById('cfval-' + col);
-    if (op) op.value = '';
-    if (vl) vl.value = '';
-    const th = document.getElementById('cf-' + col)?.closest('th');
-    if (th) th.classList.remove('th-filtered');
+    const op=document.getElementById('cfop-'+col),vl=document.getElementById('cfval-'+col);
+    if(op) op.value=''; if(vl) vl.value='';
+    const th=document.getElementById('cf-'+col)?.closest('th'); if(th) th.classList.remove('th-filtered');
   });
   applyFilters();
 }
 
-// ── OWNER MULTISELECT (admin only) ────────────────
-let selectedOwners = new Set();
-
-function toggleOwnerMs() {
-  document.getElementById('ownerWrap').classList.toggle('open');
-}
-document.addEventListener('click', e => {
-  const wrap = document.getElementById('ownerWrap');
-  if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
-});
-
-function populateOwnerFilter() {
-  if (!currentUser || currentUser.role !== 'admin') return;
-  document.getElementById('ownerWrap').style.display = 'flex';
-
-  // Get all unique owners from opps + tasks
-  const owners = [...new Set([
-    ...allOpps.map(o => o.opportunity_owner),
-    ...allTasks.map(t => t.assigned_to)
-  ].filter(Boolean))].sort();
-
-  document.getElementById('ownerDropdown').innerHTML = owners.map(o => `
-    <div class="ms-option ${selectedOwners.has(o)?'sel':''}" onclick="toggleOwner('${o}')">
-      <div class="ms-chk">${selectedOwners.has(o)?'✓':''}</div>${o}
-    </div>`).join('');
-}
-
-function toggleOwner(name) {
-  if (selectedOwners.has(name)) selectedOwners.delete(name);
-  else selectedOwners.add(name);
-  populateOwnerFilter();
-  updateOwnerBtn();
-  applyFilters();
-}
-
-function updateOwnerBtn() {
-  const btn = document.getElementById('ownerBtn');
-  const label = document.getElementById('ownerBtnLabel');
-  if (selectedOwners.size === 0) { label.innerHTML = 'All reps'; btn.classList.remove('active'); }
-  else if (selectedOwners.size === 1) { label.innerHTML = [...selectedOwners][0].split(' ')[0]; btn.classList.add('active'); }
-  else { label.innerHTML = `Reps <span class="ms-badge">${selectedOwners.size}</span>`; btn.classList.add('active'); }
-}
-
-function applyFilters() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
-
-  // Build set of account_ids for selected owners
-  let ownerAccountIds = null;
-  if (selectedOwners.size > 0) {
-    ownerAccountIds = new Set([
-      ...allOpps.filter(o => selectedOwners.has(o.opportunity_owner)).map(o => o.account_id),
-      ...allTasks.filter(t => selectedOwners.has(t.assigned_to)).map(t => t.account_id)
-    ]);
-  }
-
-  filteredAccounts = allAccounts.filter(a => {
-    if (search) {
-      const hay = [a.account_name, a.fts_id, a.city, a.state, a.industry, a.accounting_package]
-        .map(v => (v||'').toLowerCase()).join(' ');
-      if (!hay.includes(search)) return false;
-    }
-    if (ownerAccountIds && !ownerAccountIds.has(a.account_id)) return false;
-    for (const col of ['fts_id','account_name','industry','accounting_package','city','state']) {
-      if (checkFilters[col]?.size > 0 && !checkFilters[col].has(a[col])) return false;
-    }
-    if (!passesNumFilter('days_since_activity', a.days_since_activity)) return false;
-    if (!passesNumFilter('open_opps', a.open_opps)) return false;
-    if (!passesNumFilter('open_tasks', a.open_tasks)) return false;
+function applyFilters(){
+  const search=document.getElementById('searchInput').value.toLowerCase();
+  filteredAccounts=allAccounts.filter(a=>{
+    if(search){const hay=[a.account_name,a.fts_id,a.city,a.state,a.industry,a.accounting_package].map(v=>(v||'').toLowerCase()).join(' ');if(!hay.includes(search)) return false;}
+    for(const col of ['fts_id','account_name','industry','accounting_package','city','state']){if(checkFilters[col]?.size>0&&!checkFilters[col].has(a[col])) return false;}
+    if(!passesNum('days_since_activity',a.days_since_activity)) return false;
+    if(!passesNum('open_opps',a.open_opps)) return false;
+    if(!passesNum('open_tasks',a.open_tasks)) return false;
     return true;
   });
-
-  const hasAny = search ||
-    Object.values(checkFilters).some(s => s.size > 0) ||
-    Object.keys(numFilters).length > 0 ||
-    selectedOwners.size > 0;
-  document.getElementById('clearBtn').style.display = hasAny ? 'inline-block' : 'none';
-
-  updateStats();
-  renderList();
+  const hasAny=search||Object.values(checkFilters).some(s=>s.size>0)||Object.keys(numFilters).length>0;
+  document.getElementById('clearBtn').style.display=hasAny?'inline-block':'none';
+  updateStats(); renderList();
 }
 
-function updateStats() {
-  const withOpps  = filteredAccounts.filter(a => a.open_opps > 0).length;
-  const withTasks = filteredAccounts.filter(a => a.open_tasks > 0).length;
-  document.getElementById('statsBar').innerHTML = `
+function updateStats(){
+  const withOpps=filteredAccounts.filter(a=>a.open_opps>0).length;
+  const withTasks=filteredAccounts.filter(a=>a.open_tasks>0).length;
+  document.getElementById('statsBar').innerHTML=`
     <div class="stat-chip"><div class="stat-dot" style="background:var(--accent)"></div><strong>${filteredAccounts.length}</strong> accounts</div>
     <div class="stat-chip"><div class="stat-dot" style="background:var(--gold)"></div><strong>${withOpps}</strong> with open opps</div>
     <div class="stat-chip"><div class="stat-dot" style="background:var(--green)"></div><strong>${withTasks}</strong> with open tasks</div>`;
 }
 
-function fmtDate(val) {
-  if (!val) return '—';
-  const d = new Date(val);
-  return `${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCFullYear()).slice(-2)}`;
-}
+function fmtDate(val){if(!val) return '—';const d=new Date(val);return `${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCFullYear()).slice(-2)}`;}
+function daysStyle(v){const n=parseFloat(v);if(isNaN(n)) return '';if(n>30) return 'color:var(--red)';if(n>14) return 'color:var(--orange)';return 'color:var(--green)';}
 
-function daysStyle(v) {
-  const n = parseFloat(v);
-  if (isNaN(n)) return '';
-  if (n > 30) return 'color:var(--red)';
-  if (n > 14) return 'color:var(--orange)';
-  return 'color:var(--green)';
-}
-
-function renderList() {
-  const sorted = [...filteredAccounts].sort((a,b) => {
-    let av = a[sortCol] ?? '', bv = b[sortCol] ?? '';
-    if (typeof av === 'string') av = av.toLowerCase();
-    if (typeof bv === 'string') bv = bv.toLowerCase();
-    if (typeof av === 'number' || typeof bv === 'number') return (parseFloat(av)||0) < (parseFloat(bv)||0) ? -sortDir : sortDir;
-    return av < bv ? -sortDir : av > bv ? sortDir : 0;
+function renderList(){
+  const sorted=[...filteredAccounts].sort((a,b)=>{
+    let av=a[sortCol]??'',bv=b[sortCol]??'';
+    if(typeof av==='number'||typeof bv==='number') return ((parseFloat(av)||0)<(parseFloat(bv)||0)?-sortDir:sortDir);
+    return (av+'').toLowerCase()<(bv+'').toLowerCase()?-sortDir:(av+'').toLowerCase()>(bv+'').toLowerCase()?sortDir:0;
   });
-
-  document.getElementById('acctBody').innerHTML = sorted.map(a => {
-    const dv = parseFloat(a.days_since_activity);
-    const hasActive = a.open_opps > 0 || a.open_tasks > 0;
-    const ds = hasActive ? daysStyle(a.days_since_activity) : '';
+  document.getElementById('acctBody').innerHTML=sorted.map(a=>{
+    const dv=parseFloat(a.days_since_activity),hasActive=a.open_opps>0||a.open_tasks>0;
+    const ds=hasActive?daysStyle(a.days_since_activity):'';
     return `<tr onclick="openAccount('${a.account_id}')">
       <td class="mono">${a.fts_id||'—'}</td>
       <td class="primary">${a.account_name||'—'}</td>
       <td>${a.industry||'—'}</td>
       <td>${a.accounting_package||'—'}</td>
       <td class="mono" style="${ds}">${!isNaN(dv)?dv+'d':'—'}</td>
-      <td>${a.city||'—'}</td>
-      <td>${a.state||'—'}</td>
+      <td>${a.city||'—'}</td><td>${a.state||'—'}</td>
       <td class="mono" style="${a.open_opps>0?'color:var(--accent)':''}">${a.open_opps}</td>
       <td class="mono" style="${a.open_tasks>0?'color:var(--gold)':''}">${a.open_tasks}</td>
     </tr>`;
   }).join('');
-
-  document.querySelectorAll('[id^="s-"]').forEach(el => el.textContent = '');
-  const arrow = document.getElementById(`s-${sortCol}`);
-  if (arrow) arrow.textContent = sortDir === 1 ? '↑' : '↓';
+  document.querySelectorAll('[id^="s-"]').forEach(el=>el.textContent='');
+  const arrow=document.getElementById(`s-${sortCol}`);if(arrow) arrow.textContent=sortDir===1?'↑':'↓';
 }
 
-function sortBy(col) {
-  if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = 1; }
-  renderList();
-}
+function sortBy(col){if(sortCol===col) sortDir*=-1;else{sortCol=col;sortDir=1;}renderList();}
 
-// ── ACCOUNT DETAIL ────────────────────────────────
-function openAccount(accountId) {
-  const acct = allAccounts.find(a => a.account_id === accountId);
-  if (!acct) return;
+function stageColor(s){if(!s) return '#888';const l=s.toLowerCase();if(l.includes('sql')||l.includes('qualified')) return '#ff7a2f';if(l.includes('value')) return '#4ecdc4';if(l.includes('enroll')) return '#f5c842';if(l.includes('lost')) return '#ff6b6b';if(l.includes('won')) return '#5ce65c';return '#888';}
+function taskDateStyle(t){if(!t.due_date) return '';const dd=t.due_date.slice(0,10),td=new Date().toISOString().slice(0,10);if(dd<td) return 'color:var(--red);font-weight:500';if(dd===td) return 'color:var(--gold);font-weight:500';return '';}
 
-  const acctOpps  = allOpps.filter(o => o.account_id === accountId);
-  const acctTasks = allTasks.filter(t => t.account_id === accountId);
-  const openOpps  = acctOpps.filter(o => !['Lost','Closed Won'].includes(o.stage));
-  const closedOpps = acctOpps.filter(o => ['Lost','Closed Won'].includes(o.stage));
-
-  document.getElementById('pageSubtitle').textContent = acct.account_name || 'Account';
-
-  // Header
-  document.getElementById('acctHeader').innerHTML = `
-    <div class="acct-header-left">
+function openAccount(accountId){
+  const acct=allAccounts.find(a=>a.account_id===accountId);if(!acct) return;
+  const acctOpps=allOpps.filter(o=>o.account_id===accountId);
+  const acctTasks=allTasks.filter(t=>t.account_id===accountId);
+  const openOpps=acctOpps.filter(o=>!['Lost','Closed Won'].includes(o.stage));
+  const closedOpps=acctOpps.filter(o=>['Lost','Closed Won'].includes(o.stage));
+  document.getElementById('pageSubtitle').textContent=acct.account_name||'Account';
+  const dv=parseFloat(acct.days_since_activity);
+  document.getElementById('acctHeader').innerHTML=`
+    <div class="acct-header"><div class="acct-header-left">
       <div class="acct-name">${acct.account_name||'—'}</div>
-      <div class="acct-fts">${acct.fts_id ? 'FTS ID: ' + acct.fts_id : ''}</div>
+      <div class="acct-fts">${acct.fts_id?'FTS ID: '+acct.fts_id:''}</div>
       <div class="acct-meta">
-        ${acct.industry ? `<span class="acct-pill">🏢 ${acct.industry}</span>` : ''}
-        ${acct.accounting_package ? `<span class="acct-pill">📦 ${acct.accounting_package}</span>` : ''}
-        ${acct.city||acct.state ? `<span class="acct-pill">📍 ${[acct.city,acct.state].filter(Boolean).join(', ')}</span>` : ''}
-        ${acct.days_since_activity !== null ? `<span class="acct-pill" style="${daysStyle(acct.days_since_activity)}">⏱ ${acct.days_since_activity}d since activity</span>` : ''}
-        ${acct.parent_account ? `<span class="acct-pill">🏛 ${acct.parent_account}</span>` : ''}
+        ${acct.industry?`<span class="acct-pill">🏢 ${acct.industry}</span>`:''}
+        ${acct.accounting_package?`<span class="acct-pill">📦 ${acct.accounting_package}</span>`:''}
+        ${acct.city||acct.state?`<span class="acct-pill">📍 ${[acct.city,acct.state].filter(Boolean).join(', ')}</span>`:''}
+        ${!isNaN(dv)?`<span class="acct-pill" style="${daysStyle(acct.days_since_activity)}">⏱ ${dv}d since activity</span>`:''}
+        ${acct.parent_account?`<span class="acct-pill">🏛 ${acct.parent_account}</span>`:''}
       </div>
     </div>
     <div class="acct-header-right">
       <button class="back-btn" onclick="showList()">← All accounts</button>
-      ${acct.account_id ? `<a class="sf-link" href="https://fintech.lightning.force.com/lightning/r/Account/${acct.account_id}/view" target="_blank" rel="noopener">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        View in Salesforce</a>` : ''}
-    </div>`;
-
-  // Stats
-  const totalRate = acctOpps.reduce((s,o) => s + (parseFloat(o.total_flat_rate)||0), 0);
-  document.getElementById('acctStats').innerHTML = `
+      ${acct.account_id?`<a class="sf-link" href="https://fintech.lightning.force.com/lightning/r/Account/${acct.account_id}/view" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>View in Salesforce</a>`:''}
+    </div></div>`;
+  const totalRate=acctOpps.reduce((s,o)=>s+(parseFloat(o.total_flat_rate)||0),0);
+  document.getElementById('acctStats').innerHTML=`
     <div class="acct-stat"><div class="acct-stat-val">${acctOpps.length}</div><div class="acct-stat-label">Total opportunities</div></div>
     <div class="acct-stat"><div class="acct-stat-val" style="color:var(--accent)">${openOpps.length}</div><div class="acct-stat-label">Open opportunities</div></div>
     <div class="acct-stat"><div class="acct-stat-val" style="color:var(--gold)">${acctTasks.length}</div><div class="acct-stat-label">Open tasks</div></div>
     <div class="acct-stat"><div class="acct-stat-val" style="color:var(--green)">$${totalRate.toLocaleString('en-US',{maximumFractionDigits:0})}</div><div class="acct-stat-label">Total flat rate</div></div>`;
-
-  // Related sections
-  let related = '';
-
-  // Open Opps
-  related += `<div class="section-card">
-    <div class="section-header"><div class="section-title">Open Opportunities</div><div class="section-count">${openOpps.length}</div></div>
-    ${openOpps.length === 0 ? '<div class="empty-section">No open opportunities</div>' : `
-    <table class="section-table">
-      <thead><tr><th>Opportunity</th><th>Stage</th><th>Close Date</th><th>ASM Rate</th><th>Locations</th><th>Owner</th></tr></thead>
-      <tbody>${openOpps.map(o => {
-        const sc = stageColor(o.stage);
-        return `<tr>
-          <td style="color:var(--text);font-weight:500">${o.opportunity_name||o.account_name||'—'}</td>
-          <td><span class="stage-badge" style="background:color-mix(in srgb,${sc} 15%,transparent);color:${sc};border:1px solid color-mix(in srgb,${sc} 25%,transparent)">${o.stage||'—'}</span></td>
-          <td class="mono">${fmtDate(o.close_date)}</td>
-          <td class="mono">${o.asm_flat_rate ? '$'+parseFloat(o.asm_flat_rate).toLocaleString() : '—'}</td>
-          <td class="mono">${o.num_locations||'—'}</td>
-          <td>${o.opportunity_owner||'—'}</td>
-        </tr>`;
-      }).join('')}</tbody>
-    </table>`}
-  </div>`;
-
-  // Closed Opps
-  if (closedOpps.length > 0) {
-    related += `<div class="section-card">
-      <div class="section-header"><div class="section-title">Closed Opportunities</div><div class="section-count">${closedOpps.length}</div></div>
-      <table class="section-table">
-        <thead><tr><th>Opportunity</th><th>Stage</th><th>Close Date</th><th>ASM Rate</th><th>Owner</th></tr></thead>
-        <tbody>${closedOpps.map(o => {
-          const sc = stageColor(o.stage);
-          return `<tr>
-            <td style="color:var(--text);font-weight:500">${o.opportunity_name||o.account_name||'—'}</td>
-            <td><span class="stage-badge" style="background:color-mix(in srgb,${sc} 15%,transparent);color:${sc};border:1px solid color-mix(in srgb,${sc} 25%,transparent)">${o.stage||'—'}</span></td>
-            <td class="mono">${fmtDate(o.close_date)}</td>
-            <td class="mono">${o.asm_flat_rate ? '$'+parseFloat(o.asm_flat_rate).toLocaleString() : '—'}</td>
-            <td>${o.opportunity_owner||'—'}</td>
-          </tr>`;
-        }).join('')}</tbody>
-      </table>
-    </div>`;
-  }
-
-  // Tasks
-  related += `<div class="section-card">
-    <div class="section-header"><div class="section-title">Open Tasks</div><div class="section-count">${acctTasks.length}</div></div>
-    ${acctTasks.length === 0 ? '<div class="empty-section">No open tasks</div>' : `
-    <table class="section-table">
-      <thead><tr><th>Subject</th><th>Type</th><th>Due Date</th><th>Priority</th><th>Assigned To</th></tr></thead>
-      <tbody>${acctTasks.map(t => `<tr>
-        <td style="color:var(--text);font-weight:500">${t.subject||'—'}</td>
-        <td>${t.type||'—'}</td>
-        <td class="mono" style="${taskDateStyle(t)}">${fmtDate(t.due_date)}</td>
-        <td style="${t.priority==='High'?'color:var(--red);font-weight:500':''}">${t.priority||'—'}</td>
-        <td>${t.assigned_to||'—'}</td>
-      </tr>`).join('')}</tbody>
-    </table>`}
-  </div>`;
-
-  document.getElementById('acctRelated').innerHTML = related;
-
-  document.getElementById('listSection').style.display = 'none';
-  document.getElementById('detailSection').style.display = 'block';
+  let related=`<div class="section-card"><div class="section-header"><div class="section-title">Open Opportunities</div><div class="section-count">${openOpps.length}</div></div>
+    ${openOpps.length===0?'<div class="empty-section">No open opportunities</div>':`<table class="section-table"><thead><tr><th>Opportunity</th><th>Stage</th><th>Close Date</th><th>ASM Rate</th><th>Locations</th><th>Owner</th></tr></thead><tbody>
+    ${openOpps.map(o=>{const sc=stageColor(o.stage);return `<tr><td style="color:var(--text);font-weight:500">${o.opportunity_name||o.account_name||'—'}</td><td><span class="stage-badge" style="background:color-mix(in srgb,${sc} 15%,transparent);color:${sc};border:1px solid color-mix(in srgb,${sc} 25%,transparent)">${o.stage||'—'}</span></td><td class="mono">${fmtDate(o.close_date)}</td><td class="mono">${o.asm_flat_rate?'$'+parseFloat(o.asm_flat_rate).toLocaleString():'—'}</td><td class="mono">${o.num_locations||'—'}</td><td>${o.opportunity_owner||'—'}</td></tr>`;}).join('')}
+    </tbody></table>`}</div>`;
+  if(closedOpps.length>0) related+=`<div class="section-card"><div class="section-header"><div class="section-title">Closed Opportunities</div><div class="section-count">${closedOpps.length}</div></div>
+    <table class="section-table"><thead><tr><th>Opportunity</th><th>Stage</th><th>Close Date</th><th>ASM Rate</th><th>Owner</th></tr></thead><tbody>
+    ${closedOpps.map(o=>{const sc=stageColor(o.stage);return `<tr><td style="color:var(--text);font-weight:500">${o.opportunity_name||o.account_name||'—'}</td><td><span class="stage-badge" style="background:color-mix(in srgb,${sc} 15%,transparent);color:${sc};border:1px solid color-mix(in srgb,${sc} 25%,transparent)">${o.stage||'—'}</span></td><td class="mono">${fmtDate(o.close_date)}</td><td class="mono">${o.asm_flat_rate?'$'+parseFloat(o.asm_flat_rate).toLocaleString():'—'}</td><td>${o.opportunity_owner||'—'}</td></tr>`;}).join('')}
+    </tbody></table></div>`;
+  related+=`<div class="section-card"><div class="section-header"><div class="section-title">Open Tasks</div><div class="section-count">${acctTasks.length}</div></div>
+    ${acctTasks.length===0?'<div class="empty-section">No open tasks</div>':`<table class="section-table"><thead><tr><th>Subject</th><th>Type</th><th>Due Date</th><th>Priority</th><th>Assigned To</th></tr></thead><tbody>
+    ${acctTasks.map(t=>`<tr><td style="color:var(--text);font-weight:500">${t.subject||'—'}</td><td>${t.type||'—'}</td><td class="mono" style="${taskDateStyle(t)}">${fmtDate(t.due_date)}</td><td style="${t.priority==='High'?'color:var(--red);font-weight:500':''}">${t.priority||'—'}</td><td>${t.assigned_to||'—'}</td></tr>`).join('')}
+    </tbody></table>`}</div>`;
+  document.getElementById('acctRelated').innerHTML=related;
+  document.getElementById('listSection').style.display='none';
+  document.getElementById('detailSection').style.display='block';
   window.scrollTo(0,0);
 }
 
-function showList() {
-  document.getElementById('listSection').style.display = 'block';
-  document.getElementById('detailSection').style.display = 'none';
-  document.getElementById('pageSubtitle').textContent = 'Accounts';
+function showList(){
+  document.getElementById('listSection').style.display='block';
+  document.getElementById('detailSection').style.display='none';
+  document.getElementById('pageSubtitle').textContent='Accounts';
 }
 
-function stageColor(stage) {
-  if (!stage) return '#888';
-  const s = stage.toLowerCase();
-  if (s.includes('sql') || s.includes('qualified')) return '#ff7a2f';
-  if (s.includes('value')) return '#4ecdc4';
-  if (s.includes('enroll')) return '#f5c842';
-  if (s.includes('lost')) return '#ff6b6b';
-  if (s.includes('won')) return '#5ce65c';
-  return '#888';
-}
-
-function taskDateStyle(t) {
-  if (!t.due_date) return '';
-  const dd = t.due_date.slice(0,10);
-  const td = new Date().toISOString().slice(0,10);
-  if (dd < td) return 'color:var(--red);font-weight:500';
-  if (dd === td) return 'color:var(--gold);font-weight:500';
-  return '';
-}
 restoreSession();
 </script>
 </body>

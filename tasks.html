@@ -7,52 +7,28 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0f0f11;
-  --surface: #1a1a1f;
-  --surface2: #222228;
-  --surface3: #2a2a32;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.12);
-  --text: #f0f0f2;
-  --text2: #9090a0;
-  --text3: #606070;
-  --accent: #ff7a2f;
-  --accent2: #ffaa5c;
-  --gold: #f5c842;
-  --red: #ff6b6b;
-  --green: #5ce65c;
-  --orange: #ff9f43;
-  --radius: 10px;
-  --radius-lg: 14px;
+  --bg: #0f0f11; --surface: #1a1a1f; --surface2: #222228; --surface3: #2a2a32;
+  --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+  --text: #f0f0f2; --text2: #9090a0; --text3: #606070;
+  --accent: #ff7a2f; --gold: #f5c842; --red: #ff6b6b; --green: #5ce65c; --orange: #ff9f43;
+  --radius: 10px; --radius-lg: 14px;
 }
 body.light {
-  --bg: #f4f4f6;
-  --surface: #ffffff;
-  --surface2: #f0f0f3;
-  --surface3: #e5e5ea;
-  --border: rgba(0,0,0,0.08);
-  --border2: rgba(0,0,0,0.14);
-  --text: #111113;
-  --text2: #4a4a58;
-  --text3: #8a8a98;
-  --red: #d93025;
-  --green: #1a7f37;
-  --orange: #cc7a00;
-  --gold: #b08800;
+  --bg: #f4f4f6; --surface: #ffffff; --surface2: #f0f0f3; --surface3: #e5e5ea;
+  --border: rgba(0,0,0,0.08); --border2: rgba(0,0,0,0.14);
+  --text: #111113; --text2: #4a4a58; --text3: #8a8a98;
+  --red: #d93025; --green: #1a7f37; --orange: #cc7a00; --gold: #b08800;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-/* HEADER */
 .header { display: flex; align-items: center; justify-content: space-between; padding: 16px 28px; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 100; }
 .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 .logo-mark { width: 30px; height: 30px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #fff; }
-.logo-text { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; color: var(--text); }
+.logo-text { font-size: 15px; font-weight: 600; color: var(--text); }
 .logo-sub { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
 .header-right { display: flex; align-items: center; gap: 12px; }
-.nav-link { padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; text-decoration: none; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.nav-link { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; text-decoration: none; transition: all 0.15s; display: inline-flex; align-items: center; }
 .nav-link:hover { background: var(--surface2); color: var(--text); }
-.nav-link.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 .user-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--surface2); border-radius: 20px; border: 1px solid var(--border); position: relative; cursor: pointer; }
 .user-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; }
 .user-name { font-size: 13px; color: var(--text2); }
@@ -64,8 +40,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .dropdown-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; transition: all 0.15s; border: none; background: none; font-family: 'DM Sans', sans-serif; width: 100%; text-align: left; }
 .dropdown-item:hover { background: var(--surface3); color: var(--text); }
 .dropdown-item.danger:hover { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); }
-
-/* TOOLBAR */
 .toolbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-bottom: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
 .toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .search-wrap { position: relative; }
@@ -75,41 +49,76 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; }
 .filter-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--text2); font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; }
 .filter-select option { background: var(--surface2); color: var(--text); }
-.ms-wrap { position: relative; }
-.ms-btn { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; font-size: 13px; color: var(--text2); font-family: 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap; user-select: none; min-width: 110px; justify-content: space-between; transition: border 0.15s; }
-.ms-btn:hover, .ms-btn.active { border-color: var(--accent); color: var(--accent); }
-.ms-arrow { font-size: 10px; opacity: 0.5; }
-.ms-badge { background: var(--accent); color: #fff; border-radius: 10px; font-size: 10px; padding: 1px 6px; margin-left: 2px; font-weight: 600; }
-.ms-dropdown { position: absolute; top: calc(100% + 6px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 6px; min-width: 180px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
-.ms-wrap.open .ms-dropdown { display: block; }
-.ms-option { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; transition: background 0.1s; }
-.ms-option:hover { background: var(--surface3); color: var(--text); }
-.ms-option.selected { color: var(--text); }
-.ms-check { width: 15px; height: 15px; border: 1px solid var(--border2); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
-.ms-option.selected .ms-check { background: var(--accent); border-color: var(--accent); color: #fff; }
 .tab-group { display: flex; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; }
-.tab-btn { padding: 7px 16px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: none; background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; }
+.tab-btn { padding: 7px 14px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: none; background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; }
 .tab-btn.active { background: var(--accent); color: #fff; }
 .stats-bar { display: flex; gap: 16px; flex-wrap: wrap; }
 .stat-chip { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text3); }
 .stat-chip strong { color: var(--text); font-weight: 500; }
 .stat-dot { width: 8px; height: 8px; border-radius: 50%; }
-
-/* LIST */
+.ms-wrap { position: relative; }
+.ms-btn { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; font-size: 13px; color: var(--text2); font-family: 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap; min-width: 110px; justify-content: space-between; transition: border 0.15s; }
+.ms-btn.active { border-color: var(--accent); color: var(--accent); }
+.ms-badge { background: var(--accent); color: #fff; border-radius: 10px; font-size: 10px; padding: 1px 6px; font-weight: 600; }
+.ms-dropdown { position: absolute; top: calc(100% + 6px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 6px; min-width: 180px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.ms-wrap.open .ms-dropdown { display: block; }
+.ms-option { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; }
+.ms-option:hover { background: var(--surface3); color: var(--text); }
+.ms-option.sel { color: var(--text); }
+.ms-chk { width: 15px; height: 15px; border: 1px solid var(--border2); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+.ms-option.sel .ms-chk { background: var(--accent); border-color: var(--accent); color: #fff; }
 .list-wrap { padding: 20px 28px; }
 .list-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .list-table thead tr { border-bottom: 1px solid var(--border2); }
 .list-table th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); cursor: pointer; white-space: nowrap; user-select: none; }
 .list-table th:hover { color: var(--text2); }
-.list-table th.sorted { color: var(--accent); }
-.list-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; cursor: default; }
+.list-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; cursor: pointer; }
 .list-table tbody tr:hover { background: var(--surface2); }
 .list-table td { padding: 11px 14px; color: var(--text2); }
 .list-table td.primary { color: var(--text); font-weight: 500; }
 .mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+.priority-high { color: var(--red); font-weight: 500; }
+.priority-low { color: var(--text3); }
+.sort-arrow { margin-left: 4px; opacity: 0.5; }
+.cal-wrap { padding: 20px 28px; }
+.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.cal-nav { display: flex; align-items: center; gap: 10px; }
+.cal-nav-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text2); padding: 6px 12px; cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+.cal-nav-btn:hover { background: var(--surface3); color: var(--text); }
+.cal-month-label { font-size: 16px; font-weight: 500; color: var(--text); min-width: 200px; text-align: center; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border-radius: var(--radius); overflow: hidden; }
+.cal-day-header { background: var(--surface2); text-align: center; padding: 8px 4px; font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
+.cal-day { background: var(--surface); min-height: 100px; padding: 8px; cursor: pointer; }
+.cal-day.other-month { background: var(--bg); opacity: 0.5; }
+.cal-day.today { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+.cal-day-num { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text3); margin-bottom: 6px; }
+.cal-day.today .cal-day-num { color: var(--accent); font-weight: 600; }
+.cal-pill { font-size: 11px; padding: 3px 6px; border-radius: 4px; margin-bottom: 3px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent); line-height: 1.4; }
+.cal-pill:hover { opacity: 0.8; }
+.cal-pill.high { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); border-color: color-mix(in srgb, var(--red) 25%, transparent); }
+.cal-pill.overdue { background: color-mix(in srgb, var(--orange) 15%, transparent); color: var(--orange); border-color: color-mix(in srgb, var(--orange) 25%, transparent); }
+.cal-more { font-size: 11px; color: var(--accent); padding: 2px 4px; cursor: pointer; text-decoration: underline; }
+.cal-popup { position: fixed; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 10px; min-width: 220px; max-width: 280px; z-index: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+.cal-popup-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); margin-bottom: 8px; font-weight: 500; }
+.cal-popup-item { padding: 6px 8px; border-radius: 6px; font-size: 12px; color: var(--text2); cursor: pointer; margin-bottom: 2px; border-left: 2px solid var(--accent); }
+.cal-popup-item:hover { background: var(--surface3); color: var(--text); }
+.cal-popup-item.high { border-left-color: var(--red); }
+.day-panel { position: fixed; right: 0; top: 0; bottom: 0; width: 340px; background: var(--surface); border-left: 1px solid var(--border2); z-index: 201; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.16,1,0.3,1); overflow-y: auto; }
+.day-panel.open { transform: translateX(0); }
+.day-panel-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 10; display: flex; align-items: center; justify-content: space-between; }
+.day-panel-date { font-size: 16px; font-weight: 600; color: var(--text); }
+.day-panel-close { background: var(--surface2); border: 1px solid var(--border); color: var(--text3); width: 26px; height: 26px; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+.day-panel-body { padding: 14px 20px; }
+.day-task-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; border-left: 3px solid var(--accent); transition: background 0.1s; }
+.day-task-item:hover { background: var(--surface3); }
+.day-task-item.high { border-left-color: var(--red); }
+.day-task-item.overdue { border-left-color: var(--orange); }
+.day-task-subject { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+.day-task-meta { font-size: 11px; color: var(--text3); display: flex; gap: 8px; flex-wrap: wrap; }
+.day-empty { text-align: center; padding: 30px; color: var(--text3); font-size: 13px; }
 .panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
 .panel-overlay.open { opacity: 1; pointer-events: all; }
-.detail-panel { position: fixed; right: 0; top: 0; bottom: 0; width: 420px; background: var(--surface); border-left: 1px solid var(--border2); z-index: 201; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.16,1,0.3,1); overflow-y: auto; }
+.detail-panel { position: fixed; right: 0; top: 0; bottom: 0; width: 420px; background: var(--surface); border-left: 1px solid var(--border2); z-index: 202; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.16,1,0.3,1); overflow-y: auto; }
 .detail-panel.open { transform: translateX(0); }
 .panel-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 10; }
 .panel-close { position: absolute; right: 20px; top: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--text3); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
@@ -124,56 +133,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .panel-field.full { grid-column: 1 / -1; }
 .pf-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
 .pf-value { font-size: 13px; color: var(--text); line-height: 1.4; }
-.pf-value.mono { font-family: 'DM Mono', monospace; font-size: 12px; }
 .sf-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--accent); text-decoration: none; margin-top: 8px; padding: 5px 10px; background: color-mix(in srgb, var(--accent) 12%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 6px; transition: opacity 0.15s; }
 .sf-link:hover { opacity: 0.75; }
-.priority-high { color: var(--red); font-weight: 500; }
-.priority-low { color: var(--text3); }
-.sort-arrow { margin-left: 4px; opacity: 0.5; }
-
-/* CALENDAR */
-.cal-wrap { padding: 20px 28px; }
-.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.cal-nav { display: flex; align-items: center; gap: 10px; }
-.cal-nav-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text2); padding: 6px 12px; cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
-.cal-nav-btn:hover { background: var(--surface3); color: var(--text); }
-.cal-month-label { font-size: 16px; font-weight: 500; color: var(--text); min-width: 160px; text-align: center; }
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border-radius: var(--radius); overflow: hidden; }
-.cal-day-header { background: var(--surface2); text-align: center; padding: 8px 4px; font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
-.cal-day { background: var(--surface); min-height: 100px; padding: 8px; }
-.cal-day.other-month { background: var(--bg); opacity: 0.5; }
-.cal-day.today { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
-.cal-day-num { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text3); margin-bottom: 6px; }
-.cal-day.today .cal-day-num { color: var(--accent); font-weight: 600; }
-.cal-pill { font-size: 11px; padding: 3px 6px; border-radius: 4px; margin-bottom: 3px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent); line-height: 1.4; }
-.cal-pill.high { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); border-color: color-mix(in srgb, var(--red) 25%, transparent); }
-.cal-pill.overdue { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); border-color: color-mix(in srgb, var(--red) 25%, transparent); }
-.cal-more { font-size: 11px; color: var(--accent); padding: 2px 4px; cursor: pointer; text-decoration: underline; }
-.cal-more:hover { opacity: 0.75; }
-.cal-pill { cursor: pointer; }
-.cal-pill:hover { opacity: 0.8; }
-.cal-popup { position: absolute; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 10px; min-width: 220px; max-width: 280px; z-index: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
-.cal-popup-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); margin-bottom: 8px; font-weight: 500; }
-.cal-popup-item { padding: 6px 8px; border-radius: 6px; font-size: 12px; color: var(--text2); cursor: pointer; margin-bottom: 2px; border-left: 2px solid var(--accent); }
-.cal-popup-item:hover { background: var(--surface3); color: var(--text); }
-.cal-popup-item.high { border-left-color: var(--red); }
-.cal-popup-item.overdue { border-left-color: var(--red); }
-.day-panel { position: fixed; right: 0; top: 0; bottom: 0; width: 340px; background: var(--surface); border-left: 1px solid var(--border2); z-index: 201; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.16,1,0.3,1); overflow-y: auto; }
-.day-panel.open { transform: translateX(0); }
-.day-panel-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 10; display: flex; align-items: center; justify-content: space-between; }
-.day-panel-date { font-size: 16px; font-weight: 600; color: var(--text); }
-.day-panel-close { background: var(--surface2); border: 1px solid var(--border); color: var(--text3); width: 26px; height: 26px; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; }
-.day-panel-close:hover { color: var(--text); }
-.day-panel-body { padding: 14px 20px; }
-.day-task-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; border-left: 3px solid var(--accent); transition: background 0.1s; }
-.day-task-item:hover { background: var(--surface3); }
-.day-task-item.high { border-left-color: var(--red); }
-.day-task-item.overdue { border-left-color: var(--orange); }
-.day-task-subject { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
-.day-task-meta { font-size: 11px; color: var(--text3); display: flex; gap: 8px; flex-wrap: wrap; }
-.day-empty { text-align: center; padding: 30px; color: var(--text3); font-size: 13px; }
-
-/* LOADING / LOGIN */
 .login-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center; }
 .login-box { width: 100%; max-width: 380px; padding: 2rem; }
 .login-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; }
@@ -199,65 +160,33 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 </head>
 <body>
 <script>
-// Instantly hide login if session exists — prevents flash
-if (localStorage.getItem('crm_session')) {
-  document.addEventListener('DOMContentLoaded', function() {
-    var overlay = document.getElementById('loginOverlay');
-    if (overlay) overlay.style.display = 'none';
-  });
-}
-// Restore theme instantly
-if (localStorage.getItem('crm_theme') === 'light') {
-  document.documentElement.style.background = '#f4f4f6';
-}
+if (localStorage.getItem('crm_session')) { document.addEventListener('DOMContentLoaded', function() { var o=document.getElementById('loginOverlay'); if(o) o.style.display='none'; }); }
+if (localStorage.getItem('crm_theme') === 'light') document.documentElement.style.background = '#f4f4f6';
 </script>
 
-<!-- LOGIN -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-box">
-    <div class="login-logo">
-      <div class="login-logo-mark">P</div>
-      <div>
-        <div class="login-logo-text">Premium Team CRM</div>
-        <div class="login-logo-sub">Tasks</div>
-      </div>
-    </div>
+    <div class="login-logo"><div class="login-logo-mark">P</div><div><div class="login-logo-text">Premium Team CRM</div><div class="login-logo-sub">Tasks</div></div></div>
     <div class="login-title">Welcome back</div>
     <div class="login-sub">Sign in to access your tasks</div>
-    <div class="login-field">
-      <label class="login-label">Email</label>
-      <input class="login-input" id="loginEmail" type="email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <div class="login-field">
-      <label class="login-label">Password</label>
-      <input class="login-input" id="loginPassword" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
+    <div class="login-field"><label class="login-label">Email</label><input class="login-input" id="loginEmail" type="email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="login-field"><label class="login-label">Password</label><input class="login-input" id="loginPassword" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <button class="login-submit" id="loginBtn" onclick="doLogin()">Sign in</button>
     <div class="login-error" id="loginError"></div>
   </div>
 </div>
 
-<!-- HEADER -->
 <div class="header">
-  <a class="logo" href="index.html">
-    <div class="logo-mark">P</div>
-    <div>
-      <div class="logo-text">Premium Team CRM</div>
-      <div class="logo-sub">Tasks</div>
-    </div>
-  </a>
+  <a class="logo" href="index.html"><div class="logo-mark">P</div><div><div class="logo-text">Premium Team CRM</div><div class="logo-sub">Tasks</div></div></a>
   <div class="header-right">
     <a href="index.html" class="nav-link">← Pipeline</a>
     <a href="accounts.html" class="nav-link">🏢 Accounts</a>
     <div class="user-chip" id="userChip" onclick="toggleUserMenu()">
       <div class="user-avatar" id="userAvatar">T</div>
-      <span class="user-name" id="userName">Loading...</span>
+      <span class="user-name" id="userName">...</span>
       <span style="font-size:10px;color:var(--text3);margin-left:2px;">▾</span>
       <div class="user-dropdown" id="userDropdown">
-        <div class="dropdown-header">
-          <div class="dropdown-email" id="dropdownEmail">—</div>
-          <div class="dropdown-role" id="dropdownRole">—</div>
-        </div>
+        <div class="dropdown-header"><div class="dropdown-email" id="dropdownEmail">—</div><div class="dropdown-role" id="dropdownRole">—</div></div>
         <button class="dropdown-item" onclick="toggleTheme()" id="themeToggleBtn">☀ Light mode</button>
         <button class="dropdown-item danger" onclick="doLogout()">⎋ Sign out</button>
       </div>
@@ -265,32 +194,16 @@ if (localStorage.getItem('crm_theme') === 'light') {
   </div>
 </div>
 
-<!-- TOOLBAR -->
 <div class="toolbar">
   <div class="toolbar-left">
-    <div class="search-wrap">
-      <span class="search-icon">⌕</span>
-      <input class="search-input" id="taskSearch" placeholder="Search tasks, accounts..." oninput="applyFilters()">
-    </div>
+    <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" id="taskSearch" placeholder="Search tasks, accounts..." oninput="applyFilters()"></div>
     <select class="filter-select" id="statusFilter" onchange="applyFilters()">
       <option value="open">Open tasks</option>
       <option value="">All tasks</option>
       <option value="Completed">Completed</option>
     </select>
-    <!-- Type multiselect -->
-    <div class="ms-wrap" id="typeWrap">
-      <div class="ms-btn" id="typeBtn" onclick="toggleMs('typeWrap')">
-        <span id="typeBtnLabel">All types</span><span class="ms-arrow">▾</span>
-      </div>
-      <div class="ms-dropdown" id="typeDropdown"></div>
-    </div>
-    <!-- Owner multiselect -->
-    <div class="ms-wrap" id="ownerWrap">
-      <div class="ms-btn" id="ownerBtn" onclick="toggleMs('ownerWrap')">
-        <span id="ownerBtnLabel">All reps</span><span class="ms-arrow">▾</span>
-      </div>
-      <div class="ms-dropdown" id="ownerDropdown"></div>
-    </div>
+    <div class="ms-wrap" id="typeWrap"><div class="ms-btn" id="typeBtn" onclick="toggleMs('typeWrap')"><span id="typeBtnLabel">All types</span><span style="font-size:10px;opacity:.5">▾</span></div><div class="ms-dropdown" id="typeDropdown"></div></div>
+    <div class="ms-wrap" id="ownerWrap"><div class="ms-btn" id="ownerBtn" onclick="toggleMs('ownerWrap')"><span id="ownerBtnLabel">All reps</span><span style="font-size:10px;opacity:.5">▾</span></div><div class="ms-dropdown" id="ownerDropdown"></div></div>
     <div class="tab-group">
       <button class="tab-btn active" id="tabList" onclick="switchView('list')">≡ List</button>
       <button class="tab-btn" id="tabCal" onclick="switchView('calendar')">📅 Month</button>
@@ -300,604 +213,36 @@ if (localStorage.getItem('crm_theme') === 'light') {
   <div class="stats-bar" id="statsBar"></div>
 </div>
 
-<!-- LIST VIEW -->
 <div class="list-wrap" id="listView">
   <div class="loading" id="loadingMsg"><div class="spinner"></div>Loading tasks...</div>
   <table class="list-table" id="taskTable" style="display:none">
-    <thead>
-      <tr>
-        <th onclick="sortBy('due_date')">Due Date <span class="sort-arrow" id="s-due_date"></span></th>
-        <th onclick="sortBy('type')">Type <span class="sort-arrow" id="s-type"></span></th>
-        <th onclick="sortBy('subject')">Subject <span class="sort-arrow" id="s-subject"></span></th>
-        <th onclick="sortBy('account_name')">Account <span class="sort-arrow" id="s-account_name"></span></th>
-        <th onclick="sortBy('contact_name')">Primary Contact <span class="sort-arrow" id="s-contact_name"></span></th>
-        <th onclick="sortBy('days_since_activity')">Days Since Act. <span class="sort-arrow" id="s-days_since_activity"></span></th>
-        <th onclick="sortBy('priority')">Priority <span class="sort-arrow" id="s-priority"></span></th>
-        <th onclick="sortBy('assigned_to')">Assigned To <span class="sort-arrow" id="s-assigned_to"></span></th>
-      </tr>
-    </thead>
+    <thead><tr>
+      <th onclick="sortBy('due_date')">Due Date <span class="sort-arrow" id="s-due_date"></span></th>
+      <th onclick="sortBy('type')">Type <span class="sort-arrow" id="s-type"></span></th>
+      <th onclick="sortBy('subject')">Subject <span class="sort-arrow" id="s-subject"></span></th>
+      <th onclick="sortBy('account_name')">Account <span class="sort-arrow" id="s-account_name"></span></th>
+      <th onclick="sortBy('contact_name')">Primary Contact <span class="sort-arrow" id="s-contact_name"></span></th>
+      <th onclick="sortBy('days_since_activity')">Days Since Act. <span class="sort-arrow" id="s-days_since_activity"></span></th>
+      <th onclick="sortBy('priority')">Priority <span class="sort-arrow" id="s-priority"></span></th>
+      <th onclick="sortBy('assigned_to')">Assigned To <span class="sort-arrow" id="s-assigned_to"></span></th>
+    </tr></thead>
     <tbody id="taskBody"></tbody>
   </table>
 </div>
 
-<!-- CALENDAR VIEW -->
 <div class="cal-wrap hidden" id="calView">
   <div class="cal-header">
-    <div class="cal-nav">
-      <button class="cal-nav-btn" id="calPrevBtn" onclick="calNav(-1)">←</button>
-      <div class="cal-month-label" id="calLabel"></div>
-      <button class="cal-nav-btn" id="calNextBtn" onclick="calNav(1)">→</button>
-    </div>
+    <div class="cal-nav"><button class="cal-nav-btn" onclick="calNav(-1)">←</button><div class="cal-month-label" id="calLabel"></div><button class="cal-nav-btn" onclick="calNav(1)">→</button></div>
     <button class="cal-nav-btn" onclick="goToday()">Today</button>
   </div>
   <div id="calGrid"></div>
 </div>
 
-<!-- Day side panel -->
 <div class="day-panel" id="dayPanel">
-  <div class="day-panel-header">
-    <div class="day-panel-date" id="dayPanelDate"></div>
-    <button class="day-panel-close" onclick="closeDayPanel()">✕</button>
-  </div>
+  <div class="day-panel-header"><div class="day-panel-date" id="dayPanelDate"></div><button class="day-panel-close" onclick="closeDayPanel()">✕</button></div>
   <div class="day-panel-body" id="dayPanelBody"></div>
 </div>
 
-<script>
-const SUPABASE_URL = 'https://idbnpxedwpjrflsqweyh.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYm5weGVkd3BqcmZsc3F3ZXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNTY3MDYsImV4cCI6MjA5MjkzMjcwNn0.PL7ftdQbTtkCnfFa3Mwo2H3w_uPXuTh_0o75cu3_FLU';
-
-let currentUser = null;
-let allTasks = [];
-let filteredTasks = [];
-let sortCol = 'due_date';
-let sortDir = 1;
-let calYear = new Date().getFullYear();
-let calMonth = new Date().getMonth();
-let currentView = 'list';
-
-// ── AUTH ──────────────────────────────────────────
-async function restoreSession() {
-  const saved = localStorage.getItem('crm_session');
-  if (!saved) return;
-  try {
-    const session = JSON.parse(saved);
-    if (!session.token || !session.sfName) return;
-
-    // Try refresh token first if we have one — gets fresh token without network round trip to /user
-    if (session.refresh_token) {
-      try {
-        const ref = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-          body: JSON.stringify({ refresh_token: session.refresh_token })
-        });
-        if (ref.ok) {
-          const ns = await ref.json();
-          session.token = ns.access_token;
-          session.refresh_token = ns.refresh_token;
-          localStorage.setItem('crm_session', JSON.stringify(session));
-        }
-      } catch(e) { /* use existing token */ }
-    }
-
-    currentUser = { token: session.token, email: session.email, sfName: session.sfName, role: session.role };
-    setUserUI(session.sfName, session.email, session.role);
-    document.getElementById('loginOverlay').style.display = 'none';
-    document.getElementById('loginOverlay').style.display = 'none';
-    if (session.role !== 'admin') {
-      document.getElementById('ownerFilter').style.display = 'none';
-    }
-    loadTasks();
-  } catch(e) {
-    console.warn('Session restore error:', e);
-    document.getElementById('loginOverlay').style.display = 'flex';
-  }
-}
-
-async function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  const btn = document.getElementById('loginBtn');
-  const errEl = document.getElementById('loginError');
-  errEl.textContent = '';
-  btn.disabled = true;
-  btn.textContent = 'Signing in...';
-  try {
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-      body: JSON.stringify({ email, password })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error_description || data.msg || 'Login failed');
-    currentUser = { email, token: data.access_token };
-    const profileRes = await fetch(`${SUPABASE_URL}/rest/v1/tbl_users?email=eq.${encodeURIComponent(email)}&select=*`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${data.access_token}` }
-    });
-    const profiles = await profileRes.json();
-    if (!profiles || profiles.length === 0) throw new Error('User profile not found.');
-    const profile = profiles[0];
-    currentUser.sfName = profile.sf_owner_name;
-    currentUser.role = profile.role;
-    localStorage.setItem('crm_session', JSON.stringify({
-      token: data.access_token, refresh_token: data.refresh_token,
-      email, sfName: profile.sf_owner_name, role: profile.role
-    }));
-    setUserUI(profile.sf_owner_name, email, profile.role);
-    document.getElementById('loginOverlay').style.display = 'none';
-    if (profile.role !== 'admin') document.getElementById('ownerFilter').style.display = 'none';
-    loadTasks();
-  } catch(e) {
-    errEl.textContent = e.message;
-    btn.disabled = false;
-    btn.textContent = 'Sign in';
-  }
-}
-
-function setUserUI(name, email, role) {
-  document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-  document.getElementById('userName').textContent = name;
-  document.getElementById('dropdownEmail').textContent = email;
-  document.getElementById('dropdownRole').textContent = role === 'admin' ? 'Administrator' : 'Sales Rep';
-}
-
-function toggleUserMenu() {
-  document.getElementById('userChip').classList.toggle('open');
-}
-document.addEventListener('click', e => {
-  const chip = document.getElementById('userChip');
-  if (chip && !chip.contains(e.target)) chip.classList.remove('open');
-});
-
-function doLogout() {
-  currentUser = null;
-  localStorage.removeItem('crm_session');
-  document.getElementById('loginOverlay').style.display = 'flex';
-  document.getElementById('loginEmail').value = '';
-  document.getElementById('loginPassword').value = '';
-}
-
-function toggleTheme() {
-  const isLight = document.body.classList.toggle('light');
-  localStorage.setItem('crm_theme', isLight ? 'light' : 'dark');
-  document.getElementById('themeToggleBtn').textContent = isLight ? '🌙 Dark mode' : '☀ Light mode';
-}
-(function restoreTheme() {
-  if (localStorage.getItem('crm_theme') === 'light') {
-    document.body.classList.add('light');
-    const btn = document.getElementById('themeToggleBtn');
-    if (btn) btn.textContent = '🌙 Dark mode';
-  }
-})();
-
-// ── DATA ──────────────────────────────────────────
-async function loadTasks() {
-  const ownerParam = (currentUser && currentUser.role === 'rep')
-    ? `&assigned_to=eq.${encodeURIComponent(currentUser.sfName)}` : '';
-  try {
-    let all = [], page = 0, pageSize = 1000;
-    while (true) {
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/tbl_tasks?select=*&order=due_date.asc&limit=${pageSize}&offset=${page * pageSize}${ownerParam}`,
-        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}` } }
-      );
-      if (!res.ok) break;
-      const data = await res.json();
-      if (!Array.isArray(data)) break;
-      all = all.concat(data);
-      if (data.length < pageSize) break;
-      page++;
-    }
-    allTasks = all;
-    document.getElementById('loadingMsg').style.display = 'none';
-    document.getElementById('taskTable').style.display = 'table';
-    populateFilters();
-    applyFilters();
-  } catch(e) { console.error('Tasks load error:', e); }
-}
-
-let selectedTypes = new Set();
-let selectedOwners = new Set();
-
-function toggleMs(wrapId) {
-  const wrap = document.getElementById(wrapId);
-  const isOpen = wrap.classList.contains('open');
-  document.querySelectorAll('.ms-wrap.open').forEach(w => w.classList.remove('open'));
-  if (!isOpen) wrap.classList.add('open');
-}
-document.addEventListener('click', e => {
-  document.querySelectorAll('.ms-wrap').forEach(w => {
-    if (!w.contains(e.target)) w.classList.remove('open');
-  });
-});
-
-function populateFilters() {
-  const types  = [...new Set(allTasks.map(t => t.type).filter(Boolean))].sort();
-  const owners = [...new Set(allTasks.map(t => t.assigned_to).filter(Boolean))].sort();
-
-  document.getElementById('typeDropdown').innerHTML = types.map(t => `
-    <div class="ms-option ${selectedTypes.has(t) ? 'selected' : ''}" onclick="toggleOption('type','${t}')">
-      <div class="ms-check">${selectedTypes.has(t) ? '✓' : ''}</div>${t}
-    </div>`).join('');
-
-  document.getElementById('ownerDropdown').innerHTML = owners.map(o => `
-    <div class="ms-option ${selectedOwners.has(o) ? 'selected' : ''}" onclick="toggleOption('owner','${o}')">
-      <div class="ms-check">${selectedOwners.has(o) ? '✓' : ''}</div>${o}
-    </div>`).join('');
-}
-
-function toggleOption(kind, val) {
-  const set = kind === 'type' ? selectedTypes : selectedOwners;
-  if (set.has(val)) set.delete(val); else set.add(val);
-  populateFilters();
-  updateMsBtnLabel(kind);
-  applyFilters();
-}
-
-function updateMsBtnLabel(kind) {
-  const set = kind === 'type' ? selectedTypes : selectedOwners;
-  const label = document.getElementById(kind + 'BtnLabel');
-  const btn   = document.getElementById(kind + 'Btn');
-  if (set.size === 0) { label.innerHTML = kind === 'type' ? 'All types' : 'All reps'; btn.classList.remove('active'); }
-  else if (set.size === 1) { label.innerHTML = [...set][0]; btn.classList.add('active'); }
-  else { label.innerHTML = `${kind === 'type' ? 'Types' : 'Reps'} <span class="ms-badge">${set.size}</span>`; btn.classList.add('active'); }
-}
-
-function applyFilters() {
-  const search = document.getElementById('taskSearch').value.toLowerCase();
-  const status = document.getElementById('statusFilter').value;
-
-  filteredTasks = allTasks.filter(t => {
-    if (search) {
-      const hay = [t.subject, t.account_name, t.contact_name, t.assigned_to, t.type, t.comments]
-        .map(v => (v||'').toLowerCase()).join(' ');
-      if (!hay.includes(search)) return false;
-    }
-    if (status === 'open' && t.status === 'Completed') return false;
-    if (status === 'Completed' && t.status !== 'Completed') return false;
-    if (selectedTypes.size > 0 && !selectedTypes.has(t.type)) return false;
-    if (selectedOwners.size > 0 && !selectedOwners.has(t.assigned_to)) return false;
-    return true;
-  });
-
-  updateStats();
-  renderList();
-  if (currentView === 'calendar') renderCalendar();
-}
-
-// ── DETAIL PANEL ───────────────────────────────────
-function openPanel(id) {
-  const t = allTasks.find(x => x.activity_id === id);
-  if (!t) return;
-
-  document.getElementById('panelTitle').textContent = t.subject || '—';
-  document.getElementById('panelSub').textContent = t.account_name || '';
-
-  const sfLink = document.getElementById('panelSFLink');
-  if (t.account_id) {
-    sfLink.href = `https://fintech.lightning.force.com/lightning/r/Account/${t.account_id}/view`;
-    sfLink.style.display = 'inline-flex';
-  } else {
-    sfLink.style.display = 'none';
-  }
-
-  const dv = parseFloat(t.days_since_activity);
-  const daysColor = isNaN(dv) ? '' : dv > 30 ? 'color:var(--red)' : dv > 14 ? 'color:var(--orange)' : 'color:var(--green)';
-
-  document.getElementById('panelBody').innerHTML = `
-    <div class="panel-section">
-      <div class="panel-section-title">Task details</div>
-      <div class="panel-grid">
-        <div class="panel-field"><div class="pf-label">Type</div><div class="pf-value">${t.type||'—'}</div></div>
-        <div class="panel-field"><div class="pf-label">Priority</div><div class="pf-value ${t.priority==='High'?'priority-high':''}">${t.priority||'—'}</div></div>
-        <div class="panel-field"><div class="pf-label">Status</div><div class="pf-value" style="${t.status==='Completed'?'color:var(--green)':'color:var(--accent)'}">${t.status||'—'}</div></div>
-        <div class="panel-field"><div class="pf-label">Due Date</div><div class="pf-value mono" style="${dateStyle(t)}">${fmtDate(t.due_date)}</div></div>
-        <div class="panel-field"><div class="pf-label">Created Date</div><div class="pf-value mono">${fmtDate(t.created_date)}</div></div>
-        <div class="panel-field"><div class="pf-label">Days Since Activity</div><div class="pf-value mono" style="${daysColor}">${!isNaN(dv)?dv+'d':'—'}</div></div>
-        <div class="panel-field"><div class="pf-label">Assigned To</div><div class="pf-value">${t.assigned_to||'—'}</div></div>
-        <div class="panel-field"><div class="pf-label">FTS ID</div><div class="pf-value mono">${t.fts_id||'—'}</div></div>
-      </div>
-    </div>
-    <div class="panel-section">
-      <div class="panel-section-title">Account</div>
-      <div class="panel-grid">
-        <div class="panel-field full"><div class="pf-label">Account Name</div><div class="pf-value">${t.account_name||'—'}</div></div>
-        <div class="panel-field"><div class="pf-label">Industry</div><div class="pf-value">${t.industry||'—'}</div></div>
-        <div class="panel-field"><div class="pf-label">Accounting Package</div><div class="pf-value">${t.accounting_package||'—'}</div></div>
-      </div>
-    </div>
-    <div class="panel-section">
-      <div class="panel-section-title">Contact</div>
-      <div class="panel-grid">
-        <div class="panel-field full"><div class="pf-label">Contact Name</div><div class="pf-value">${t.contact_name||'—'}</div></div>
-      </div>
-    </div>
-    ${t.comments ? `<div class="panel-section">
-      <div class="panel-section-title">Comments</div>
-      <div class="panel-field full"><div class="pf-value" style="white-space:pre-wrap;font-size:12px;color:var(--text2);line-height:1.6">${t.comments}</div></div>
-    </div>` : ''}
-  `;
-
-  document.getElementById('panelOverlay').classList.add('open');
-  document.getElementById('detailPanel').classList.add('open');
-}
-
-function closePanel() {
-  document.getElementById('panelOverlay').classList.remove('open');
-  document.getElementById('detailPanel').classList.remove('open');
-}
-
-function updateStats() {
-  const open = filteredTasks.filter(t => t.status !== 'Completed').length;
-  const overdue = filteredTasks.filter(t => {
-    if (!t.due_date || t.status === 'Completed') return false;
-    return t.due_date.slice(0,10) < new Date().toISOString().slice(0,10);
-  }).length;
-  document.getElementById('statsBar').innerHTML = `
-    <div class="stat-chip"><div class="stat-dot" style="background:var(--accent)"></div><strong>${filteredTasks.length}</strong> tasks</div>
-    <div class="stat-chip"><div class="stat-dot" style="background:var(--gold)"></div><strong>${open}</strong> open</div>
-    <div class="stat-chip"><div class="stat-dot" style="background:var(--red)"></div><strong>${overdue}</strong> overdue</div>`;
-}
-
-function fmtDate(val) {
-  if (!val) return '—';
-  const d = new Date(val);
-  return `${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCFullYear()).slice(-2)}`;
-}
-
-function dateStyle(t) {
-  if (!t.due_date || t.status === 'Completed') return '';
-  const dd = t.due_date.slice(0,10);
-  const td = new Date().toISOString().slice(0,10);
-  if (dd < td) return 'color:var(--red);font-weight:500';
-  if (dd === td) return 'color:var(--gold);font-weight:500';
-  return '';
-}
-
-function renderList() {
-  const sorted = [...filteredTasks].sort((a,b) => {
-    let av = a[sortCol] ?? '', bv = b[sortCol] ?? '';
-    if (typeof av === 'string') av = av.toLowerCase();
-    if (typeof bv === 'string') bv = bv.toLowerCase();
-    return av < bv ? -sortDir : av > bv ? sortDir : 0;
-  });
-
-  document.getElementById('taskBody').innerHTML = sorted.map(t => {
-    const dv = parseFloat(t.days_since_activity);
-    const daysStyle = isNaN(dv) ? '' : dv > 30 ? 'color:var(--red)' : dv > 14 ? 'color:var(--orange)' : 'color:var(--green)';
-    const daysVal = !isNaN(dv) ? dv + 'd' : '—';
-    return `<tr onclick="openPanel('${t.activity_id}')" style="cursor:pointer" title="${(t.comments||'').replace(/"/g,'&quot;')}">
-      <td class="mono" style="${dateStyle(t)}">${fmtDate(t.due_date)}</td>
-      <td>${t.type || '—'}</td>
-      <td class="primary">${t.subject || '—'}</td>
-      <td>${t.account_name || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px">${t.fts_id||''}</span></td>
-      <td>${t.contact_name || '—'}</td>
-      <td class="mono" style="${daysStyle}">${daysVal}</td>
-      <td class="${t.priority === 'High' ? 'priority-high' : t.priority === 'Low' ? 'priority-low' : ''}">${t.priority || '—'}</td>
-      <td>${t.assigned_to || '—'}</td>
-    </tr>`;
-  }).join('');
-
-  document.querySelectorAll('[id^="s-"]').forEach(el => el.textContent = '');
-  const arrow = document.getElementById(`s-${sortCol}`);
-  if (arrow) arrow.textContent = sortDir === 1 ? '↑' : '↓';
-}
-
-function sortBy(col) {
-  if (sortCol === col) sortDir *= -1;
-  else { sortCol = col; sortDir = 1; }
-  renderList();
-}
-
-// ── VIEW SWITCH ────────────────────────────────────
-function switchView(view) {
-  currentView = view;
-  const isList = view === 'list';
-  const isCal  = !isList;
-  document.getElementById('listView').classList.toggle('hidden', !isList);
-  document.getElementById('calView').classList.toggle('hidden', isList);
-  document.getElementById('tabList').classList.toggle('active', isList);
-  document.getElementById('tabCal').classList.toggle('active', view === 'calendar');
-  document.getElementById('tabWeek').classList.toggle('active', view === 'week');
-  if (isCal) {
-    calView = view === 'week' ? 'week' : 'month';
-    if (calView === 'week' && !weekStart) initWeekStart();
-    renderCalendar();
-  }
-}
-
-// ── CALENDAR ───────────────────────────────────────
-let calView = 'month'; // 'month' or 'week'
-let weekStart = null; // Date object — start of current work week
-
-function calNav(dir) {
-  if (calView === 'month') {
-    calMonth += dir;
-    if (calMonth > 11) { calMonth = 0; calYear++; }
-    if (calMonth < 0)  { calMonth = 11; calYear--; }
-  } else {
-    weekStart = new Date(weekStart);
-    weekStart.setDate(weekStart.getDate() + dir * 7);
-  }
-  renderCalendar();
-}
-
-function goToday() {
-  calYear  = new Date().getFullYear();
-  calMonth = new Date().getMonth();
-  initWeekStart();
-  renderCalendar();
-}
-
-function initWeekStart() {
-  const now = new Date();
-  const day = now.getDay();
-  const diff = day === 0 ? -6 : 1 - day; // Monday
-  weekStart = new Date(now);
-  weekStart.setDate(now.getDate() + diff);
-  weekStart.setHours(0,0,0,0);
-}
-
-function getTasksByDate() {
-  const map = {};
-  filteredTasks.forEach(t => {
-    if (!t.due_date || t.status === 'Completed') return;
-    const d = t.due_date.slice(0,10);
-    if (!map[d]) map[d] = [];
-    map[d].push(t);
-  });
-  return map;
-}
-
-function renderCalendar() {
-  if (calView === 'month') renderMonth();
-  else renderWeek();
-}
-
-function renderMonth() {
-  document.getElementById('calLabel').textContent =
-    new Date(calYear, calMonth, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-
-  const today    = new Date().toISOString().slice(0,10);
-  const firstDay = new Date(calYear, calMonth, 1).getDay();
-  const lastDate = new Date(calYear, calMonth + 1, 0).getDate();
-  const days     = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const taskMap  = getTasksByDate();
-
-  let html = `<div class="cal-grid">` + days.map(d => `<div class="cal-day-header">${d}</div>`).join('');
-  for (let i = 0; i < firstDay; i++) html += `<div class="cal-day other-month"></div>`;
-
-  for (let d = 1; d <= lastDate; d++) {
-    const ds    = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const tasks = taskMap[ds] || [];
-    const show  = tasks.slice(0, 3);
-    const more  = tasks.length - show.length;
-    const isOver = ds < today;
-
-    const pills = show.map(t => {
-      const cls = t.priority === 'High' ? 'high' : isOver ? 'overdue' : '';
-      return `<div class="cal-pill ${cls}" onclick="openPanel('${t.activity_id}')">${t.subject||'Task'}</div>`;
-    }).join('');
-
-    html += `<div class="cal-day${ds === today ? ' today' : ''}" onclick="openDayPanel('${ds}')">
-      <div class="cal-day-num">${d}</div>
-      ${pills}
-      ${more > 0 ? `<div class="cal-more" onclick="event.stopPropagation();showMorePopup(event,'${ds}')">+${more} more</div>` : ''}
-    </div>`;
-  }
-
-  html += `</div>`;
-  document.getElementById('calGrid').innerHTML = html;
-}
-
-function renderWeek() {
-  if (!weekStart) initWeekStart();
-  const days = ['Mon','Tue','Wed','Thu','Fri'];
-  const taskMap = getTasksByDate();
-  const today = new Date().toISOString().slice(0,10);
-
-  // Build week dates (Mon-Fri)
-  const weekDates = [];
-  for (let i = 0; i < 5; i++) {
-    const d = new Date(weekStart);
-    d.setDate(weekStart.getDate() + i);
-    weekDates.push(d);
-  }
-
-  const startLabel = weekDates[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  const endLabel   = weekDates[4].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  document.getElementById('calLabel').textContent = `${startLabel} — ${endLabel}`;
-
-  let html = `<div class="cal-grid" style="grid-template-columns:repeat(5,1fr)">`;
-  html += weekDates.map(d => {
-    const ds = d.toISOString().slice(0,10);
-    const isToday = ds === today;
-    return `<div class="cal-day-header" style="${isToday?'color:var(--accent)':''}">${days[weekDates.indexOf(d)]} ${d.getDate()}</div>`;
-  }).join('');
-
-  weekDates.forEach(d => {
-    const ds    = d.toISOString().slice(0,10);
-    const tasks = taskMap[ds] || [];
-    const isOver = ds < today;
-
-    const pills = tasks.map(t => {
-      const cls = t.priority === 'High' ? 'high' : isOver ? 'overdue' : '';
-      return `<div class="cal-pill ${cls}" onclick="openPanel('${t.activity_id}')">${t.subject||'Task'}</div>`;
-    }).join('');
-
-    html += `<div class="cal-day${ds === today ? ' today' : ''}" onclick="openDayPanel('${ds}')" style="min-height:120px">
-      ${pills || '<div style="color:var(--text3);font-size:11px;padding:4px">No tasks</div>'}
-    </div>`;
-  });
-
-  html += `</div>`;
-  document.getElementById('calGrid').innerHTML = html;
-}
-
-// ── DAY PANEL ──────────────────────────────────────
-function openDayPanel(dateStr) {
-  const tasks = filteredTasks.filter(t => t.due_date && t.due_date.slice(0,10) === dateStr);
-  const today = new Date().toISOString().slice(0,10);
-  const isOver = dateStr < today;
-
-  const label = new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  document.getElementById('dayPanelDate').textContent = label;
-
-  if (tasks.length === 0) {
-    document.getElementById('dayPanelBody').innerHTML = '<div class="day-empty">No tasks on this day</div>';
-  } else {
-    document.getElementById('dayPanelBody').innerHTML = tasks.map(t => {
-      const cls = t.priority === 'High' ? 'high' : isOver ? 'overdue' : '';
-      return `<div class="day-task-item ${cls}" onclick="openPanel('${t.activity_id}')">
-        <div class="day-task-subject">${t.subject||'—'}</div>
-        <div class="day-task-meta">
-          ${t.type ? `<span>${t.type}</span>` : ''}
-          ${t.priority ? `<span>${t.priority}</span>` : ''}
-          ${t.assigned_to ? `<span>${t.assigned_to}</span>` : ''}
-          ${t.account_name ? `<span>${t.account_name}</span>` : ''}
-        </div>
-      </div>`;
-    }).join('');
-  }
-
-  document.getElementById('dayPanel').classList.add('open');
-}
-
-function closeDayPanel() {
-  document.getElementById('dayPanel').classList.remove('open');
-}
-
-// ── MORE POPUP ─────────────────────────────────────
-let activePopup = null;
-function showMorePopup(e, dateStr) {
-  e.stopPropagation();
-  if (activePopup) { activePopup.remove(); activePopup = null; }
-
-  const tasks = filteredTasks.filter(t => t.due_date && t.due_date.slice(0,10) === dateStr);
-  const today = new Date().toISOString().slice(0,10);
-  const isOver = dateStr < today;
-  const label = new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-  const popup = document.createElement('div');
-  popup.className = 'cal-popup';
-  popup.style.cssText = `position:fixed;top:${Math.min(e.clientY+8, window.innerHeight-200)}px;left:${Math.min(e.clientX, window.innerWidth-290)}px`;
-  popup.innerHTML = `<div class="cal-popup-title">${label} — ${tasks.length} tasks</div>` +
-    tasks.map(t => {
-      const cls = t.priority === 'High' ? 'high' : isOver ? 'overdue' : '';
-      return `<div class="cal-popup-item ${cls}" onclick="openPanel('${t.activity_id}');closePopup()">${t.subject||'Task'}</div>`;
-    }).join('');
-
-  document.body.appendChild(popup);
-  activePopup = popup;
-  setTimeout(() => document.addEventListener('click', closePopup, { once: true }), 10);
-}
-
-function closePopup() {
-  if (activePopup) { activePopup.remove(); activePopup = null; }
-}
-restoreSession();
-</script>
-<!-- DETAIL PANEL -->
 <div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
 <div class="detail-panel" id="detailPanel">
   <div class="panel-header">
@@ -911,5 +256,314 @@ restoreSession();
   </div>
   <div class="panel-body" id="panelBody"></div>
 </div>
+
+<script>
+const SUPABASE_URL = 'https://idbnpxedwpjrflsqweyh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYm5weGVkd3BqcmZsc3F3ZXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNTY3MDYsImV4cCI6MjA5MjkzMjcwNn0.PL7ftdQbTtkCnfFa3Mwo2H3w_uPXuTh_0o75cu3_FLU';
+
+let currentUser = null;
+let allTasks = [], filteredTasks = [];
+let sortCol = 'due_date', sortDir = 1;
+let currentView = 'list';
+let calViewMode = 'month';
+let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
+let weekStart = null;
+let selectedTypes = new Set(), selectedOwners = new Set();
+let activePopup = null;
+
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  localStorage.setItem('crm_theme', isLight ? 'light' : 'dark');
+  document.getElementById('themeToggleBtn').textContent = isLight ? '🌙 Dark mode' : '☀ Light mode';
+}
+if (localStorage.getItem('crm_theme') === 'light') {
+  document.body.classList.add('light');
+  document.addEventListener('DOMContentLoaded', () => { const b=document.getElementById('themeToggleBtn'); if(b) b.textContent='🌙 Dark mode'; });
+}
+
+function toggleUserMenu() { document.getElementById('userChip').classList.toggle('open'); }
+document.addEventListener('click', e => { const c=document.getElementById('userChip'); if(c&&!c.contains(e.target)) c.classList.remove('open'); });
+
+function setUserUI(name, email, role) {
+  document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('userName').textContent = name;
+  document.getElementById('dropdownEmail').textContent = email;
+  document.getElementById('dropdownRole').textContent = role === 'admin' ? 'Administrator' : 'Sales Rep';
+}
+
+function doLogout() {
+  currentUser = null;
+  localStorage.removeItem('crm_session');
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = ''; btn.disabled = true; btn.textContent = 'Signing in...';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || 'Login failed');
+    const pr = await fetch(`${SUPABASE_URL}/rest/v1/tbl_users?email=eq.${encodeURIComponent(email)}&select=*`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${data.access_token}` }
+    });
+    const profiles = await pr.json();
+    if (!profiles?.length) throw new Error('User profile not found.');
+    const profile = profiles[0];
+    currentUser = { token: data.access_token, refresh_token: data.refresh_token, email, sfName: profile.sf_owner_name, role: profile.role };
+    localStorage.setItem('crm_session', JSON.stringify(currentUser));
+    setUserUI(profile.sf_owner_name, email, profile.role);
+    document.getElementById('loginOverlay').style.display = 'none';
+    loadTasks();
+  } catch(e) { errEl.textContent = e.message; btn.disabled = false; btn.textContent = 'Sign in'; }
+}
+
+async function restoreSession() {
+  const saved = localStorage.getItem('crm_session');
+  if (!saved) return;
+  try {
+    const session = JSON.parse(saved);
+    if (!session.token || !session.sfName) return;
+    if (session.refresh_token) {
+      try {
+        const ref = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+          body: JSON.stringify({ refresh_token: session.refresh_token })
+        });
+        if (ref.ok) {
+          const ns = await ref.json();
+          session.token = ns.access_token; session.refresh_token = ns.refresh_token;
+          localStorage.setItem('crm_session', JSON.stringify(session));
+        }
+      } catch(e) {}
+    }
+    currentUser = { token: session.token, refresh_token: session.refresh_token, email: session.email, sfName: session.sfName, role: session.role };
+    setUserUI(session.sfName, session.email, session.role);
+    document.getElementById('loginOverlay').style.display = 'none';
+    loadTasks();
+  } catch(e) {
+    console.warn('Session restore error:', e);
+    document.getElementById('loginOverlay').style.display = 'flex';
+  }
+}
+
+async function loadTasks() {
+  const ownerParam = currentUser?.role === 'rep' ? `&assigned_to=eq.${encodeURIComponent(currentUser.sfName)}` : '';
+  const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}` };
+  try {
+    let all = [], page = 0, size = 1000;
+    while (true) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/tbl_tasks?select=*&order=due_date.asc&limit=${size}&offset=${page*size}${ownerParam}`, { headers });
+      if (!res.ok) break;
+      const data = await res.json();
+      if (!Array.isArray(data)) break;
+      all = all.concat(data); if (data.length < size) break; page++;
+    }
+    allTasks = all;
+    document.getElementById('loadingMsg').style.display = 'none';
+    document.getElementById('taskTable').style.display = 'table';
+    populateFilters();
+    applyFilters();
+  } catch(e) { console.error('Tasks load error:', e); }
+}
+
+function toggleMs(wrapId) {
+  const wrap = document.getElementById(wrapId);
+  const isOpen = wrap.classList.contains('open');
+  document.querySelectorAll('.ms-wrap.open').forEach(w => w.classList.remove('open'));
+  if (!isOpen) wrap.classList.add('open');
+}
+document.addEventListener('click', e => { document.querySelectorAll('.ms-wrap').forEach(w => { if (!w.contains(e.target)) w.classList.remove('open'); }); });
+
+function populateFilters() {
+  const types  = [...new Set(allTasks.map(t => t.type).filter(Boolean))].sort();
+  const owners = [...new Set(allTasks.map(t => t.assigned_to).filter(Boolean))].sort();
+  renderMs('typeDropdown', types, selectedTypes, 'type');
+  renderMs('ownerDropdown', owners, selectedOwners, 'owner');
+}
+
+function renderMs(ddId, values, sel, kind) {
+  document.getElementById(ddId).innerHTML = values.map(v => `
+    <div class="ms-option ${sel.has(v)?'sel':''}" onclick="toggleMsOpt('${kind}','${v.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">
+      <div class="ms-chk">${sel.has(v)?'✓':''}</div>${v}
+    </div>`).join('');
+}
+
+function toggleMsOpt(kind, val) {
+  const sel = kind==='type' ? selectedTypes : selectedOwners;
+  if (sel.has(val)) sel.delete(val); else sel.add(val);
+  const values = [...new Set(allTasks.map(t => kind==='type'?t.type:t.assigned_to).filter(Boolean))].sort();
+  renderMs(kind==='type'?'typeDropdown':'ownerDropdown', values, sel, kind);
+  const lbl = document.getElementById(kind==='type'?'typeBtnLabel':'ownerBtnLabel');
+  const btn = document.getElementById(kind==='type'?'typeBtn':'ownerBtn');
+  const label = kind==='type'?'All types':'All reps';
+  const plural = kind==='type'?'Types':'Reps';
+  if (sel.size===0) { lbl.innerHTML=label; btn.classList.remove('active'); }
+  else if (sel.size===1) { lbl.innerHTML=[...sel][0]; btn.classList.add('active'); }
+  else { lbl.innerHTML=`${plural} <span class="ms-badge">${sel.size}</span>`; btn.classList.add('active'); }
+  applyFilters();
+}
+
+function applyFilters() {
+  const search = document.getElementById('taskSearch').value.toLowerCase();
+  const status = document.getElementById('statusFilter').value;
+  filteredTasks = allTasks.filter(t => {
+    if (search) { const hay=[t.subject,t.account_name,t.contact_name,t.assigned_to,t.type,t.comments,t.fts_id].map(v=>(v||'').toLowerCase()).join(' '); if (!hay.includes(search)) return false; }
+    if (status==='open' && t.status==='Completed') return false;
+    if (status==='Completed' && t.status!=='Completed') return false;
+    if (selectedTypes.size>0 && !selectedTypes.has(t.type)) return false;
+    if (selectedOwners.size>0 && !selectedOwners.has(t.assigned_to)) return false;
+    return true;
+  });
+  updateStats(); renderList();
+  if (currentView==='calendar'||currentView==='week') renderCalendar();
+}
+
+function updateStats() {
+  const open = filteredTasks.filter(t=>t.status!=='Completed').length;
+  const overdue = filteredTasks.filter(t=>t.due_date&&t.status!=='Completed'&&t.due_date.slice(0,10)<new Date().toISOString().slice(0,10)).length;
+  document.getElementById('statsBar').innerHTML=`
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--accent)"></div><strong>${filteredTasks.length}</strong> tasks</div>
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--gold)"></div><strong>${open}</strong> open</div>
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--red)"></div><strong>${overdue}</strong> overdue</div>`;
+}
+
+function fmtDate(val) { if(!val) return '—'; const d=new Date(val); return `${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCFullYear()).slice(-2)}`; }
+function dateStyle(t) { if(!t.due_date||t.status==='Completed') return ''; const dd=t.due_date.slice(0,10),td=new Date().toISOString().slice(0,10); if(dd<td) return 'color:var(--red);font-weight:500'; if(dd===td) return 'color:var(--gold);font-weight:500'; return ''; }
+
+function renderList() {
+  const sorted=[...filteredTasks].sort((a,b)=>{ let av=a[sortCol]??'',bv=b[sortCol]??''; if(typeof av==='string') av=av.toLowerCase(); if(typeof bv==='string') bv=bv.toLowerCase(); return av<bv?-sortDir:av>bv?sortDir:0; });
+  document.getElementById('taskBody').innerHTML=sorted.map(t=>{
+    const dv=parseFloat(t.days_since_activity);
+    const ds=isNaN(dv)?'':dv>30?'color:var(--red)':dv>14?'color:var(--orange)':'color:var(--green)';
+    return `<tr onclick="openPanel('${t.activity_id}')" title="${(t.comments||'').replace(/"/g,'&quot;')}">
+      <td class="mono" style="${dateStyle(t)}">${fmtDate(t.due_date)}</td>
+      <td>${t.type||'—'}</td><td class="primary">${t.subject||'—'}</td>
+      <td>${t.account_name||'—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px">${t.fts_id||''}</span></td>
+      <td>${t.contact_name||'—'}</td>
+      <td class="mono" style="${ds}">${!isNaN(dv)?dv+'d':'—'}</td>
+      <td class="${t.priority==='High'?'priority-high':t.priority==='Low'?'priority-low':''}">${t.priority||'—'}</td>
+      <td>${t.assigned_to||'—'}</td>
+    </tr>`;
+  }).join('');
+  document.querySelectorAll('[id^="s-"]').forEach(el=>el.textContent='');
+  const arrow=document.getElementById(`s-${sortCol}`); if(arrow) arrow.textContent=sortDir===1?'↑':'↓';
+}
+
+function sortBy(col) { if(sortCol===col) sortDir*=-1; else {sortCol=col;sortDir=1;} renderList(); }
+
+function switchView(view) {
+  currentView=view; const isList=view==='list';
+  document.getElementById('listView').classList.toggle('hidden',!isList);
+  document.getElementById('calView').classList.toggle('hidden',isList);
+  document.getElementById('tabList').classList.toggle('active',isList);
+  document.getElementById('tabCal').classList.toggle('active',view==='calendar');
+  document.getElementById('tabWeek').classList.toggle('active',view==='week');
+  if(!isList){calViewMode=view==='week'?'week':'month';if(calViewMode==='week'&&!weekStart)initWeekStart();renderCalendar();}
+}
+
+function initWeekStart(){const now=new Date(),day=now.getDay(),diff=day===0?-6:1-day;weekStart=new Date(now);weekStart.setDate(now.getDate()+diff);weekStart.setHours(0,0,0,0);}
+function calNav(dir){if(calViewMode==='month'){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}}else{weekStart=new Date(weekStart);weekStart.setDate(weekStart.getDate()+dir*7);}renderCalendar();}
+function goToday(){calYear=new Date().getFullYear();calMonth=new Date().getMonth();initWeekStart();renderCalendar();}
+function getTasksByDate(){const map={};filteredTasks.forEach(t=>{if(!t.due_date||t.status==='Completed')return;const d=t.due_date.slice(0,10);if(!map[d])map[d]=[];map[d].push(t);});return map;}
+function renderCalendar(){calViewMode==='month'?renderMonth():renderWeek();}
+
+function renderMonth(){
+  document.getElementById('calLabel').textContent=new Date(calYear,calMonth,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const today=new Date().toISOString().slice(0,10),firstDay=new Date(calYear,calMonth,1).getDay(),lastDate=new Date(calYear,calMonth+1,0).getDate(),taskMap=getTasksByDate();
+  let html=`<div class="cal-grid">`+['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="cal-day-header">${d}</div>`).join('');
+  for(let i=0;i<firstDay;i++) html+=`<div class="cal-day other-month"></div>`;
+  for(let d=1;d<=lastDate;d++){
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const tasks=taskMap[ds]||[],show=tasks.slice(0,3),more=tasks.length-show.length,isOver=ds<today;
+    const pills=show.map(t=>`<div class="cal-pill ${t.priority==='High'?'high':isOver?'overdue':''}" onclick="event.stopPropagation();openPanel('${t.activity_id}')">${t.subject||'Task'}</div>`).join('');
+    html+=`<div class="cal-day${ds===today?' today':''}" onclick="openDayPanel('${ds}')"><div class="cal-day-num">${d}</div>${pills}${more>0?`<div class="cal-more" onclick="event.stopPropagation();showMorePopup(event,'${ds}')">+${more} more</div>`:''}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML=html+`</div>`;
+}
+
+function renderWeek(){
+  if(!weekStart)initWeekStart();
+  const taskMap=getTasksByDate(),today=new Date().toISOString().slice(0,10);
+  const wd=Array.from({length:5},(_,i)=>{const d=new Date(weekStart);d.setDate(weekStart.getDate()+i);return d;});
+  document.getElementById('calLabel').textContent=`${wd[0].toLocaleDateString('en-US',{month:'short',day:'numeric'})} — ${wd[4].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+  let html=`<div class="cal-grid" style="grid-template-columns:repeat(5,1fr)">`;
+  html+=wd.map((d,i)=>{const ds=d.toISOString().slice(0,10);return `<div class="cal-day-header" style="${ds===today?'color:var(--accent)':''}">${['Mon','Tue','Wed','Thu','Fri'][i]} ${d.getDate()}</div>`;}).join('');
+  wd.forEach(d=>{const ds=d.toISOString().slice(0,10),tasks=taskMap[ds]||[],isOver=ds<today;
+    const pills=tasks.map(t=>`<div class="cal-pill ${t.priority==='High'?'high':isOver?'overdue':''}" onclick="event.stopPropagation();openPanel('${t.activity_id}')">${t.subject||'Task'}</div>`).join('');
+    html+=`<div class="cal-day${ds===today?' today':''}" onclick="openDayPanel('${ds}')" style="min-height:120px">${pills||'<div style="color:var(--text3);font-size:11px;padding:4px">No tasks</div>'}</div>`;
+  });
+  document.getElementById('calGrid').innerHTML=html+`</div>`;
+}
+
+function openDayPanel(ds){
+  const tasks=filteredTasks.filter(t=>t.due_date?.slice(0,10)===ds),isOver=ds<new Date().toISOString().slice(0,10);
+  document.getElementById('dayPanelDate').textContent=new Date(ds+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('dayPanelBody').innerHTML=tasks.length===0?'<div class="day-empty">No tasks on this day</div>':
+    tasks.map(t=>`<div class="day-task-item ${t.priority==='High'?'high':isOver?'overdue':''}" onclick="openPanel('${t.activity_id}')">
+      <div class="day-task-subject">${t.subject||'—'}</div>
+      <div class="day-task-meta">${[t.type,t.priority,t.assigned_to,t.account_name].filter(Boolean).map(v=>`<span>${v}</span>`).join('')}</div>
+    </div>`).join('');
+  document.getElementById('dayPanel').classList.add('open');
+}
+function closeDayPanel(){document.getElementById('dayPanel').classList.remove('open');}
+
+function showMorePopup(e,ds){
+  if(activePopup){activePopup.remove();activePopup=null;}
+  const tasks=filteredTasks.filter(t=>t.due_date?.slice(0,10)===ds);
+  const label=new Date(ds+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const popup=document.createElement('div');popup.className='cal-popup';
+  popup.style.cssText=`top:${Math.min(e.clientY+8,window.innerHeight-200)}px;left:${Math.min(e.clientX,window.innerWidth-290)}px`;
+  popup.innerHTML=`<div class="cal-popup-title">${label} — ${tasks.length} tasks</div>`+
+    tasks.map(t=>`<div class="cal-popup-item ${t.priority==='High'?'high':''}" onclick="openPanel('${t.activity_id}');closePopup()">${t.subject||'Task'}</div>`).join('');
+  document.body.appendChild(popup);activePopup=popup;
+  setTimeout(()=>document.addEventListener('click',closePopup,{once:true}),10);
+}
+function closePopup(){if(activePopup){activePopup.remove();activePopup=null;}}
+
+function openPanel(id){
+  const t=allTasks.find(x=>x.activity_id===id);if(!t)return;
+  document.getElementById('panelTitle').textContent=t.subject||'—';
+  document.getElementById('panelSub').textContent=t.account_name||'';
+  const sfLink=document.getElementById('panelSFLink');
+  if(t.account_id){sfLink.href=`https://fintech.lightning.force.com/lightning/r/Account/${t.account_id}/view`;sfLink.style.display='inline-flex';}
+  else sfLink.style.display='none';
+  const dv=parseFloat(t.days_since_activity);
+  const dc=isNaN(dv)?'':dv>30?'color:var(--red)':dv>14?'color:var(--orange)':'color:var(--green)';
+  document.getElementById('panelBody').innerHTML=`
+    <div class="panel-section"><div class="panel-section-title">Task details</div><div class="panel-grid">
+      <div class="panel-field"><div class="pf-label">Type</div><div class="pf-value">${t.type||'—'}</div></div>
+      <div class="panel-field"><div class="pf-label">Priority</div><div class="pf-value" style="${t.priority==='High'?'color:var(--red)':''}">${t.priority||'—'}</div></div>
+      <div class="panel-field"><div class="pf-label">Status</div><div class="pf-value" style="${t.status==='Completed'?'color:var(--green)':'color:var(--accent)'}">${t.status||'—'}</div></div>
+      <div class="panel-field"><div class="pf-label">Due Date</div><div class="pf-value mono" style="${dateStyle(t)}">${fmtDate(t.due_date)}</div></div>
+      <div class="panel-field"><div class="pf-label">Created Date</div><div class="pf-value mono">${fmtDate(t.created_date)}</div></div>
+      <div class="panel-field"><div class="pf-label">Days Since Activity</div><div class="pf-value mono" style="${dc}">${!isNaN(dv)?dv+'d':'—'}</div></div>
+      <div class="panel-field"><div class="pf-label">Assigned To</div><div class="pf-value">${t.assigned_to||'—'}</div></div>
+      <div class="panel-field"><div class="pf-label">FTS ID</div><div class="pf-value mono">${t.fts_id||'—'}</div></div>
+    </div></div>
+    <div class="panel-section"><div class="panel-section-title">Account</div><div class="panel-grid">
+      <div class="panel-field full"><div class="pf-label">Account Name</div><div class="pf-value">${t.account_name||'—'}</div></div>
+      <div class="panel-field"><div class="pf-label">Industry</div><div class="pf-value">${t.industry||'—'}</div></div>
+      <div class="panel-field"><div class="pf-label">Accounting Package</div><div class="pf-value">${t.accounting_package||'—'}</div></div>
+    </div></div>
+    <div class="panel-section"><div class="panel-section-title">Contact</div><div class="panel-grid">
+      <div class="panel-field full"><div class="pf-label">Contact Name</div><div class="pf-value">${t.contact_name||'—'}</div></div>
+    </div></div>
+    ${t.comments?`<div class="panel-section"><div class="panel-section-title">Comments</div><div class="panel-field full"><div class="pf-value" style="white-space:pre-wrap;font-size:12px;color:var(--text2);line-height:1.6">${t.comments}</div></div></div>`:''}`;
+  document.getElementById('panelOverlay').classList.add('open');
+  document.getElementById('detailPanel').classList.add('open');
+}
+function closePanel(){document.getElementById('panelOverlay').classList.remove('open');document.getElementById('detailPanel').classList.remove('open');}
+
+restoreSession();
+</script>
 </body>
 </html>
