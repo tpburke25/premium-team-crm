@@ -70,6 +70,28 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .list-table td.primary { color: var(--text); font-weight: 500; }
 .mono { font-family: 'DM Mono', monospace; font-size: 12px; }
 .sort-arrow { margin-left: 4px; opacity: 0.5; }
+.clear-btn { padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text3); font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
+.clear-btn:hover { background: var(--surface2); color: var(--red); border-color: var(--red); }
+.cf-wrap { position: relative; white-space: nowrap; }
+.cf-btn { margin-left: 3px; opacity: 0.4; cursor: pointer; font-size: 10px; }
+.cf-btn:hover { opacity: 1; color: var(--accent); }
+.cf-dd { position: absolute; top: calc(100% + 4px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 8px; min-width: 200px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.cf-wrap.open .cf-dd { display: block; }
+.cf-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); margin-bottom: 6px; font-weight: 500; }
+.cf-search { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 5px; }
+.cf-list { max-height: 160px; overflow-y: auto; margin-bottom: 6px; }
+.cf-item { display: flex; align-items: center; gap: 7px; padding: 5px 6px; border-radius: 4px; font-size: 12px; color: var(--text2); cursor: pointer; }
+.cf-item:hover { background: var(--surface3); color: var(--text); }
+.cf-chk { width: 13px; height: 13px; border: 1px solid var(--border2); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; }
+.cf-item.sel .cf-chk { background: var(--accent); border-color: var(--accent); color: #fff; }
+.cf-sel-all { font-size: 11px; color: var(--text3); cursor: pointer; display: block; margin-bottom: 5px; }
+.cf-sel-all:hover { color: var(--accent); }
+.cf-num-op { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 5px; }
+.cf-num-val { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Mono', monospace; outline: none; margin-bottom: 8px; }
+.cf-btns { display: flex; gap: 6px; }
+.cf-apply { padding: 5px 12px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.cf-clear { padding: 5px 12px; background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.th-filtered { color: var(--accent) !important; }
 
 /* ACCOUNT DETAIL PAGE */
 .acct-detail { display: none; padding: 28px; max-width: 1100px; margin: 0 auto; }
@@ -184,12 +206,7 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
         <span class="search-icon">⌕</span>
         <input class="search-input" id="searchInput" placeholder="Search accounts, FTS ID..." oninput="applyFilters()">
       </div>
-      <select class="filter-select" id="industryFilter" onchange="applyFilters()">
-        <option value="">All industries</option>
-      </select>
-      <select class="filter-select" id="pkgFilter" onchange="applyFilters()">
-        <option value="">All accounting packages</option>
-      </select>
+      <button class="clear-btn" id="clearBtn" onclick="clearAllFilters()" style="display:none">✕ Clear filters</button>
     </div>
     <div class="stats-bar" id="statsBar"></div>
   </div>
@@ -198,15 +215,33 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
     <table class="list-table" id="acctTable" style="display:none">
       <thead>
         <tr>
-          <th onclick="sortBy('account_name')">Account <span class="sort-arrow" id="s-account_name"></span></th>
-          <th onclick="sortBy('fts_id')">FTS ID <span class="sort-arrow" id="s-fts_id"></span></th>
-          <th onclick="sortBy('industry')">Industry <span class="sort-arrow" id="s-industry"></span></th>
-          <th onclick="sortBy('accounting_package')">Accounting Package <span class="sort-arrow" id="s-accounting_package"></span></th>
-          <th onclick="sortBy('days_since_activity')">Days Since Act. <span class="sort-arrow" id="s-days_since_activity"></span></th>
-          <th onclick="sortBy('city')">City <span class="sort-arrow" id="s-city"></span></th>
-          <th onclick="sortBy('state')">State <span class="sort-arrow" id="s-state"></span></th>
-          <th onclick="sortBy('open_opps')">Open Opps <span class="sort-arrow" id="s-open_opps"></span></th>
-          <th onclick="sortBy('open_tasks')">Open Tasks <span class="sort-arrow" id="s-open_tasks"></span></th>
+          <th class="cf-wrap" onclick="sortBy('fts_id')">FTS ID <span class="sort-arrow" id="s-fts_id"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('fts_id','check')">▾</span>
+            <div class="cf-dd" id="cf-fts_id"><div class="cf-title">FTS ID filter</div><input class="cf-search" id="cfs-fts_id" placeholder="Search..." oninput="renderCFList('fts_id')"><span class="cf-sel-all" onclick="toggleAllCF('fts_id')">Select / Deselect all</span><div class="cf-list" id="cfl-fts_id"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('fts_id')">Apply</button><button class="cf-clear" onclick="clearCF('fts_id')">Clear</button></div></div>
+          </th>
+          <th class="cf-wrap" onclick="sortBy('account_name')">Account <span class="sort-arrow" id="s-account_name"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('account_name','check')">▾</span>
+            <div class="cf-dd" id="cf-account_name"><div class="cf-title">Account filter</div><input class="cf-search" id="cfs-account_name" placeholder="Search..." oninput="renderCFList('account_name')"><span class="cf-sel-all" onclick="toggleAllCF('account_name')">Select / Deselect all</span><div class="cf-list" id="cfl-account_name"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('account_name')">Apply</button><button class="cf-clear" onclick="clearCF('account_name')">Clear</button></div></div>
+          </th>
+          <th class="cf-wrap" onclick="sortBy('industry')">Industry <span class="sort-arrow" id="s-industry"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('industry','check')">▾</span>
+            <div class="cf-dd" id="cf-industry"><div class="cf-title">Industry filter</div><input class="cf-search" id="cfs-industry" placeholder="Search..." oninput="renderCFList('industry')"><span class="cf-sel-all" onclick="toggleAllCF('industry')">Select / Deselect all</span><div class="cf-list" id="cfl-industry"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('industry')">Apply</button><button class="cf-clear" onclick="clearCF('industry')">Clear</button></div></div>
+          </th>
+          <th class="cf-wrap" onclick="sortBy('accounting_package')">Accounting Pkg <span class="sort-arrow" id="s-accounting_package"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('accounting_package','check')">▾</span>
+            <div class="cf-dd" id="cf-accounting_package"><div class="cf-title">Accounting Package filter</div><input class="cf-search" id="cfs-accounting_package" placeholder="Search..." oninput="renderCFList('accounting_package')"><span class="cf-sel-all" onclick="toggleAllCF('accounting_package')">Select / Deselect all</span><div class="cf-list" id="cfl-accounting_package"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('accounting_package')">Apply</button><button class="cf-clear" onclick="clearCF('accounting_package')">Clear</button></div></div>
+          </th>
+          <th class="cf-wrap" onclick="sortBy('days_since_activity')">Days Since Act. <span class="sort-arrow" id="s-days_since_activity"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('days_since_activity','num')">▾</span>
+            <div class="cf-dd" id="cf-days_since_activity"><div class="cf-title">Days Since Activity</div><select class="cf-num-op" id="cfop-days_since_activity"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-days_since_activity" type="number" min="0" placeholder="e.g. 30"><div class="cf-btns"><button class="cf-apply" onclick="applyNumCF('days_since_activity')">Apply</button><button class="cf-clear" onclick="clearNumCF('days_since_activity')">Clear</button></div></div>
+          </th>
+          <th class="cf-wrap" onclick="sortBy('city')">City <span class="sort-arrow" id="s-city"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('city','check')">▾</span>
+            <div class="cf-dd" id="cf-city"><div class="cf-title">City filter</div><input class="cf-search" id="cfs-city" placeholder="Search..." oninput="renderCFList('city')"><span class="cf-sel-all" onclick="toggleAllCF('city')">Select / Deselect all</span><div class="cf-list" id="cfl-city"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('city')">Apply</button><button class="cf-clear" onclick="clearCF('city')">Clear</button></div></div>
+          </th>
+          <th class="cf-wrap" onclick="sortBy('state')">State <span class="sort-arrow" id="s-state"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('state','check')">▾</span>
+            <div class="cf-dd" id="cf-state"><div class="cf-title">State filter</div><input class="cf-search" id="cfs-state" placeholder="Search..." oninput="renderCFList('state')"><span class="cf-sel-all" onclick="toggleAllCF('state')">Select / Deselect all</span><div class="cf-list" id="cfl-state"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('state')">Apply</button><button class="cf-clear" onclick="clearCF('state')">Clear</button></div></div>
+          </th>
+          <th class="cf-wrap" onclick="sortBy('open_opps')">Open Opps <span class="sort-arrow" id="s-open_opps"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('open_opps','num')">▾</span>
+            <div class="cf-dd" id="cf-open_opps"><div class="cf-title">Open Opps</div><select class="cf-num-op" id="cfop-open_opps"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-open_opps" type="number" min="0" placeholder="e.g. 1"><div class="cf-btns"><button class="cf-apply" onclick="applyNumCF('open_opps')">Apply</button><button class="cf-clear" onclick="clearNumCF('open_opps')">Clear</button></div></div>
+          </th>
+          <th class="cf-wrap" onclick="sortBy('open_tasks')">Open Tasks <span class="sort-arrow" id="s-open_tasks"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('open_tasks','num')">▾</span>
+            <div class="cf-dd" id="cf-open_tasks"><div class="cf-title">Open Tasks</div><select class="cf-num-op" id="cfop-open_tasks"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-open_tasks" type="number" min="0" placeholder="e.g. 1"><div class="cf-btns"><button class="cf-apply" onclick="applyNumCF('open_tasks')">Apply</button><button class="cf-clear" onclick="clearNumCF('open_tasks')">Clear</button></div></div>
+          </th>
         </tr>
       </thead>
       <tbody id="acctBody"></tbody>
@@ -392,17 +427,129 @@ function buildAccountList() {
   document.getElementById('acctTable').style.display = 'table';
 }
 
+// ── COLUMN FILTERS ────────────────────────────────
+const checkFilters = {}; // col -> Set of selected values
+const numFilters   = {}; // col -> {op, val}
+const cfValues     = {}; // col -> all unique values
+
 function populateFilters() {
-  const industries = [...new Set(allAccounts.map(a => a.industry).filter(Boolean))].sort();
-  const pkgs = [...new Set(allAccounts.map(a => a.accounting_package).filter(Boolean))].sort();
-  document.getElementById('industryFilter').innerHTML = '<option value="">All industries</option>' + industries.map(i => `<option>${i}</option>`).join('');
-  document.getElementById('pkgFilter').innerHTML = '<option value="">All accounting packages</option>' + pkgs.map(p => `<option>${p}</option>`).join('');
+  ['fts_id','account_name','industry','accounting_package','city','state'].forEach(col => {
+    cfValues[col] = [...new Set(allAccounts.map(a => a[col]).filter(Boolean))].sort();
+  });
+}
+
+function openCF(col, type) {
+  document.querySelectorAll('.cf-wrap.open').forEach(w => w.classList.remove('open'));
+  const wrap = document.getElementById('cf-' + col).closest('.cf-wrap');
+  wrap.classList.add('open');
+  if (type === 'check') renderCFList(col);
+}
+
+document.addEventListener('click', e => {
+  document.querySelectorAll('.cf-wrap.open').forEach(w => {
+    if (!w.contains(e.target)) w.classList.remove('open');
+  });
+});
+
+function renderCFList(col) {
+  const search = (document.getElementById('cfs-' + col)?.value || '').toLowerCase();
+  const sel    = checkFilters[col] || new Set();
+  const vals   = (cfValues[col] || []).filter(v => v.toLowerCase().includes(search));
+  document.getElementById('cfl-' + col).innerHTML = vals.map(v => `
+    <div class="cf-item ${sel.has(v)?'sel':''}" onclick="toggleCFItem('${col}','${v.replace(/'/g,"\'")}')">
+      <div class="cf-chk">${sel.has(v)?'✓':''}</div>${v}
+    </div>`).join('');
+}
+
+function toggleCFItem(col, val) {
+  if (!checkFilters[col]) checkFilters[col] = new Set();
+  if (checkFilters[col].has(val)) checkFilters[col].delete(val);
+  else checkFilters[col].add(val);
+  renderCFList(col);
+}
+
+function toggleAllCF(col) {
+  const search = (document.getElementById('cfs-' + col)?.value || '').toLowerCase();
+  const visible = (cfValues[col] || []).filter(v => v.toLowerCase().includes(search));
+  if (!checkFilters[col]) checkFilters[col] = new Set();
+  const allSel = visible.every(v => checkFilters[col].has(v));
+  visible.forEach(v => allSel ? checkFilters[col].delete(v) : checkFilters[col].add(v));
+  renderCFList(col);
+}
+
+function applyCF(col) {
+  const th = document.getElementById('cf-' + col).closest('th');
+  const hasFilter = checkFilters[col]?.size > 0;
+  if (th) th.classList.toggle('th-filtered', hasFilter);
+  document.querySelector('.cf-wrap.open')?.classList.remove('open');
+  applyFilters();
+}
+
+function clearCF(col) {
+  if (checkFilters[col]) checkFilters[col].clear();
+  const th = document.getElementById('cf-' + col).closest('th');
+  if (th) th.classList.remove('th-filtered');
+  renderCFList(col);
+  document.querySelector('.cf-wrap.open')?.classList.remove('open');
+  applyFilters();
+}
+
+function applyNumCF(col) {
+  const op  = document.getElementById('cfop-' + col).value;
+  const val = parseFloat(document.getElementById('cfval-' + col).value);
+  if (op && !isNaN(val)) {
+    numFilters[col] = { op, val };
+    const th = document.getElementById('cf-' + col).closest('th');
+    if (th) th.classList.add('th-filtered');
+  }
+  document.querySelector('.cf-wrap.open')?.classList.remove('open');
+  applyFilters();
+}
+
+function clearNumCF(col) {
+  delete numFilters[col];
+  document.getElementById('cfop-' + col).value = '';
+  document.getElementById('cfval-' + col).value = '';
+  const th = document.getElementById('cf-' + col).closest('th');
+  if (th) th.classList.remove('th-filtered');
+  document.querySelector('.cf-wrap.open')?.classList.remove('open');
+  applyFilters();
+}
+
+function passesNumFilter(col, val) {
+  const f = numFilters[col];
+  if (!f) return true;
+  const v = parseFloat(val);
+  if (isNaN(v)) return false;
+  if (f.op === 'gt')  return v >  f.val;
+  if (f.op === 'gte') return v >= f.val;
+  if (f.op === 'lt')  return v <  f.val;
+  if (f.op === 'lte') return v <= f.val;
+  if (f.op === 'eq')  return v === f.val;
+  return true;
+}
+
+function clearAllFilters() {
+  document.getElementById('searchInput').value = '';
+  ['fts_id','account_name','industry','accounting_package','city','state'].forEach(col => {
+    if (checkFilters[col]) checkFilters[col].clear();
+    const th = document.getElementById('cf-' + col)?.closest('th');
+    if (th) th.classList.remove('th-filtered');
+  });
+  ['days_since_activity','open_opps','open_tasks'].forEach(col => {
+    delete numFilters[col];
+    const op = document.getElementById('cfop-' + col);
+    const vl = document.getElementById('cfval-' + col);
+    if (op) op.value = '';
+    if (vl) vl.value = '';
+    const th = document.getElementById('cf-' + col)?.closest('th');
+    if (th) th.classList.remove('th-filtered');
+  });
+  applyFilters();
 }
 
 function applyFilters() {
-  const search   = document.getElementById('searchInput').value.toLowerCase();
-  const industry = document.getElementById('industryFilter').value;
-  const pkg      = document.getElementById('pkgFilter').value;
+  const search = document.getElementById('searchInput').value.toLowerCase();
 
   filteredAccounts = allAccounts.filter(a => {
     if (search) {
@@ -410,10 +557,19 @@ function applyFilters() {
         .map(v => (v||'').toLowerCase()).join(' ');
       if (!hay.includes(search)) return false;
     }
-    if (industry && a.industry !== industry) return false;
-    if (pkg && a.accounting_package !== pkg) return false;
+    for (const col of ['fts_id','account_name','industry','accounting_package','city','state']) {
+      if (checkFilters[col]?.size > 0 && !checkFilters[col].has(a[col])) return false;
+    }
+    if (!passesNumFilter('days_since_activity', a.days_since_activity)) return false;
+    if (!passesNumFilter('open_opps', a.open_opps)) return false;
+    if (!passesNumFilter('open_tasks', a.open_tasks)) return false;
     return true;
   });
+
+  const hasAny = search ||
+    Object.values(checkFilters).some(s => s.size > 0) ||
+    Object.keys(numFilters).length > 0;
+  document.getElementById('clearBtn').style.display = hasAny ? 'inline-block' : 'none';
 
   updateStats();
   renderList();
@@ -453,12 +609,14 @@ function renderList() {
 
   document.getElementById('acctBody').innerHTML = sorted.map(a => {
     const dv = parseFloat(a.days_since_activity);
+    const hasActive = a.open_opps > 0 || a.open_tasks > 0;
+    const ds = hasActive ? daysStyle(a.days_since_activity) : '';
     return `<tr onclick="openAccount('${a.account_id}')">
-      <td class="primary">${a.account_name||'—'}</td>
       <td class="mono">${a.fts_id||'—'}</td>
+      <td class="primary">${a.account_name||'—'}</td>
       <td>${a.industry||'—'}</td>
       <td>${a.accounting_package||'—'}</td>
-      <td class="mono" style="${daysStyle(a.days_since_activity)}">${!isNaN(dv)?dv+'d':'—'}</td>
+      <td class="mono" style="${ds}">${!isNaN(dv)?dv+'d':'—'}</td>
       <td>${a.city||'—'}</td>
       <td>${a.state||'—'}</td>
       <td class="mono" style="${a.open_opps>0?'color:var(--accent)':''}">${a.open_opps}</td>
