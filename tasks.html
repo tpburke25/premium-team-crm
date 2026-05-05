@@ -356,7 +356,7 @@ let calMonth = new Date().getMonth();
 let currentView = 'list';
 
 // ── AUTH ──────────────────────────────────────────
-(async function restoreSession() {
+async function restoreSession() {
   const saved = localStorage.getItem('crm_session');
   if (!saved) return;
   try {
@@ -391,10 +391,9 @@ let currentView = 'list';
   } catch(e) { localStorage.removeItem('crm_session'); }
   } catch(e) {
     console.warn('Session restore error:', e);
-    // Don't clear session on error — just show login
     document.getElementById('loginOverlay').style.display = 'flex';
   }
-})();
+}
 
 async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
@@ -897,6 +896,7 @@ function showMorePopup(e, dateStr) {
 function closePopup() {
   if (activePopup) { activePopup.remove(); activePopup = null; }
 }
+restoreSession();
 </script>
 <!-- DETAIL PANEL -->
 <div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>

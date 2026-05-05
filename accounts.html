@@ -286,7 +286,7 @@ let sortCol = 'account_name';
 let sortDir = 1;
 
 // ── AUTH ──────────────────────────────────────────
-(async function restoreSession() {
+async function restoreSession() {
   const saved = localStorage.getItem('crm_session');
   if (!saved) return;
   try {
@@ -318,10 +318,9 @@ let sortDir = 1;
   } catch(e) { localStorage.removeItem('crm_session'); }
   } catch(e) {
     console.warn('Session restore error:', e);
-    // Don't clear session on error — just show login
     document.getElementById('loginOverlay').style.display = 'flex';
   }
-})();
+}
 
 async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
@@ -848,6 +847,7 @@ function taskDateStyle(t) {
   if (dd === td) return 'color:var(--gold);font-weight:500';
   return '';
 }
+restoreSession();
 </script>
 </body>
 </html>

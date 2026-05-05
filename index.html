@@ -1225,7 +1225,14 @@ function closePanel() {
 // ── AUTH ──────────────────────────────────────────
 
 // Restore session from localStorage on page load
-(async function restoreSession() {
+function setUserUI(name, email, role) {
+  document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('userName').textContent   = name;
+  document.getElementById('dropdownEmail').textContent = email;
+  document.getElementById('dropdownRole').textContent  = role === 'admin' ? 'Administrator' : 'Sales Rep';
+}
+
+async function restoreSession() {
   const saved = localStorage.getItem('crm_session');
   if (!saved) return;
   try {
@@ -1255,10 +1262,9 @@ function closePanel() {
     loadData();
   } catch(e) {
     console.warn('Session restore error:', e);
-    // Don't clear session on error — just show login
     document.getElementById('loginOverlay').style.display = 'flex';
   }
-})();
+}
 
 // Check if this is a password reset redirect
 (function checkResetRedirect() {
@@ -1630,6 +1636,7 @@ async function loadData() {
   btn.classList.remove('syncing');
   label.textContent = 'Refresh';
 }
+restoreSession();
 </script>
 </body>
 </html>
