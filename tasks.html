@@ -388,7 +388,6 @@ async function restoreSession() {
       document.getElementById('ownerFilter').style.display = 'none';
     }
     loadTasks();
-  } catch(e) { localStorage.removeItem('crm_session'); }
   } catch(e) {
     console.warn('Session restore error:', e);
     document.getElementById('loginOverlay').style.display = 'flex';
