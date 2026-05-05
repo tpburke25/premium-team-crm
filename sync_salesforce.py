@@ -209,7 +209,8 @@ def sync_tasks(token, instance):
             Owner.Name, Description,
             Account.Name, Account.Industry,
             Account.FTS_ID__c,
-            Account.Accounting_Package__c
+            Account.Accounting_Package__c,
+            Account.Days_Since_Activity__c
         FROM Task
         WHERE IsDeleted = false
         AND Status != 'Completed'
@@ -239,6 +240,7 @@ def sync_tasks(token, instance):
             'industry':           acc.get('Industry'),
             'accounting_package': acc.get('Accounting_Package__c'),
             'contact_name':       who.get('Name') if (r.get('WhoId') or '').startswith('003') else None,
+            'days_since_activity': clean_int(acc.get('Days_Since_Activity__c')),
             'synced_at':          now_iso(),
         })
 
