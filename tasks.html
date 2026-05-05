@@ -75,6 +75,18 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; }
 .filter-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--text2); font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; }
 .filter-select option { background: var(--surface2); color: var(--text); }
+.ms-wrap { position: relative; }
+.ms-btn { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; font-size: 13px; color: var(--text2); font-family: 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap; user-select: none; min-width: 110px; justify-content: space-between; transition: border 0.15s; }
+.ms-btn:hover, .ms-btn.active { border-color: var(--accent); color: var(--accent); }
+.ms-arrow { font-size: 10px; opacity: 0.5; }
+.ms-badge { background: var(--accent); color: #fff; border-radius: 10px; font-size: 10px; padding: 1px 6px; margin-left: 2px; font-weight: 600; }
+.ms-dropdown { position: absolute; top: calc(100% + 6px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 6px; min-width: 180px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.ms-wrap.open .ms-dropdown { display: block; }
+.ms-option { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; transition: background 0.1s; }
+.ms-option:hover { background: var(--surface3); color: var(--text); }
+.ms-option.selected { color: var(--text); }
+.ms-check { width: 15px; height: 15px; border: 1px solid var(--border2); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+.ms-option.selected .ms-check { background: var(--accent); border-color: var(--accent); color: #fff; }
 .tab-group { display: flex; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; }
 .tab-btn { padding: 7px 16px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: none; background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; }
 .tab-btn.active { background: var(--accent); color: #fff; }
@@ -95,6 +107,26 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .list-table td { padding: 11px 14px; color: var(--text2); }
 .list-table td.primary { color: var(--text); font-weight: 500; }
 .mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+.panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.panel-overlay.open { opacity: 1; pointer-events: all; }
+.detail-panel { position: fixed; right: 0; top: 0; bottom: 0; width: 420px; background: var(--surface); border-left: 1px solid var(--border2); z-index: 201; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.16,1,0.3,1); overflow-y: auto; }
+.detail-panel.open { transform: translateX(0); }
+.panel-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 10; }
+.panel-close { position: absolute; right: 20px; top: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--text3); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+.panel-close:hover { color: var(--text); }
+.panel-title { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 4px; line-height: 1.3; padding-right: 36px; }
+.panel-sub { font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; }
+.panel-body { padding: 20px 24px; }
+.panel-section { margin-bottom: 22px; }
+.panel-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 10px; font-weight: 500; }
+.panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.panel-field { background: var(--surface2); border-radius: 8px; padding: 10px 12px; border: 1px solid var(--border); }
+.panel-field.full { grid-column: 1 / -1; }
+.pf-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.pf-value { font-size: 13px; color: var(--text); line-height: 1.4; }
+.pf-value.mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+.sf-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--accent); text-decoration: none; margin-top: 8px; padding: 5px 10px; background: color-mix(in srgb, var(--accent) 12%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 6px; transition: opacity 0.15s; }
+.sf-link:hover { opacity: 0.75; }
 .priority-high { color: var(--red); font-weight: 500; }
 .priority-low { color: var(--text3); }
 .sort-arrow { margin-left: 4px; opacity: 0.5; }
@@ -143,6 +175,19 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 </style>
 </head>
 <body>
+<script>
+// Instantly hide login if session exists — prevents flash
+if (localStorage.getItem('crm_session')) {
+  document.addEventListener('DOMContentLoaded', function() {
+    var overlay = document.getElementById('loginOverlay');
+    if (overlay) overlay.style.display = 'none';
+  });
+}
+// Restore theme instantly
+if (localStorage.getItem('crm_theme') === 'light') {
+  document.documentElement.style.background = '#f4f4f6';
+}
+</script>
 
 <!-- LOGIN -->
 <div class="login-overlay" id="loginOverlay">
@@ -208,12 +253,20 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <option value="">All tasks</option>
       <option value="Completed">Completed</option>
     </select>
-    <select class="filter-select" id="typeFilter" onchange="applyFilters()">
-      <option value="">All types</option>
-    </select>
-    <select class="filter-select" id="ownerFilter" onchange="applyFilters()">
-      <option value="">All reps</option>
-    </select>
+    <!-- Type multiselect -->
+    <div class="ms-wrap" id="typeWrap">
+      <div class="ms-btn" id="typeBtn" onclick="toggleMs('typeWrap')">
+        <span id="typeBtnLabel">All types</span><span class="ms-arrow">▾</span>
+      </div>
+      <div class="ms-dropdown" id="typeDropdown"></div>
+    </div>
+    <!-- Owner multiselect -->
+    <div class="ms-wrap" id="ownerWrap">
+      <div class="ms-btn" id="ownerBtn" onclick="toggleMs('ownerWrap')">
+        <span id="ownerBtnLabel">All reps</span><span class="ms-arrow">▾</span>
+      </div>
+      <div class="ms-dropdown" id="ownerDropdown"></div>
+    </div>
     <div class="tab-group">
       <button class="tab-btn active" id="tabList" onclick="switchView('list')">≡ List</button>
       <button class="tab-btn" id="tabCal" onclick="switchView('calendar')">📅 Calendar</button>
@@ -405,18 +458,56 @@ async function loadTasks() {
   } catch(e) { console.error('Tasks load error:', e); }
 }
 
+let selectedTypes = new Set();
+let selectedOwners = new Set();
+
+function toggleMs(wrapId) {
+  const wrap = document.getElementById(wrapId);
+  const isOpen = wrap.classList.contains('open');
+  document.querySelectorAll('.ms-wrap.open').forEach(w => w.classList.remove('open'));
+  if (!isOpen) wrap.classList.add('open');
+}
+document.addEventListener('click', e => {
+  document.querySelectorAll('.ms-wrap').forEach(w => {
+    if (!w.contains(e.target)) w.classList.remove('open');
+  });
+});
+
 function populateFilters() {
   const types  = [...new Set(allTasks.map(t => t.type).filter(Boolean))].sort();
   const owners = [...new Set(allTasks.map(t => t.assigned_to).filter(Boolean))].sort();
-  document.getElementById('typeFilter').innerHTML  = '<option value="">All types</option>' + types.map(t => `<option>${t}</option>`).join('');
-  document.getElementById('ownerFilter').innerHTML = '<option value="">All reps</option>' + owners.map(o => `<option>${o}</option>`).join('');
+
+  document.getElementById('typeDropdown').innerHTML = types.map(t => `
+    <div class="ms-option ${selectedTypes.has(t) ? 'selected' : ''}" onclick="toggleOption('type','${t}')">
+      <div class="ms-check">${selectedTypes.has(t) ? '✓' : ''}</div>${t}
+    </div>`).join('');
+
+  document.getElementById('ownerDropdown').innerHTML = owners.map(o => `
+    <div class="ms-option ${selectedOwners.has(o) ? 'selected' : ''}" onclick="toggleOption('owner','${o}')">
+      <div class="ms-check">${selectedOwners.has(o) ? '✓' : ''}</div>${o}
+    </div>`).join('');
+}
+
+function toggleOption(kind, val) {
+  const set = kind === 'type' ? selectedTypes : selectedOwners;
+  if (set.has(val)) set.delete(val); else set.add(val);
+  populateFilters();
+  updateMsBtnLabel(kind);
+  applyFilters();
+}
+
+function updateMsBtnLabel(kind) {
+  const set = kind === 'type' ? selectedTypes : selectedOwners;
+  const label = document.getElementById(kind + 'BtnLabel');
+  const btn   = document.getElementById(kind + 'Btn');
+  if (set.size === 0) { label.innerHTML = kind === 'type' ? 'All types' : 'All reps'; btn.classList.remove('active'); }
+  else if (set.size === 1) { label.innerHTML = [...set][0]; btn.classList.add('active'); }
+  else { label.innerHTML = `${kind === 'type' ? 'Types' : 'Reps'} <span class="ms-badge">${set.size}</span>`; btn.classList.add('active'); }
 }
 
 function applyFilters() {
   const search = document.getElementById('taskSearch').value.toLowerCase();
   const status = document.getElementById('statusFilter').value;
-  const type   = document.getElementById('typeFilter').value;
-  const owner  = document.getElementById('ownerFilter').value;
 
   filteredTasks = allTasks.filter(t => {
     if (search) {
@@ -426,14 +517,76 @@ function applyFilters() {
     }
     if (status === 'open' && t.status === 'Completed') return false;
     if (status === 'Completed' && t.status !== 'Completed') return false;
-    if (type  && t.type !== type)   return false;
-    if (owner && t.assigned_to !== owner) return false;
+    if (selectedTypes.size > 0 && !selectedTypes.has(t.type)) return false;
+    if (selectedOwners.size > 0 && !selectedOwners.has(t.assigned_to)) return false;
     return true;
   });
 
   updateStats();
   renderList();
   if (currentView === 'calendar') renderCalendar();
+}
+
+// ── DETAIL PANEL ───────────────────────────────────
+function openPanel(id) {
+  const t = allTasks.find(x => x.activity_id === id);
+  if (!t) return;
+
+  document.getElementById('panelTitle').textContent = t.subject || '—';
+  document.getElementById('panelSub').textContent = t.account_name || '';
+
+  const sfLink = document.getElementById('panelSFLink');
+  if (t.account_id) {
+    sfLink.href = `https://fintech.lightning.force.com/lightning/r/Account/${t.account_id}/view`;
+    sfLink.style.display = 'inline-flex';
+  } else {
+    sfLink.style.display = 'none';
+  }
+
+  const dv = parseFloat(t.days_since_activity);
+  const daysColor = isNaN(dv) ? '' : dv > 30 ? 'color:var(--red)' : dv > 14 ? 'color:var(--orange)' : 'color:var(--green)';
+
+  document.getElementById('panelBody').innerHTML = `
+    <div class="panel-section">
+      <div class="panel-section-title">Task details</div>
+      <div class="panel-grid">
+        <div class="panel-field"><div class="pf-label">Type</div><div class="pf-value">${t.type||'—'}</div></div>
+        <div class="panel-field"><div class="pf-label">Priority</div><div class="pf-value ${t.priority==='High'?'priority-high':''}">${t.priority||'—'}</div></div>
+        <div class="panel-field"><div class="pf-label">Status</div><div class="pf-value" style="${t.status==='Completed'?'color:var(--green)':'color:var(--accent)'}">${t.status||'—'}</div></div>
+        <div class="panel-field"><div class="pf-label">Due Date</div><div class="pf-value mono" style="${dateStyle(t)}">${fmtDate(t.due_date)}</div></div>
+        <div class="panel-field"><div class="pf-label">Created Date</div><div class="pf-value mono">${fmtDate(t.created_date)}</div></div>
+        <div class="panel-field"><div class="pf-label">Days Since Activity</div><div class="pf-value mono" style="${daysColor}">${!isNaN(dv)?dv+'d':'—'}</div></div>
+        <div class="panel-field"><div class="pf-label">Assigned To</div><div class="pf-value">${t.assigned_to||'—'}</div></div>
+        <div class="panel-field"><div class="pf-label">FTS ID</div><div class="pf-value mono">${t.fts_id||'—'}</div></div>
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-title">Account</div>
+      <div class="panel-grid">
+        <div class="panel-field full"><div class="pf-label">Account Name</div><div class="pf-value">${t.account_name||'—'}</div></div>
+        <div class="panel-field"><div class="pf-label">Industry</div><div class="pf-value">${t.industry||'—'}</div></div>
+        <div class="panel-field"><div class="pf-label">Accounting Package</div><div class="pf-value">${t.accounting_package||'—'}</div></div>
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-title">Contact</div>
+      <div class="panel-grid">
+        <div class="panel-field full"><div class="pf-label">Contact Name</div><div class="pf-value">${t.contact_name||'—'}</div></div>
+      </div>
+    </div>
+    ${t.comments ? `<div class="panel-section">
+      <div class="panel-section-title">Comments</div>
+      <div class="panel-field full"><div class="pf-value" style="white-space:pre-wrap;font-size:12px;color:var(--text2);line-height:1.6">${t.comments}</div></div>
+    </div>` : ''}
+  `;
+
+  document.getElementById('panelOverlay').classList.add('open');
+  document.getElementById('detailPanel').classList.add('open');
+}
+
+function closePanel() {
+  document.getElementById('panelOverlay').classList.remove('open');
+  document.getElementById('detailPanel').classList.remove('open');
 }
 
 function updateStats() {
@@ -471,17 +624,21 @@ function renderList() {
     return av < bv ? -sortDir : av > bv ? sortDir : 0;
   });
 
-  document.getElementById('taskBody').innerHTML = sorted.map(t => `
-    <tr title="${(t.comments||'').replace(/"/g,'&quot;')}">
+  document.getElementById('taskBody').innerHTML = sorted.map(t => {
+    const dv = parseFloat(t.days_since_activity);
+    const daysStyle = isNaN(dv) ? '' : dv > 30 ? 'color:var(--red)' : dv > 14 ? 'color:var(--orange)' : 'color:var(--green)';
+    const daysVal = !isNaN(dv) ? dv + 'd' : '—';
+    return `<tr onclick="openPanel('${t.activity_id}')" style="cursor:pointer" title="${(t.comments||'').replace(/"/g,'&quot;')}">
       <td class="mono" style="${dateStyle(t)}">${fmtDate(t.due_date)}</td>
       <td>${t.type || '—'}</td>
       <td class="primary">${t.subject || '—'}</td>
       <td>${t.account_name || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px">${t.fts_id||''}</span></td>
       <td>${t.contact_name || '—'}</td>
+      <td class="mono" style="${daysStyle}">${daysVal}</td>
       <td class="${t.priority === 'High' ? 'priority-high' : t.priority === 'Low' ? 'priority-low' : ''}">${t.priority || '—'}</td>
-      <td style="${t.status === 'Completed' ? 'color:var(--green)' : 'color:var(--accent)'}">${t.status || '—'}</td>
       <td>${t.assigned_to || '—'}</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 
   document.querySelectorAll('[id^="s-"]').forEach(el => el.textContent = '');
   const arrow = document.getElementById(`s-${sortCol}`);
@@ -562,5 +719,19 @@ function renderCalendar() {
   document.getElementById('calGrid').innerHTML = html;
 }
 </script>
+<!-- DETAIL PANEL -->
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+<div class="detail-panel" id="detailPanel">
+  <div class="panel-header">
+    <div class="panel-title" id="panelTitle"></div>
+    <div class="panel-sub" id="panelSub"></div>
+    <a class="sf-link" id="panelSFLink" href="#" target="_blank" rel="noopener" style="display:none">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      View in Salesforce
+    </a>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+</div>
 </body>
 </html>
