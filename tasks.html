@@ -361,33 +361,39 @@ let currentView = 'list';
   if (!saved) return;
   try {
     const session = JSON.parse(saved);
-    if (!session.token) return;
-    const check = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${session.token}` }
-    });
-    if (!check.ok) {
-      if (session.refresh_token) {
+    if (!session.token || !session.sfName) return;
+
+    // Try refresh token first if we have one — gets fresh token without network round trip to /user
+    if (session.refresh_token) {
+      try {
         const ref = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
           body: JSON.stringify({ refresh_token: session.refresh_token })
         });
         if (ref.ok) {
-          const newSession = await ref.json();
-          session.token = newSession.access_token;
-          session.refresh_token = newSession.refresh_token;
+          const ns = await ref.json();
+          session.token = ns.access_token;
+          session.refresh_token = ns.refresh_token;
           localStorage.setItem('crm_session', JSON.stringify(session));
-        } else { localStorage.removeItem('crm_session'); return; }
-      } else { localStorage.removeItem('crm_session'); return; }
+        }
+      } catch(e) { /* use existing token */ }
     }
+
     currentUser = { token: session.token, email: session.email, sfName: session.sfName, role: session.role };
     setUserUI(session.sfName, session.email, session.role);
+    document.getElementById('loginOverlay').style.display = 'none';
     document.getElementById('loginOverlay').style.display = 'none';
     if (session.role !== 'admin') {
       document.getElementById('ownerFilter').style.display = 'none';
     }
     loadTasks();
   } catch(e) { localStorage.removeItem('crm_session'); }
+  } catch(e) {
+    console.warn('Session restore error:', e);
+    // Don't clear session on error — just show login
+    document.getElementById('loginOverlay').style.display = 'flex';
+  }
 })();
 
 async function doLogin() {

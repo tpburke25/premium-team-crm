@@ -72,6 +72,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .sort-arrow { margin-left: 4px; opacity: 0.5; }
 .clear-btn { padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text3); font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
 .clear-btn:hover { background: var(--surface2); color: var(--red); border-color: var(--red); }
+.ms-wrap { position: relative; }
+.ms-btn { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; font-size: 13px; color: var(--text2); cursor: pointer; white-space: nowrap; min-width: 110px; justify-content: space-between; transition: border 0.15s; }
+.ms-btn.active { border-color: var(--accent); color: var(--accent); }
+.ms-badge { background: var(--accent); color: #fff; border-radius: 10px; font-size: 10px; padding: 1px 6px; font-weight: 600; }
+.ms-dropdown { position: absolute; top: calc(100% + 6px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 6px; min-width: 180px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.ms-wrap.open .ms-dropdown { display: block; }
+.ms-option { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; }
+.ms-option:hover { background: var(--surface3); color: var(--text); }
+.ms-option.sel { color: var(--text); }
+.ms-chk { width: 15px; height: 15px; border: 1px solid var(--border2); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+.ms-option.sel .ms-chk { background: var(--accent); border-color: var(--accent); color: #fff; }
 .cf-wrap { position: relative; white-space: nowrap; }
 .cf-btn { margin-left: 3px; opacity: 0.4; cursor: pointer; font-size: 10px; }
 .cf-btn:hover { opacity: 1; color: var(--accent); }
@@ -206,6 +217,12 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
         <span class="search-icon">⌕</span>
         <input class="search-input" id="searchInput" placeholder="Search accounts, FTS ID..." oninput="applyFilters()">
       </div>
+      <div class="ms-wrap" id="ownerWrap" style="display:none" id="ownerWrapAdmin">
+        <div class="ms-btn" id="ownerBtn" onclick="toggleOwnerMs()">
+          <span id="ownerBtnLabel">All reps</span><span style="font-size:10px;opacity:0.5;margin-left:4px">▾</span>
+        </div>
+        <div class="ms-dropdown" id="ownerDropdown"></div>
+      </div>
       <button class="clear-btn" id="clearBtn" onclick="clearAllFilters()" style="display:none">✕ Clear filters</button>
     </div>
     <div class="stats-bar" id="statsBar"></div>
@@ -274,28 +291,36 @@ let sortDir = 1;
   if (!saved) return;
   try {
     const session = JSON.parse(saved);
-    if (!session.token) return;
-    const check = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${session.token}` }
-    });
-    if (!check.ok) {
-      if (session.refresh_token) {
+    if (!session.token || !session.sfName) return;
+
+    // Try refresh token first if we have one — gets fresh token without network round trip to /user
+    if (session.refresh_token) {
+      try {
         const ref = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
           body: JSON.stringify({ refresh_token: session.refresh_token })
         });
         if (ref.ok) {
           const ns = await ref.json();
-          session.token = ns.access_token; session.refresh_token = ns.refresh_token;
+          session.token = ns.access_token;
+          session.refresh_token = ns.refresh_token;
           localStorage.setItem('crm_session', JSON.stringify(session));
-        } else { localStorage.removeItem('crm_session'); return; }
-      } else { localStorage.removeItem('crm_session'); return; }
+        }
+      } catch(e) { /* use existing token */ }
     }
+
     currentUser = { token: session.token, email: session.email, sfName: session.sfName, role: session.role };
     setUserUI(session.sfName, session.email, session.role);
     document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('loginOverlay').style.display = 'none';
     loadData();
   } catch(e) { localStorage.removeItem('crm_session'); }
+  } catch(e) {
+    console.warn('Session restore error:', e);
+    // Don't clear session on error — just show login
+    document.getElementById('loginOverlay').style.display = 'flex';
+  }
 })();
 
 async function doLogin() {
@@ -422,6 +447,7 @@ function buildAccountList() {
 
   allAccounts = Object.values(accountMap).sort((a,b) => (a.account_name||'').localeCompare(b.account_name||''));
   populateFilters();
+  populateOwnerFilter();
   applyFilters();
   document.getElementById('loadingMsg').style.display = 'none';
   document.getElementById('acctTable').style.display = 'table';
@@ -531,6 +557,9 @@ function passesNumFilter(col, val) {
 
 function clearAllFilters() {
   document.getElementById('searchInput').value = '';
+  selectedOwners.clear();
+  updateOwnerBtn();
+  populateOwnerFilter();
   ['fts_id','account_name','industry','accounting_package','city','state'].forEach(col => {
     if (checkFilters[col]) checkFilters[col].clear();
     const th = document.getElementById('cf-' + col)?.closest('th');
@@ -548,8 +577,60 @@ function clearAllFilters() {
   applyFilters();
 }
 
+// ── OWNER MULTISELECT (admin only) ────────────────
+let selectedOwners = new Set();
+
+function toggleOwnerMs() {
+  document.getElementById('ownerWrap').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('ownerWrap');
+  if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
+});
+
+function populateOwnerFilter() {
+  if (!currentUser || currentUser.role !== 'admin') return;
+  document.getElementById('ownerWrap').style.display = 'flex';
+
+  // Get all unique owners from opps + tasks
+  const owners = [...new Set([
+    ...allOpps.map(o => o.opportunity_owner),
+    ...allTasks.map(t => t.assigned_to)
+  ].filter(Boolean))].sort();
+
+  document.getElementById('ownerDropdown').innerHTML = owners.map(o => `
+    <div class="ms-option ${selectedOwners.has(o)?'sel':''}" onclick="toggleOwner('${o}')">
+      <div class="ms-chk">${selectedOwners.has(o)?'✓':''}</div>${o}
+    </div>`).join('');
+}
+
+function toggleOwner(name) {
+  if (selectedOwners.has(name)) selectedOwners.delete(name);
+  else selectedOwners.add(name);
+  populateOwnerFilter();
+  updateOwnerBtn();
+  applyFilters();
+}
+
+function updateOwnerBtn() {
+  const btn = document.getElementById('ownerBtn');
+  const label = document.getElementById('ownerBtnLabel');
+  if (selectedOwners.size === 0) { label.innerHTML = 'All reps'; btn.classList.remove('active'); }
+  else if (selectedOwners.size === 1) { label.innerHTML = [...selectedOwners][0].split(' ')[0]; btn.classList.add('active'); }
+  else { label.innerHTML = `Reps <span class="ms-badge">${selectedOwners.size}</span>`; btn.classList.add('active'); }
+}
+
 function applyFilters() {
   const search = document.getElementById('searchInput').value.toLowerCase();
+
+  // Build set of account_ids for selected owners
+  let ownerAccountIds = null;
+  if (selectedOwners.size > 0) {
+    ownerAccountIds = new Set([
+      ...allOpps.filter(o => selectedOwners.has(o.opportunity_owner)).map(o => o.account_id),
+      ...allTasks.filter(t => selectedOwners.has(t.assigned_to)).map(t => t.account_id)
+    ]);
+  }
 
   filteredAccounts = allAccounts.filter(a => {
     if (search) {
@@ -557,6 +638,7 @@ function applyFilters() {
         .map(v => (v||'').toLowerCase()).join(' ');
       if (!hay.includes(search)) return false;
     }
+    if (ownerAccountIds && !ownerAccountIds.has(a.account_id)) return false;
     for (const col of ['fts_id','account_name','industry','accounting_package','city','state']) {
       if (checkFilters[col]?.size > 0 && !checkFilters[col].has(a[col])) return false;
     }
@@ -568,7 +650,8 @@ function applyFilters() {
 
   const hasAny = search ||
     Object.values(checkFilters).some(s => s.size > 0) ||
-    Object.keys(numFilters).length > 0;
+    Object.keys(numFilters).length > 0 ||
+    selectedOwners.size > 0;
   document.getElementById('clearBtn').style.display = hasAny ? 'inline-block' : 'none';
 
   updateStats();
