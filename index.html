@@ -284,6 +284,19 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
 </style>
 </head>
 <body>
+<script>
+// Instantly hide login if session exists — prevents flash
+if (localStorage.getItem('crm_session')) {
+  document.addEventListener('DOMContentLoaded', function() {
+    var overlay = document.getElementById('loginOverlay');
+    if (overlay) overlay.style.display = 'none';
+  });
+}
+// Restore theme instantly
+if (localStorage.getItem('crm_theme') === 'light') {
+  document.documentElement.style.background = '#f4f4f6';
+}
+</script>
 
 <!-- LOGIN SCREEN -->
 <div class="login-overlay" id="loginOverlay">
@@ -357,6 +370,7 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
       <span id="syncLabel">Refresh</span>
     </button>
     <a href="tasks.html" class="sync-btn" style="text-decoration:none;">📋 Tasks</a>
+    <a href="accounts.html" class="sync-btn" style="text-decoration:none;">🏢 Accounts</a>
     <button class="sf-sync-btn" id="sfSyncBtn" onclick="triggerSFSync()" title="Sync latest data from Salesforce">
       <span id="sfSyncIcon">⟳</span>
       <span id="sfSyncLabel">Sync from Salesforce</span>

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premium Team CRM — Accounts</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f11; --surface: #1a1a1f; --surface2: #222228; --surface3: #2a2a32;
+  --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+  --text: #f0f0f2; --text2: #9090a0; --text3: #606070;
+  --accent: #ff7a2f; --gold: #f5c842; --red: #ff6b6b; --green: #5ce65c; --orange: #ff9f43;
+  --radius: 10px; --radius-lg: 14px;
+}
+body.light {
+  --bg: #f4f4f6; --surface: #ffffff; --surface2: #f0f0f3; --surface3: #e5e5ea;
+  --border: rgba(0,0,0,0.08); --border2: rgba(0,0,0,0.14);
+  --text: #111113; --text2: #4a4a58; --text3: #8a8a98;
+  --red: #d93025; --green: #1a7f37; --orange: #cc7a00; --gold: #b08800;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* HEADER */
+.header { display: flex; align-items: center; justify-content: space-between; padding: 16px 28px; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 100; }
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.logo-mark { width: 30px; height: 30px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #fff; }
+.logo-text { font-size: 15px; font-weight: 600; color: var(--text); }
+.logo-sub { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.nav-link { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; text-decoration: none; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.nav-link:hover { background: var(--surface2); color: var(--text); }
+.user-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--surface2); border-radius: 20px; border: 1px solid var(--border); position: relative; cursor: pointer; }
+.user-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; }
+.user-name { font-size: 13px; color: var(--text2); }
+.user-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 6px; min-width: 180px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.user-chip.open .user-dropdown { display: block; }
+.dropdown-header { padding: 8px 10px 6px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+.dropdown-email { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dropdown-role { font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+.dropdown-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; transition: all 0.15s; border: none; background: none; font-family: 'DM Sans', sans-serif; width: 100%; text-align: left; }
+.dropdown-item:hover { background: var(--surface3); color: var(--text); }
+.dropdown-item.danger:hover { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); }
+
+/* TOOLBAR */
+.toolbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-bottom: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
+.toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.search-wrap { position: relative; }
+.search-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px 8px 34px; font-size: 13px; color: var(--text); font-family: 'DM Sans', sans-serif; width: 240px; outline: none; transition: border 0.15s; }
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: var(--text3); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; }
+.filter-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--text2); font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; }
+.filter-select option { background: var(--surface2); color: var(--text); }
+.stats-bar { display: flex; gap: 16px; flex-wrap: wrap; }
+.stat-chip { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text3); }
+.stat-chip strong { color: var(--text); font-weight: 500; }
+.stat-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* ACCOUNTS LIST */
+.list-wrap { padding: 20px 28px; }
+.list-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.list-table thead tr { border-bottom: 1px solid var(--border2); }
+.list-table th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); cursor: pointer; white-space: nowrap; user-select: none; }
+.list-table th:hover { color: var(--text2); }
+.list-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; cursor: pointer; }
+.list-table tbody tr:hover { background: var(--surface2); }
+.list-table td { padding: 11px 14px; color: var(--text2); }
+.list-table td.primary { color: var(--text); font-weight: 500; }
+.mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+.sort-arrow { margin-left: 4px; opacity: 0.5; }
+
+/* ACCOUNT DETAIL PAGE */
+.acct-detail { display: none; padding: 28px; max-width: 1100px; margin: 0 auto; }
+.acct-header { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px 28px; margin-bottom: 24px; display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.acct-header-left { flex: 1; }
+.acct-name { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.acct-fts { font-size: 13px; color: var(--text3); font-family: 'DM Mono', monospace; margin-bottom: 14px; }
+.acct-meta { display: flex; gap: 10px; flex-wrap: wrap; }
+.acct-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 4px 10px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); color: var(--text2); }
+.acct-header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.back-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; text-decoration: none; }
+.back-btn:hover { background: var(--surface2); color: var(--text); }
+.sf-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--accent); text-decoration: none; padding: 6px 12px; background: color-mix(in srgb, var(--accent) 12%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 6px; transition: opacity 0.15s; }
+.sf-link:hover { opacity: 0.75; }
+.acct-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.acct-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+.acct-stat-val { font-size: 24px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.acct-stat-label { font-size: 12px; color: var(--text3); }
+.section-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 20px; overflow: hidden; }
+.section-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.section-title { font-size: 14px; font-weight: 500; color: var(--text); }
+.section-count { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text3); background: var(--surface2); padding: 2px 8px; border-radius: 10px; border: 1px solid var(--border); }
+.section-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.section-table th { text-align: left; padding: 8px 16px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text3); border-bottom: 1px solid var(--border); }
+.section-table td { padding: 10px 16px; color: var(--text2); border-bottom: 1px solid var(--border); }
+.section-table tbody tr:last-child td { border-bottom: none; }
+.section-table tbody tr:hover { background: var(--surface2); }
+.stage-badge { display: inline-block; font-size: 11px; padding: 3px 8px; border-radius: 8px; font-weight: 500; white-space: nowrap; }
+.empty-section { padding: 24px; text-align: center; color: var(--text3); font-size: 13px; }
+
+/* LOGIN */
+.login-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+.login-box { width: 100%; max-width: 380px; padding: 2rem; }
+.login-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; }
+.login-logo-mark { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #fff; }
+.login-logo-text { font-size: 18px; font-weight: 600; color: var(--text); }
+.login-logo-sub { font-size: 12px; color: var(--text3); }
+.login-title { font-size: 22px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+.login-sub { font-size: 14px; color: var(--text3); margin-bottom: 2rem; }
+.login-field { margin-bottom: 14px; }
+.login-label { font-size: 12px; color: var(--text3); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.04em; }
+.login-input { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 11px 14px; font-size: 14px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; transition: border 0.15s; }
+.login-input:focus { border-color: var(--accent); }
+.login-input::placeholder { color: var(--text3); }
+.login-submit { width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: opacity 0.15s; }
+.login-submit:hover { opacity: 0.85; }
+.login-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+.login-error { font-size: 13px; color: var(--red); margin-top: 10px; text-align: center; min-height: 20px; }
+.loading { text-align: center; padding: 80px 20px; color: var(--text3); }
+.spinner { width: 28px; height: 28px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 14px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<script>
+if (localStorage.getItem('crm_session')) {
+  document.addEventListener('DOMContentLoaded', function() {
+    var o = document.getElementById('loginOverlay');
+    if (o) o.style.display = 'none';
+  });
+}
+if (localStorage.getItem('crm_theme') === 'light') document.documentElement.style.background = '#f4f4f6';
+</script>
+
+<!-- LOGIN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-mark">P</div>
+      <div><div class="login-logo-text">Premium Team CRM</div><div class="login-logo-sub">Accounts</div></div>
+    </div>
+    <div class="login-title">Welcome back</div>
+    <div class="login-sub">Sign in to access your accounts</div>
+    <div class="login-field"><label class="login-label">Email</label><input class="login-input" id="loginEmail" type="email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="login-field"><label class="login-label">Password</label><input class="login-input" id="loginPassword" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="login-submit" id="loginBtn" onclick="doLogin()">Sign in</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <a class="logo" href="index.html">
+    <div class="logo-mark">P</div>
+    <div><div class="logo-text">Premium Team CRM</div><div class="logo-sub" id="pageSubtitle">Accounts</div></div>
+  </a>
+  <div class="header-right">
+    <a href="index.html" class="nav-link">← Pipeline</a>
+    <a href="tasks.html" class="nav-link">📋 Tasks</a>
+    <div class="user-chip" id="userChip" onclick="toggleUserMenu()">
+      <div class="user-avatar" id="userAvatar">T</div>
+      <span class="user-name" id="userName">Loading...</span>
+      <span style="font-size:10px;color:var(--text3);margin-left:2px;">▾</span>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="dropdown-header">
+          <div class="dropdown-email" id="dropdownEmail">—</div>
+          <div class="dropdown-role" id="dropdownRole">—</div>
+        </div>
+        <button class="dropdown-item" onclick="toggleTheme()" id="themeToggleBtn">☀ Light mode</button>
+        <button class="dropdown-item danger" onclick="doLogout()">⎋ Sign out</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ACCOUNTS LIST VIEW -->
+<div id="listSection">
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input class="search-input" id="searchInput" placeholder="Search accounts, FTS ID..." oninput="applyFilters()">
+      </div>
+      <select class="filter-select" id="industryFilter" onchange="applyFilters()">
+        <option value="">All industries</option>
+      </select>
+      <select class="filter-select" id="pkgFilter" onchange="applyFilters()">
+        <option value="">All accounting packages</option>
+      </select>
+    </div>
+    <div class="stats-bar" id="statsBar"></div>
+  </div>
+  <div class="list-wrap">
+    <div class="loading" id="loadingMsg"><div class="spinner"></div>Loading accounts...</div>
+    <table class="list-table" id="acctTable" style="display:none">
+      <thead>
+        <tr>
+          <th onclick="sortBy('account_name')">Account <span class="sort-arrow" id="s-account_name"></span></th>
+          <th onclick="sortBy('fts_id')">FTS ID <span class="sort-arrow" id="s-fts_id"></span></th>
+          <th onclick="sortBy('industry')">Industry <span class="sort-arrow" id="s-industry"></span></th>
+          <th onclick="sortBy('accounting_package')">Accounting Package <span class="sort-arrow" id="s-accounting_package"></span></th>
+          <th onclick="sortBy('days_since_activity')">Days Since Act. <span class="sort-arrow" id="s-days_since_activity"></span></th>
+          <th onclick="sortBy('city')">City <span class="sort-arrow" id="s-city"></span></th>
+          <th onclick="sortBy('state')">State <span class="sort-arrow" id="s-state"></span></th>
+          <th onclick="sortBy('open_opps')">Open Opps <span class="sort-arrow" id="s-open_opps"></span></th>
+          <th onclick="sortBy('open_tasks')">Open Tasks <span class="sort-arrow" id="s-open_tasks"></span></th>
+        </tr>
+      </thead>
+      <tbody id="acctBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ACCOUNT DETAIL VIEW -->
+<div class="acct-detail" id="detailSection">
+  <div class="acct-header" id="acctHeader"></div>
+  <div class="acct-stats" id="acctStats"></div>
+  <div id="acctRelated"></div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://idbnpxedwpjrflsqweyh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYm5weGVkd3BqcmZsc3F3ZXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNTY3MDYsImV4cCI6MjA5MjkzMjcwNn0.PL7ftdQbTtkCnfFa3Mwo2H3w_uPXuTh_0o75cu3_FLU';
+
+let currentUser = null;
+let allAccounts = [];
+let filteredAccounts = [];
+let allOpps = [];
+let allTasks = [];
+let sortCol = 'account_name';
+let sortDir = 1;
+
+// ── AUTH ──────────────────────────────────────────
+(async function restoreSession() {
+  const saved = localStorage.getItem('crm_session');
+  if (!saved) return;
+  try {
+    const session = JSON.parse(saved);
+    if (!session.token) return;
+    const check = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${session.token}` }
+    });
+    if (!check.ok) {
+      if (session.refresh_token) {
+        const ref = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+          body: JSON.stringify({ refresh_token: session.refresh_token })
+        });
+        if (ref.ok) {
+          const ns = await ref.json();
+          session.token = ns.access_token; session.refresh_token = ns.refresh_token;
+          localStorage.setItem('crm_session', JSON.stringify(session));
+        } else { localStorage.removeItem('crm_session'); return; }
+      } else { localStorage.removeItem('crm_session'); return; }
+    }
+    currentUser = { token: session.token, email: session.email, sfName: session.sfName, role: session.role };
+    setUserUI(session.sfName, session.email, session.role);
+    document.getElementById('loginOverlay').style.display = 'none';
+    loadData();
+  } catch(e) { localStorage.removeItem('crm_session'); }
+})();
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = ''; btn.disabled = true; btn.textContent = 'Signing in...';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || 'Login failed');
+    currentUser = { email, token: data.access_token };
+    const pr = await fetch(`${SUPABASE_URL}/rest/v1/tbl_users?email=eq.${encodeURIComponent(email)}&select=*`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${data.access_token}` }
+    });
+    const profiles = await pr.json();
+    if (!profiles?.length) throw new Error('User profile not found.');
+    const profile = profiles[0];
+    currentUser.sfName = profile.sf_owner_name; currentUser.role = profile.role;
+    localStorage.setItem('crm_session', JSON.stringify({
+      token: data.access_token, refresh_token: data.refresh_token,
+      email, sfName: profile.sf_owner_name, role: profile.role
+    }));
+    setUserUI(profile.sf_owner_name, email, profile.role);
+    document.getElementById('loginOverlay').style.display = 'none';
+    loadData();
+  } catch(e) { errEl.textContent = e.message; btn.disabled = false; btn.textContent = 'Sign in'; }
+}
+
+function setUserUI(name, email, role) {
+  document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('userName').textContent = name;
+  document.getElementById('dropdownEmail').textContent = email;
+  document.getElementById('dropdownRole').textContent = role === 'admin' ? 'Administrator' : 'Sales Rep';
+}
+
+function toggleUserMenu() { document.getElementById('userChip').classList.toggle('open'); }
+document.addEventListener('click', e => { const c = document.getElementById('userChip'); if (c && !c.contains(e.target)) c.classList.remove('open'); });
+function doLogout() { currentUser = null; localStorage.removeItem('crm_session'); document.getElementById('loginOverlay').style.display = 'flex'; }
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  localStorage.setItem('crm_theme', isLight ? 'light' : 'dark');
+  document.getElementById('themeToggleBtn').textContent = isLight ? '🌙 Dark mode' : '☀ Light mode';
+}
+(function() { if (localStorage.getItem('crm_theme') === 'light') { document.body.classList.add('light'); const b = document.getElementById('themeToggleBtn'); if(b) b.textContent = '🌙 Dark mode'; } })();
+
+// ── DATA LOAD ─────────────────────────────────────
+async function fetchAll(table, ownerField) {
+  const ownerParam = (currentUser?.role === 'rep') ? `&${ownerField}=eq.${encodeURIComponent(currentUser.sfName)}` : '';
+  const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}` };
+  let all = [], page = 0, size = 1000;
+  while (true) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*&limit=${size}&offset=${page*size}${ownerParam}`, { headers });
+    if (!res.ok) break;
+    const data = await res.json();
+    if (!Array.isArray(data)) break;
+    all = all.concat(data);
+    if (data.length < size) break;
+    page++;
+  }
+  return all;
+}
+
+async function loadData() {
+  try {
+    const [opps, tasks] = await Promise.all([
+      fetchAll('tbl_opportunities', 'opportunity_owner'),
+      fetchAll('tbl_tasks', 'assigned_to')
+    ]);
+    allOpps  = opps;
+    allTasks = tasks;
+    buildAccountList();
+  } catch(e) {
+    console.error('Load error:', e);
+  }
+}
+
+function buildAccountList() {
+  const accountMap = {};
+
+  // Build from opportunities
+  allOpps.forEach(o => {
+    if (!o.account_id) return;
+    if (!accountMap[o.account_id]) {
+      accountMap[o.account_id] = {
+        account_id: o.account_id, account_name: o.account_name, fts_id: o.fts_id,
+        industry: o.industry, accounting_package: o.accounting_package,
+        days_since_activity: o.days_since_activity, city: o.city, state: o.state,
+        parent_account: o.parent_account, open_opps: 0, open_tasks: 0, total_opps: 0
+      };
+    }
+    const a = accountMap[o.account_id];
+    a.total_opps++;
+    if (!['Lost', 'Closed Won'].includes(o.stage)) a.open_opps++;
+    // Fill in missing fields from opps
+    if (!a.fts_id && o.fts_id) a.fts_id = o.fts_id;
+    if (!a.industry && o.industry) a.industry = o.industry;
+    if (!a.accounting_package && o.accounting_package) a.accounting_package = o.accounting_package;
+    if (!a.city && o.city) a.city = o.city;
+    if (!a.state && o.state) a.state = o.state;
+    if (o.days_since_activity !== null) a.days_since_activity = o.days_since_activity;
+  });
+
+  // Merge from tasks
+  allTasks.forEach(t => {
+    if (!t.account_id) return;
+    if (!accountMap[t.account_id]) {
+      accountMap[t.account_id] = {
+        account_id: t.account_id, account_name: t.account_name, fts_id: t.fts_id,
+        industry: t.industry, accounting_package: t.accounting_package,
+        days_since_activity: t.days_since_activity, city: null, state: null,
+        parent_account: null, open_opps: 0, open_tasks: 0, total_opps: 0
+      };
+    }
+    accountMap[t.account_id].open_tasks++;
+    if (!accountMap[t.account_id].fts_id && t.fts_id) accountMap[t.account_id].fts_id = t.fts_id;
+    if (!accountMap[t.account_id].days_since_activity && t.days_since_activity)
+      accountMap[t.account_id].days_since_activity = t.days_since_activity;
+  });
+
+  allAccounts = Object.values(accountMap).sort((a,b) => (a.account_name||'').localeCompare(b.account_name||''));
+  populateFilters();
+  applyFilters();
+  document.getElementById('loadingMsg').style.display = 'none';
+  document.getElementById('acctTable').style.display = 'table';
+}
+
+function populateFilters() {
+  const industries = [...new Set(allAccounts.map(a => a.industry).filter(Boolean))].sort();
+  const pkgs = [...new Set(allAccounts.map(a => a.accounting_package).filter(Boolean))].sort();
+  document.getElementById('industryFilter').innerHTML = '<option value="">All industries</option>' + industries.map(i => `<option>${i}</option>`).join('');
+  document.getElementById('pkgFilter').innerHTML = '<option value="">All accounting packages</option>' + pkgs.map(p => `<option>${p}</option>`).join('');
+}
+
+function applyFilters() {
+  const search   = document.getElementById('searchInput').value.toLowerCase();
+  const industry = document.getElementById('industryFilter').value;
+  const pkg      = document.getElementById('pkgFilter').value;
+
+  filteredAccounts = allAccounts.filter(a => {
+    if (search) {
+      const hay = [a.account_name, a.fts_id, a.city, a.state, a.industry, a.accounting_package]
+        .map(v => (v||'').toLowerCase()).join(' ');
+      if (!hay.includes(search)) return false;
+    }
+    if (industry && a.industry !== industry) return false;
+    if (pkg && a.accounting_package !== pkg) return false;
+    return true;
+  });
+
+  updateStats();
+  renderList();
+}
+
+function updateStats() {
+  const withOpps  = filteredAccounts.filter(a => a.open_opps > 0).length;
+  const withTasks = filteredAccounts.filter(a => a.open_tasks > 0).length;
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--accent)"></div><strong>${filteredAccounts.length}</strong> accounts</div>
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--gold)"></div><strong>${withOpps}</strong> with open opps</div>
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--green)"></div><strong>${withTasks}</strong> with open tasks</div>`;
+}
+
+function fmtDate(val) {
+  if (!val) return '—';
+  const d = new Date(val);
+  return `${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCFullYear()).slice(-2)}`;
+}
+
+function daysStyle(v) {
+  const n = parseFloat(v);
+  if (isNaN(n)) return '';
+  if (n > 30) return 'color:var(--red)';
+  if (n > 14) return 'color:var(--orange)';
+  return 'color:var(--green)';
+}
+
+function renderList() {
+  const sorted = [...filteredAccounts].sort((a,b) => {
+    let av = a[sortCol] ?? '', bv = b[sortCol] ?? '';
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    if (typeof av === 'number' || typeof bv === 'number') return (parseFloat(av)||0) < (parseFloat(bv)||0) ? -sortDir : sortDir;
+    return av < bv ? -sortDir : av > bv ? sortDir : 0;
+  });
+
+  document.getElementById('acctBody').innerHTML = sorted.map(a => {
+    const dv = parseFloat(a.days_since_activity);
+    return `<tr onclick="openAccount('${a.account_id}')">
+      <td class="primary">${a.account_name||'—'}</td>
+      <td class="mono">${a.fts_id||'—'}</td>
+      <td>${a.industry||'—'}</td>
+      <td>${a.accounting_package||'—'}</td>
+      <td class="mono" style="${daysStyle(a.days_since_activity)}">${!isNaN(dv)?dv+'d':'—'}</td>
+      <td>${a.city||'—'}</td>
+      <td>${a.state||'—'}</td>
+      <td class="mono" style="${a.open_opps>0?'color:var(--accent)':''}">${a.open_opps}</td>
+      <td class="mono" style="${a.open_tasks>0?'color:var(--gold)':''}">${a.open_tasks}</td>
+    </tr>`;
+  }).join('');
+
+  document.querySelectorAll('[id^="s-"]').forEach(el => el.textContent = '');
+  const arrow = document.getElementById(`s-${sortCol}`);
+  if (arrow) arrow.textContent = sortDir === 1 ? '↑' : '↓';
+}
+
+function sortBy(col) {
+  if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = 1; }
+  renderList();
+}
+
+// ── ACCOUNT DETAIL ────────────────────────────────
+function openAccount(accountId) {
+  const acct = allAccounts.find(a => a.account_id === accountId);
+  if (!acct) return;
+
+  const acctOpps  = allOpps.filter(o => o.account_id === accountId);
+  const acctTasks = allTasks.filter(t => t.account_id === accountId);
+  const openOpps  = acctOpps.filter(o => !['Lost','Closed Won'].includes(o.stage));
+  const closedOpps = acctOpps.filter(o => ['Lost','Closed Won'].includes(o.stage));
+
+  document.getElementById('pageSubtitle').textContent = acct.account_name || 'Account';
+
+  // Header
+  document.getElementById('acctHeader').innerHTML = `
+    <div class="acct-header-left">
+      <div class="acct-name">${acct.account_name||'—'}</div>
+      <div class="acct-fts">${acct.fts_id ? 'FTS ID: ' + acct.fts_id : ''}</div>
+      <div class="acct-meta">
+        ${acct.industry ? `<span class="acct-pill">🏢 ${acct.industry}</span>` : ''}
+        ${acct.accounting_package ? `<span class="acct-pill">📦 ${acct.accounting_package}</span>` : ''}
+        ${acct.city||acct.state ? `<span class="acct-pill">📍 ${[acct.city,acct.state].filter(Boolean).join(', ')}</span>` : ''}
+        ${acct.days_since_activity !== null ? `<span class="acct-pill" style="${daysStyle(acct.days_since_activity)}">⏱ ${acct.days_since_activity}d since activity</span>` : ''}
+        ${acct.parent_account ? `<span class="acct-pill">🏛 ${acct.parent_account}</span>` : ''}
+      </div>
+    </div>
+    <div class="acct-header-right">
+      <button class="back-btn" onclick="showList()">← All accounts</button>
+      ${acct.account_id ? `<a class="sf-link" href="https://fintech.lightning.force.com/lightning/r/Account/${acct.account_id}/view" target="_blank" rel="noopener">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        View in Salesforce</a>` : ''}
+    </div>`;
+
+  // Stats
+  const totalRate = acctOpps.reduce((s,o) => s + (parseFloat(o.total_flat_rate)||0), 0);
+  document.getElementById('acctStats').innerHTML = `
+    <div class="acct-stat"><div class="acct-stat-val">${acctOpps.length}</div><div class="acct-stat-label">Total opportunities</div></div>
+    <div class="acct-stat"><div class="acct-stat-val" style="color:var(--accent)">${openOpps.length}</div><div class="acct-stat-label">Open opportunities</div></div>
+    <div class="acct-stat"><div class="acct-stat-val" style="color:var(--gold)">${acctTasks.length}</div><div class="acct-stat-label">Open tasks</div></div>
+    <div class="acct-stat"><div class="acct-stat-val" style="color:var(--green)">$${totalRate.toLocaleString('en-US',{maximumFractionDigits:0})}</div><div class="acct-stat-label">Total flat rate</div></div>`;
+
+  // Related sections
+  let related = '';
+
+  // Open Opps
+  related += `<div class="section-card">
+    <div class="section-header"><div class="section-title">Open Opportunities</div><div class="section-count">${openOpps.length}</div></div>
+    ${openOpps.length === 0 ? '<div class="empty-section">No open opportunities</div>' : `
+    <table class="section-table">
+      <thead><tr><th>Opportunity</th><th>Stage</th><th>Close Date</th><th>ASM Rate</th><th>Locations</th><th>Owner</th></tr></thead>
+      <tbody>${openOpps.map(o => {
+        const sc = stageColor(o.stage);
+        return `<tr>
+          <td style="color:var(--text);font-weight:500">${o.opportunity_name||o.account_name||'—'}</td>
+          <td><span class="stage-badge" style="background:color-mix(in srgb,${sc} 15%,transparent);color:${sc};border:1px solid color-mix(in srgb,${sc} 25%,transparent)">${o.stage||'—'}</span></td>
+          <td class="mono">${fmtDate(o.close_date)}</td>
+          <td class="mono">${o.asm_flat_rate ? '$'+parseFloat(o.asm_flat_rate).toLocaleString() : '—'}</td>
+          <td class="mono">${o.num_locations||'—'}</td>
+          <td>${o.opportunity_owner||'—'}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`}
+  </div>`;
+
+  // Closed Opps
+  if (closedOpps.length > 0) {
+    related += `<div class="section-card">
+      <div class="section-header"><div class="section-title">Closed Opportunities</div><div class="section-count">${closedOpps.length}</div></div>
+      <table class="section-table">
+        <thead><tr><th>Opportunity</th><th>Stage</th><th>Close Date</th><th>ASM Rate</th><th>Owner</th></tr></thead>
+        <tbody>${closedOpps.map(o => {
+          const sc = stageColor(o.stage);
+          return `<tr>
+            <td style="color:var(--text);font-weight:500">${o.opportunity_name||o.account_name||'—'}</td>
+            <td><span class="stage-badge" style="background:color-mix(in srgb,${sc} 15%,transparent);color:${sc};border:1px solid color-mix(in srgb,${sc} 25%,transparent)">${o.stage||'—'}</span></td>
+            <td class="mono">${fmtDate(o.close_date)}</td>
+            <td class="mono">${o.asm_flat_rate ? '$'+parseFloat(o.asm_flat_rate).toLocaleString() : '—'}</td>
+            <td>${o.opportunity_owner||'—'}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
+  }
+
+  // Tasks
+  related += `<div class="section-card">
+    <div class="section-header"><div class="section-title">Open Tasks</div><div class="section-count">${acctTasks.length}</div></div>
+    ${acctTasks.length === 0 ? '<div class="empty-section">No open tasks</div>' : `
+    <table class="section-table">
+      <thead><tr><th>Subject</th><th>Type</th><th>Due Date</th><th>Priority</th><th>Assigned To</th></tr></thead>
+      <tbody>${acctTasks.map(t => `<tr>
+        <td style="color:var(--text);font-weight:500">${t.subject||'—'}</td>
+        <td>${t.type||'—'}</td>
+        <td class="mono" style="${taskDateStyle(t)}">${fmtDate(t.due_date)}</td>
+        <td style="${t.priority==='High'?'color:var(--red);font-weight:500':''}">${t.priority||'—'}</td>
+        <td>${t.assigned_to||'—'}</td>
+      </tr>`).join('')}</tbody>
+    </table>`}
+  </div>`;
+
+  document.getElementById('acctRelated').innerHTML = related;
+
+  document.getElementById('listSection').style.display = 'none';
+  document.getElementById('detailSection').style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+function showList() {
+  document.getElementById('listSection').style.display = 'block';
+  document.getElementById('detailSection').style.display = 'none';
+  document.getElementById('pageSubtitle').textContent = 'Accounts';
+}
+
+function stageColor(stage) {
+  if (!stage) return '#888';
+  const s = stage.toLowerCase();
+  if (s.includes('sql') || s.includes('qualified')) return '#ff7a2f';
+  if (s.includes('value')) return '#4ecdc4';
+  if (s.includes('enroll')) return '#f5c842';
+  if (s.includes('lost')) return '#ff6b6b';
+  if (s.includes('won')) return '#5ce65c';
+  return '#888';
+}
+
+function taskDateStyle(t) {
+  if (!t.due_date) return '';
+  const dd = t.due_date.slice(0,10);
+  const td = new Date().toISOString().slice(0,10);
+  if (dd < td) return 'color:var(--red);font-weight:500';
+  if (dd === td) return 'color:var(--gold);font-weight:500';
+  return '';
+}
+</script>
+</body>
+</html>
