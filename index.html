@@ -361,7 +361,7 @@ if (localStorage.getItem('crm_theme') === 'light') {
     <div class="logo-mark">P</div>
     <div>
       <div class="logo-text">Premium Team CRM</div>
-      <div class="logo-sub" id="currentSection">Pipeline</div>
+      <div class="logo-sub" id="currentSection">Opportunities</div>
     </div>
   </div>
   <div class="header-right">
@@ -475,15 +475,15 @@ if (localStorage.getItem('crm_theme') === 'light') {
       <button class="sort-dir-btn" id="sortDirBtn" onclick="toggleSortDir()" title="Toggle direction">↑</button>
     </div>
     <div class="tab-group">
-      <button class="tab-btn active" id="tabKanban" onclick="switchView('kanban')">⊞ Board</button>
-      <button class="tab-btn" id="tabList" onclick="switchView('list')">≡ List</button>
+      <button class="tab-btn" id="tabKanban" onclick="switchView('kanban')">⊞ Board</button>
+      <button class="tab-btn active" id="tabList" onclick="switchView('list')">≡ List</button>
     </div>
     <button class="clear-btn" id="clearBtn" onclick="clearFilters()" style="display:none">✕ Clear filters</button>
   </div>
   <div class="stats-bar" id="statsBar"></div>
 </div>
 
-<div id="kanbanView">
+<div id="kanbanView" class="hidden">
   <div class="kanban-wrap">
     <div class="kanban-board" id="kanbanBoard">
       <div class="loading"><div class="spinner"></div>Loading pipeline...</div>
@@ -491,7 +491,7 @@ if (localStorage.getItem('crm_theme') === 'light') {
   </div>
 </div>
 
-<div id="listView" class="hidden">
+<div id="listView">
   <div class="list-wrap">
     <table class="list-table">
       <thead>
@@ -503,6 +503,7 @@ if (localStorage.getItem('crm_theme') === 'light') {
           <th onclick="sortList('created_date')">Create Date <span class="sort-arrow" id="sort-created_date"></span></th>
           <th onclick="sortList('close_date')">Close Date <span class="sort-arrow" id="sort-close_date"></span></th>
           <th onclick="sortList('lead_source')" class="col-filter-wrap">Lead Source <span class="sort-arrow" id="sort-lead_source"></span><span class="col-filter-btn" onclick="event.stopPropagation();openLeadFilter()" title="Filter">▾</span><div class="col-filter-dropdown" id="colfilter-lead_source" style="min-width:220px"><div class="cf-title">Lead Source filter</div><input class="cf-search" id="cf-lead-search" placeholder="Search..." oninput="renderLeadOptions()"><span class="cf-select-all" onclick="toggleAllLeadSources()">Select / Deselect all</span><div class="cf-checklist" id="cf-lead-list"></div><div style="display:flex;gap:6px"><button class="cf-apply" onclick="applyLeadFilter()">Apply</button><button class="cf-clear" onclick="clearLeadFilter()">Clear</button></div></div></th>
+          <th onclick="sortList('closed_reason')">Closed Reason <span class="sort-arrow" id="sort-closed_reason"></span></th>
           <th onclick="sortList('days_since_activity')" class="col-filter-wrap">Days Since Act. <span class="sort-arrow" id="sort-days_since_activity"></span><span class="col-filter-btn" onclick="event.stopPropagation();toggleColFilter('days_since_activity')" title="Filter">▾</span><div class="col-filter-dropdown" id="colfilter-days_since_activity"><div class="cf-title">Days Since Activity filter</div><select class="cf-op" id="cfop-days_since_activity"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">Greater than or equal</option><option value="lt">Less than</option><option value="lte">Less than or equal</option><option value="eq">Equal to</option></select><input class="cf-val" id="cfval-days_since_activity" type="number" min="0" placeholder="e.g. 14"><button class="cf-apply" onclick="applyColFilter('days_since_activity')">Apply</button><button class="cf-clear" onclick="clearColFilter('days_since_activity')">Clear</button></div></th>
           <th onclick="sortList('asm_flat_rate')">ASM Rate <span class="sort-arrow" id="sort-asm_flat_rate"></span></th>
         </tr>
@@ -542,7 +543,7 @@ const STAGES = [
 let currentUser = null;
 let allDeals = [];
 let filteredDeals = [];
-let currentView = 'kanban';
+let currentView = 'list';
 let sortCol = 'close_date';
 let sortDir = 1;
 let globalSortCol = 'close_date';
@@ -1063,6 +1064,7 @@ function renderList() {
       <td class="mono">${fmt(d.created_date,'date')}</td>
       <td class="mono" style="${isPastDue ? 'color:var(--red);font-weight:500' : isToday ? 'color:var(--gold);font-weight:500' : ''}">${closeDateStr}</td>
       <td>${d.lead_source || '—'}</td>
+      <td>${d.closed_reason || '—'}</td>
       <td class="mono" style="${dc === 'danger' ? 'color:var(--red)' : dc === 'warn' ? 'color:var(--orange)' : dc === 'good' ? 'color:var(--green)' : ''}">${d.days_since_activity !== null && d.days_since_activity !== undefined ? d.days_since_activity+'d' : '—'}</td>
       <td class="mono">${d.asm_flat_rate ? '$'+parseFloat(d.asm_flat_rate).toLocaleString() : '—'}</td>
     </tr>`;
