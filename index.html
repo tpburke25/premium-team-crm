@@ -500,13 +500,11 @@ if (localStorage.getItem('crm_theme') === 'light') {
           <th onclick="sortList('account_name')">Account <span class="sort-arrow" id="sort-account_name"></span></th>
           <th onclick="sortList('num_locations')" class="col-filter-wrap"># Locs <span class="sort-arrow" id="sort-num_locations"></span><span class="col-filter-btn" onclick="event.stopPropagation();toggleColFilter('num_locations')" title="Filter">▾</span><div class="col-filter-dropdown" id="colfilter-num_locations"><div class="cf-title"># Locations filter</div><select class="cf-op" id="cfop-num_locations"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">Greater than or equal</option><option value="lt">Less than</option><option value="lte">Less than or equal</option><option value="eq">Equal to</option></select><input class="cf-val" id="cfval-num_locations" type="number" min="0" placeholder="e.g. 5"><button class="cf-apply" onclick="applyColFilter('num_locations')">Apply</button><button class="cf-clear" onclick="clearColFilter('num_locations')">Clear</button></div></th>
           <th onclick="sortList('stage')">Stage <span class="sort-arrow" id="sort-stage"></span></th>
-          <th onclick="sortList('created_date')">Create Date <span class="sort-arrow" id="sort-created_date"></span></th>
           <th onclick="sortList('close_date')">Close Date <span class="sort-arrow" id="sort-close_date"></span></th>
           <th onclick="sortList('lead_source')" class="col-filter-wrap">Lead Source <span class="sort-arrow" id="sort-lead_source"></span><span class="col-filter-btn" onclick="event.stopPropagation();openLeadFilter()" title="Filter">▾</span><div class="col-filter-dropdown" id="colfilter-lead_source" style="min-width:220px"><div class="cf-title">Lead Source filter</div><input class="cf-search" id="cf-lead-search" placeholder="Search..." oninput="renderLeadOptions()"><span class="cf-select-all" onclick="toggleAllLeadSources()">Select / Deselect all</span><div class="cf-checklist" id="cf-lead-list"></div><div style="display:flex;gap:6px"><button class="cf-apply" onclick="applyLeadFilter()">Apply</button><button class="cf-clear" onclick="clearLeadFilter()">Clear</button></div></div></th>
-          <th onclick="sortList('closed_reason')" class="col-filter-wrap">Closed Reason <span class="sort-arrow" id="sort-closed_reason"></span><span class="col-filter-btn" onclick="event.stopPropagation();openClosedReasonFilter()" title="Filter">▾</span><div class="col-filter-dropdown" id="colfilter-closed_reason" style="min-width:220px"><div class="cf-title">Closed Reason filter</div><input class="cf-search" id="cf-cr-search" placeholder="Search..." oninput="renderCROptions()"><span class="cf-select-all" onclick="toggleAllCR()">Select / Deselect all</span><div class="cf-checklist" id="cf-cr-list"></div><div style="display:flex;gap:6px"><button class="cf-apply" onclick="applyCRFilter()">Apply</button><button class="cf-clear" onclick="clearCRFilter()">Clear</button></div></div></th>
           <th onclick="sortList('last_activity_date')">Last Activity <span class="sort-arrow" id="sort-last_activity_date"></span></th>
+          <th onclick="sortList('next_task_date')">Next Task <span class="sort-arrow" id="sort-next_task_date"></span></th>
           <th onclick="sortList('days_since_activity')" class="col-filter-wrap">Days Since Act. <span class="sort-arrow" id="sort-days_since_activity"></span><span class="col-filter-btn" onclick="event.stopPropagation();toggleColFilter('days_since_activity')" title="Filter">▾</span><div class="col-filter-dropdown" id="colfilter-days_since_activity"><div class="cf-title">Days Since Activity filter</div><select class="cf-op" id="cfop-days_since_activity"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">Greater than or equal</option><option value="lt">Less than</option><option value="lte">Less than or equal</option><option value="eq">Equal to</option></select><input class="cf-val" id="cfval-days_since_activity" type="number" min="0" placeholder="e.g. 14"><button class="cf-apply" onclick="applyColFilter('days_since_activity')">Apply</button><button class="cf-clear" onclick="clearColFilter('days_since_activity')">Clear</button></div></th>
-          <th onclick="sortList('asm_flat_rate')">ASM Rate <span class="sort-arrow" id="sort-asm_flat_rate"></span></th>
         </tr>
       </thead>
       <tbody id="listBody"></tbody>
@@ -1019,24 +1017,60 @@ let activityByAccount = {};
 async function loadActivities() {
   const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}` };
   try {
-    let all = [], page = 0, size = 1000;
+    // Load activities
+    let acts = [], page = 0, size = 1000;
     while (true) {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/tbl_activities?select=*&order=activity_date.desc&limit=${size}&offset=${page*size}`, { headers });
       if (!res.ok) break;
       const data = await res.json();
       if (!Array.isArray(data)) break;
-      all = all.concat(data); if (data.length < size) break; page++;
+      acts = acts.concat(data); if (data.length < size) break; page++;
     }
-    allActivities = all;
-    // Build lookup by account_id -> most recent activity
+    allActivities = acts;
     activityByAccount = {};
-    all.forEach(a => {
+    acts.forEach(a => {
       if (!a.account_id) return;
-      if (!activityByAccount[a.account_id] || a.activity_date > activityByAccount[a.account_id].activity_date) {
+      if (!activityByAccount[a.account_id] || a.activity_date > activityByAccount[a.account_id].activity_date)
         activityByAccount[a.account_id] = a;
-      }
     });
+
+    // Load open tasks for next task column
+    let tasks = [], tp = 0;
+    while (true) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/tbl_tasks?select=*&status=neq.Completed&order=due_date.asc&limit=${size}&offset=${tp*size}`, { headers });
+      if (!res.ok) break;
+      const data = await res.json();
+      if (!Array.isArray(data)) break;
+      tasks = tasks.concat(data); if (data.length < size) break; tp++;
+    }
+    buildTaskMap(tasks);
+    window._allOpenTasks = tasks;
   } catch(e) { console.warn('Activities load error:', e); }
+}
+
+// Task lookup by account
+let taskByAccount = {};
+
+function buildTaskMap(tasks) {
+  taskByAccount = {};
+  const today = new Date().toISOString().slice(0,10);
+  tasks.forEach(t => {
+    if (!t.account_id || t.status === 'Completed' || !t.due_date) return;
+    // Keep earliest future/current task
+    if (!taskByAccount[t.account_id] || t.due_date < taskByAccount[t.account_id].due_date) {
+      taskByAccount[t.account_id] = t;
+    }
+  });
+}
+
+function fmtNextTask(accountId) {
+  const t = taskByAccount[accountId];
+  if (!t || !t.due_date) return '—';
+  const today = new Date().toISOString().slice(0,10);
+  const dateColor = t.due_date < today ? 'color:var(--red)' : t.due_date === today ? 'color:var(--gold)' : '';
+  const dateStr = fmt(t.due_date, 'date');
+  const subject = t.subject ? `<span style="color:var(--text3);margin-left:6px;font-size:11px">${t.subject}</span>` : '';
+  return `<span style="${dateColor}">${dateStr}</span>${subject}`;
 }
 
 function fmtLastActivity(accountId) {
@@ -1154,13 +1188,11 @@ function renderList() {
       <td class="primary">${d.account_name || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px;font-weight:400">${d.fts_id || ''}</span></td>
       <td class="mono" style="${lc === 'loc-high' ? 'color:#16a34a;font-weight:500' : lc === 'loc-mid' ? 'color:#4ade80' : ''}">${d.num_locations || '—'}</td>
       <td><span class="stage-badge ${sc}">${d.stage || '—'}</span></td>
-      <td class="mono">${fmt(d.created_date,'date')}</td>
       <td class="mono" style="${isPastDue ? 'color:var(--red);font-weight:500' : isToday ? 'color:var(--gold);font-weight:500' : ''}">${closeDateStr}</td>
       <td>${d.lead_source || '—'}</td>
-      <td>${d.closed_reason || '—'}</td>
       <td class="mono">${fmtLastActivity(d.account_id)}</td>
+      <td class="mono">${fmtNextTask(d.account_id)}</td>
       <td class="mono" style="${dc === 'danger' ? 'color:var(--red)' : dc === 'warn' ? 'color:var(--orange)' : dc === 'good' ? 'color:var(--green)' : ''}">${d.days_since_activity !== null && d.days_since_activity !== undefined ? d.days_since_activity+'d' : '—'}</td>
-      <td class="mono">${d.asm_flat_rate ? '$'+parseFloat(d.asm_flat_rate).toLocaleString() : '—'}</td>
     </tr>`;
   }).join('');
 
@@ -1258,6 +1290,38 @@ function openDetail(id) {
       <span class="save-msg hidden" id="saveMsg">Saved ✓</span>
     </div>
     ${d.description ? `<div class="panel-section"><div class="panel-section-title">Description</div><div class="panel-field" style="grid-column:1/-1"><div class="pf-value" style="white-space:pre-wrap;font-size:12px;color:var(--text2);line-height:1.6">${d.description}</div></div></div>` : ''}
+    ${(() => {
+      // Open tasks for this account
+      const acctTasks = allActivities.length >= 0 ? 
+        Object.values(taskByAccount).filter ? 
+          (window._allOpenTasks || []).filter(t => t.account_id === d.account_id) : [] : [];
+      if (!acctTasks.length) return '';
+      return `<div class="panel-section"><div class="panel-section-title">Open Tasks</div><div style="display:flex;flex-direction:column;gap:6px">` +
+        acctTasks.sort((a,b)=>(a.due_date||'').localeCompare(b.due_date||'')).slice(0,5).map(t => {
+          const today = new Date().toISOString().slice(0,10);
+          const dc = t.due_date ? (t.due_date < today ? 'color:var(--red)' : t.due_date === today ? 'color:var(--gold)' : '') : '';
+          return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;border-left:3px solid var(--gold)">
+            <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px">${t.subject||'—'}</div>
+            <div style="font-size:11px;color:var(--text3);display:flex;gap:10px">
+              <span style="${dc}">${t.due_date ? fmt(t.due_date,'date') : '—'}</span>
+              ${t.type?`<span>${t.type}</span>`:''}${t.assigned_to?`<span>${t.assigned_to}</span>`:''}
+            </div>
+          </div>`;
+        }).join('') + `</div></div>`;
+    })()}
+    ${(() => {
+      const acts = getAccountActivities(d.account_id);
+      if (!acts.length) return '';
+      return `<div class="panel-section"><div class="panel-section-title">Recent Activity</div><div style="display:flex;flex-direction:column;gap:6px">` +
+        acts.slice(0,10).map(a => `
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;border-left:3px solid var(--accent)">
+            <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px">${a.subject||'—'}</div>
+            <div style="font-size:11px;color:var(--text3);display:flex;gap:10px">
+              <span>${fmt(a.activity_date,'date')}</span>
+              ${a.type?`<span>${a.type}</span>`:''}${a.assigned_to?`<span>${a.assigned_to}</span>`:''}
+            </div>
+          </div>`).join('') + `</div></div>`;
+    })()}
   `;
 
   loadEnrichment((d.fts_id || d.account_id || '').toString().trim());
