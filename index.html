@@ -534,26 +534,19 @@ let selectedOwners = new Set();
 
 
 
-function populateOwnerFilter() {
-  const owners = [...new Set(allDeals.map(d => d.opportunity_owner).filter(Boolean))].sort();
-  const dd = document.getElementById('ownerDropdown');
-  if (!dd) return;
-  dd.innerHTML = owners.map(o => `
-    <div class="ms-option ms-owner-opt" data-owner="${o}" onclick="toggleOwner('${o}')">
-      <div class="ms-check"></div>${o}
-    </div>`).join('');
-  renderOwnerChecks();
-}
-
 function clearFilters() {
   chFilters = {};
+  selectedStages.clear();
+  selectedOwners.clear();
   activeViewName = null;
-  document.getElementById('viewsBtnLabel').textContent = '⊞ Views';
-  document.getElementById('searchInput').value = '';
-  document.getElementById('datePreset').value = '';
-  document.getElementById('dateFrom').value = '';
-  document.getElementById('dateTo').value = '';
-  document.getElementById('customDateInputs').style.display = 'none';
+  const vbl = document.getElementById('viewsBtnLabel');
+  if (vbl) vbl.textContent = '⊞ Views';
+  const si = document.getElementById('searchInput');
+  if (si) si.value = '';
+  (document.getElementById('datePreset')||{}).value = '';
+  (document.getElementById('dateFrom')||{}).value = '';
+  (document.getElementById('dateTo')||{}).value = '';
+  (document.getElementById('customDateInputs')||{}).style.display = 'none';
   window._dateFrom = null;
   window._dateTo = null;
   selectedStages.clear();
@@ -570,97 +563,11 @@ function clearFilters() {
 const OPEN_STAGES   = ['Sales Qualified Lead (SQL)', 'Value Selling', 'Enrolling'];
 const CLOSED_STAGES = ['Lost', 'Closed Won'];
 
-function toggleMs(wrapId) {
-  const wrap = document.getElementById(wrapId);
-  const isOpen = wrap.classList.contains('open');
-  // Close all
-  document.querySelectorAll('.ms-wrap.open').forEach(w => w.classList.remove('open'));
-  if (!isOpen) wrap.classList.add('open');
-}
-
 document.addEventListener('click', function(e) {
   document.querySelectorAll('.ms-wrap').forEach(w => {
     if (!w.contains(e.target)) w.classList.remove('open');
   });
 });
-
-function toggleStage(stage) {
-  if (selectedStages.has(stage)) selectedStages.delete(stage);
-  else selectedStages.add(stage);
-  renderStageChecks();
-  applyFilters();
-}
-
-function toggleStageGroup(group) {
-  const stages = group === 'open' ? OPEN_STAGES : CLOSED_STAGES;
-  const allSelected = stages.every(s => selectedStages.has(s));
-  if (allSelected) stages.forEach(s => selectedStages.delete(s));
-  else stages.forEach(s => selectedStages.add(s));
-  renderStageChecks();
-  applyFilters();
-}
-
-function renderStageChecks() {
-  const stageMap = {
-    'Sales Qualified Lead (SQL)': 'sql',
-    'Value Selling': 'vs',
-    'Enrolling': 'enr',
-    'Lost': 'lost',
-    'Closed Won': 'won'
-  };
-  Object.entries(stageMap).forEach(([stage, key]) => {
-    const el = document.getElementById(`chk-stage-${key}`);
-    const opt = el ? el.closest('.ms-option') : null;
-    if (el) el.textContent = selectedStages.has(stage) ? '✓' : '';
-    if (opt) opt.classList.toggle('selected', selectedStages.has(stage));
-  });
-  const openSel = OPEN_STAGES.every(s => selectedStages.has(s));
-  const closedSel = CLOSED_STAGES.every(s => selectedStages.has(s));
-  const openEl = document.getElementById('chk-stage-__open__');
-  const closedEl = document.getElementById('chk-stage-__closed__');
-  if (openEl) { openEl.textContent = openSel ? '✓' : ''; openEl.closest('.ms-option').classList.toggle('selected', openSel); }
-  if (closedEl) { closedEl.textContent = closedSel ? '✓' : ''; closedEl.closest('.ms-option').classList.toggle('selected', closedSel); }
-  // Update button label
-  const btn = document.getElementById('stageBtnLabel');
-  if (selectedStages.size === 0) btn.innerHTML = 'All stages';
-  else if (selectedStages.size === 1) btn.innerHTML = [...selectedStages][0].replace('Sales Qualified Lead (SQL)', 'SQL');
-  else btn.innerHTML = `Stages <span class="ms-badge">${selectedStages.size}</span>`;
-  document.getElementById('stageBtn').classList.toggle('active', selectedStages.size > 0);
-}
-
-function toggleOwner(owner) {
-  if (selectedOwners.has(owner)) selectedOwners.delete(owner);
-  else selectedOwners.add(owner);
-  renderOwnerChecks();
-  applyFilters();
-}
-
-function renderOwnerChecks() {
-  document.querySelectorAll('.ms-owner-opt').forEach(el => {
-    const owner = el.dataset.owner;
-    const chk = el.querySelector('.ms-check');
-    const sel = selectedOwners.has(owner);
-    if (chk) chk.textContent = sel ? '✓' : '';
-    el.classList.toggle('selected', sel);
-  });
-  const btn = document.getElementById('ownerBtnLabel');
-  if (selectedOwners.size === 0) btn.innerHTML = 'All reps';
-  else if (selectedOwners.size === 1) btn.innerHTML = [...selectedOwners][0].split(' ')[0];
-  else btn.innerHTML = `Reps <span class="ms-badge">${selectedOwners.size}</span>`;
-  document.getElementById('ownerBtn').classList.toggle('active', selectedOwners.size > 0);
-}
-
-function applySort() {
-  listSortCol = // sortSelect removed //;
-  applyFilters();
-  if (currentView === 'list') renderList();
-}
-
-function toggleSortDir() {
-  listSortDir *= -1;
-    applyFilters();
-  if (currentView === 'list') renderList();
-}
 
 function sortDeals(deals) {
   return [...deals].sort((a, b) => {
@@ -686,103 +593,9 @@ function sortDeals(deals) {
 let selectedClosedReasons = new Set();
 let allClosedReasons = [];
 
-function openClosedReasonFilter() {
-  allClosedReasons = [...new Set(allDeals.map(d => d.closed_reason).filter(Boolean))].sort();
-  renderCROptions();
-  toggleColFilter('closed_reason');
-}
-
-function renderCROptions() {
-  const search = (document.getElementById('cf-cr-search').value || '').toLowerCase();
-  const list = document.getElementById('cf-cr-list');
-  const filtered = allClosedReasons.filter(s => s.toLowerCase().includes(search));
-  list.innerHTML = filtered.map(s => `
-    <label class="cf-check-item">
-      <input type="checkbox" value="${s}" ${selectedClosedReasons.has(s) ? 'checked' : ''} onchange="toggleCR('${s.replace(/'/g,"\'")}', this.checked)">
-      ${s}
-    </label>`).join('');
-}
-
-function toggleCR(val, checked) {
-  if (checked) selectedClosedReasons.add(val); else selectedClosedReasons.delete(val);
-}
-
-function toggleAllCR() {
-  const search = (document.getElementById('cf-cr-search').value || '').toLowerCase();
-  const visible = allClosedReasons.filter(s => s.toLowerCase().includes(search));
-  const allChecked = visible.every(s => selectedClosedReasons.has(s));
-  visible.forEach(s => allChecked ? selectedClosedReasons.delete(s) : selectedClosedReasons.add(s));
-  renderCROptions();
-}
-
-function applyCRFilter() {
-  document.getElementById('colfilter-closed_reason').classList.remove('open');
-  const th = document.getElementById('colfilter-closed_reason').closest('th');
-  if (th) th.classList.toggle('th-filtered', selectedClosedReasons.size > 0);
-  applyFilters();
-}
-
-function clearCRFilter() {
-  selectedClosedReasons.clear();
-  document.getElementById('cf-cr-search').value = '';
-  renderCROptions();
-  const th = document.getElementById('colfilter-closed_reason').closest('th');
-  if (th) th.classList.remove('th-filtered');
-  document.getElementById('colfilter-closed_reason').classList.remove('open');
-  applyFilters();
-}
-
 // ── LEAD SOURCE FILTER ────────────────────────────
 let selectedLeadSources = new Set();
 let allLeadSources = [];
-
-function openLeadFilter() {
-  // Build list from current data
-  allLeadSources = [...new Set(allDeals.map(d => d.lead_source).filter(Boolean))].sort();
-  renderLeadOptions();
-  toggleColFilter('lead_source');
-}
-
-function renderLeadOptions() {
-  const search = (document.getElementById('cf-lead-search').value || '').toLowerCase();
-  const list = document.getElementById('cf-lead-list');
-  const filtered = allLeadSources.filter(s => s.toLowerCase().includes(search));
-  list.innerHTML = filtered.map(s => `
-    <label class="cf-check-item">
-      <input type="checkbox" value="${s}" ${selectedLeadSources.has(s) ? 'checked' : ''} onchange="toggleLeadSource('${s}', this.checked)">
-      ${s}
-    </label>`).join('');
-}
-
-function toggleLeadSource(source, checked) {
-  if (checked) selectedLeadSources.add(source);
-  else selectedLeadSources.delete(source);
-}
-
-function toggleAllLeadSources() {
-  const search = (document.getElementById('cf-lead-search').value || '').toLowerCase();
-  const visible = allLeadSources.filter(s => s.toLowerCase().includes(search));
-  const allChecked = visible.every(s => selectedLeadSources.has(s));
-  visible.forEach(s => allChecked ? selectedLeadSources.delete(s) : selectedLeadSources.add(s));
-  renderLeadOptions();
-}
-
-function applyLeadFilter() {
-  document.getElementById('colfilter-lead_source').classList.remove('open');
-  const th = document.getElementById('colfilter-lead_source').closest('th');
-  if (th) th.classList.toggle('th-filtered', selectedLeadSources.size > 0);
-  applyFilters();
-}
-
-function clearLeadFilter() {
-  selectedLeadSources.clear();
-  document.getElementById('cf-lead-search').value = '';
-  renderLeadOptions();
-  const th = document.getElementById('colfilter-lead_source').closest('th');
-  if (th) th.classList.remove('th-filtered');
-  document.getElementById('colfilter-lead_source').classList.remove('open');
-  applyFilters();
-}
 
 // ── COLUMN FILTERS ────────────────────────────────
 const colFilters = {};
@@ -799,41 +612,6 @@ document.addEventListener('click', function(e) {
     document.querySelectorAll('.col-filter-dropdown.open').forEach(d => d.classList.remove('open'));
   }
 });
-
-function applyColFilter(col) {
-  const op  = document.getElementById(`cfop-${col}`).value;
-  const val = parseFloat(document.getElementById(`cfval-${col}`).value);
-  if (!op || isNaN(val)) { clearColFilter(col); return; }
-  colFilters[col] = { op, val };
-  document.getElementById(`colfilter-${col}`).classList.remove('open');
-  // Mark header as filtered
-  const th = document.getElementById(`colfilter-${col}`).closest('th');
-  if (th) th.classList.add('th-filtered');
-  applyFilters();
-}
-
-function clearColFilter(col) {
-  delete colFilters[col];
-  document.getElementById(`cfop-${col}`).value = '';
-  document.getElementById(`cfval-${col}`).value = '';
-  document.getElementById(`colfilter-${col}`).classList.remove('open');
-  const th = document.getElementById(`colfilter-${col}`).closest('th');
-  if (th) th.classList.remove('th-filtered');
-  applyFilters();
-}
-
-function passesColFilters(d) {
-  for (const [col, filter] of Object.entries(colFilters)) {
-    const val = parseFloat(d[col]);
-    if (isNaN(val)) return false;
-    if (filter.op === 'gt'  && !(val >  filter.val)) return false;
-    if (filter.op === 'gte' && !(val >= filter.val)) return false;
-    if (filter.op === 'lt'  && !(val <  filter.val)) return false;
-    if (filter.op === 'lte' && !(val <= filter.val)) return false;
-    if (filter.op === 'eq'  && !(val === filter.val)) return false;
-  }
-  return true;
-}
 
 // ── THEME TOGGLE ───────────────────────────────────
 function toggleTheme() {
@@ -852,73 +630,17 @@ function toggleTheme() {
   }
 })();
 
-function applyDatePreset() {
-  const preset = document.getElementById('datePreset').value;
-  const customInputs = document.getElementById('customDateInputs');
-  const now = new Date();
-  let from = null, to = null;
-
-  if (preset === 'custom') {
-    customInputs.style.display = 'flex';
-    return;
-  }
-  customInputs.style.display = 'none';
-  document.getElementById('dateFrom').value = '';
-  document.getElementById('dateTo').value = '';
-
-  if (preset === 'this_month') {
-    from = new Date(now.getFullYear(), now.getMonth(), 1);
-    to   = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  } else if (preset === 'last_30') {
-    from = new Date(now - 30 * 864e5);
-    to   = now;
-  } else if (preset === 'last_60') {
-    from = new Date(now - 60 * 864e5);
-    to   = now;
-  } else if (preset === 'last_90') {
-    from = new Date(now - 90 * 864e5);
-    to   = now;
-  } else if (preset === 'this_quarter') {
-    const q = Math.floor(now.getMonth() / 3);
-    from = new Date(now.getFullYear(), q * 3, 1);
-    to   = new Date(now.getFullYear(), q * 3 + 3, 0);
-  } else if (preset === 'this_year') {
-    from = new Date(now.getFullYear(), 0, 1);
-    to   = new Date(now.getFullYear(), 11, 31);
-  } else if (preset === 'next_month') {
-    from = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    to   = new Date(now.getFullYear(), now.getMonth() + 2, 0);
-  } else if (preset === 'next_30') {
-    from = now;
-    to   = new Date(now.getTime() + 30 * 864e5);
-  } else if (preset === 'next_60') {
-    from = now;
-    to   = new Date(now.getTime() + 60 * 864e5);
-  } else if (preset === 'next_90') {
-    from = now;
-    to   = new Date(now.getTime() + 90 * 864e5);
-  } else if (preset === 'future_all') {
-    from = now;
-    to   = null;
-  }
-
-  // Store computed dates for applyFilters to use
-  window._dateFrom = from;
-  window._dateTo   = to;
-  applyFilters();
-}
-
 function applyFilters() {
   const search = document.getElementById('searchInput').value.toLowerCase();
   const stage  = null; // handled by selectedStages
   const owner  = null; // handled by selectedOwners
-  const preset = document.getElementById('datePreset').value;
+  const preset = (document.getElementById('datePreset')||{}).value;
 
   // Resolve date range
   let dateFrom = null, dateTo = null;
   if (preset === 'custom') {
-    const f = document.getElementById('dateFrom').value;
-    const t = document.getElementById('dateTo').value;
+    const f = (document.getElementById('dateFrom')||{}).value;
+    const t = (document.getElementById('dateTo')||{}).value;
     if (f) dateFrom = new Date(f);
     if (t) dateTo   = new Date(t + 'T23:59:59');
   } else if (preset && window._dateFrom) {
