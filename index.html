@@ -533,8 +533,8 @@ let selectedOwners = new Set();
 
 function clearFilters() {
   chFilters = {};
-  selectedStages.clear();
-  selectedOwners.clear();
+  // Clear ch-filtered class from all headers
+  document.querySelectorAll('.ch-wrap.ch-filtered').forEach(th => th.classList.remove('ch-filtered'));
   activeViewName = null;
   const vbl = document.getElementById('viewsBtnLabel');
   if (vbl) vbl.textContent = '⊞ Views';
@@ -623,35 +623,17 @@ function toggleTheme() {
 })();
 
 function applyFilters() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const stage  = null; // handled by selectedStages
-  const owner  = null; // handled by selectedOwners
-  const preset = (document.getElementById('datePreset')||{}).value;
-
-  // Resolve date range
-  let dateFrom = null, dateTo = null;
-  if (preset === 'custom') {
-    const f = (document.getElementById('dateFrom')||{}).value;
-    const t = (document.getElementById('dateTo')||{}).value;
-    if (f) dateFrom = new Date(f);
-    if (t) dateTo   = new Date(t + 'T23:59:59');
-  } else if (preset && window._dateFrom) {
-    dateFrom = window._dateFrom;
-    dateTo   = window._dateTo;
-  }
-
-  const closedStages = ['Lost', 'Closed Won'];
-  const openStages   = ['Sales Qualified Lead (SQL)', 'Value Selling', 'Enrolling'];
+  const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
 
   filteredDeals = allDeals.filter(d => {
-    // Column header filters
+    // Column header filters (stage, owner, close date, locs, days, lead source)
     for (const id of Object.keys(chFilters)) {
       if (!passesChFilter(id, d)) return false;
     }
+    // Search
     if (search) {
       const hay = [
         d.account_name, d.opportunity_name, d.fts_id,
-        d.contact_name, d.contact_email, d.contact_phone,
         d.opportunity_owner, d.additional_rep, d.industry,
         d.accounting_package, d.city, d.state, d.product_name,
         d.lead_source, d.closed_reason, d.description
@@ -659,26 +641,15 @@ function applyFilters() {
       const notes = (d._notes||'').toLowerCase();
       if (!hay.includes(search) && !notes.includes(search)) return false;
     }
-    if (selectedStages.size > 0 && !selectedStages.has(d.stage)) return false;
-    if (selectedOwners.size > 0 && !selectedOwners.has(d.opportunity_owner)) return false;
-    if (dateFrom || dateTo) {
-      const cd = d.close_date ? new Date(d.close_date) : null;
-      if (!cd) return false;
-      if (dateFrom && cd < dateFrom) return false;
-      if (dateTo   && cd > dateTo)   return false;
-    }
-    if (selectedLeadSources.size > 0 && !selectedLeadSources.has(d.lead_source)) return false;
-    if (selectedClosedReasons.size > 0 && !selectedClosedReasons.has(d.closed_reason)) return false;
     return true;
   });
 
-  // Show/hide clear button
-  const hasFilter = search || selectedStages.size > 0 || selectedOwners.size > 0 || preset || selectedLeadSources.size > 0 || selectedClosedReasons.size > 0 || Object.keys(colFilters).length > 0;
-  document.getElementById('clearBtn').style.display = hasFilter ? 'inline-block' : 'none';
+  const hasFilter = search || Object.keys(chFilters).length > 0;
+  const cb = document.getElementById('clearBtn');
+  if (cb) cb.style.display = hasFilter ? 'inline-block' : 'none';
 
   updateStats();
-  if (currentView === 'kanban') renderKanban();
-  else renderList();
+  renderList();
 }
 
 function updateStats() {
@@ -1244,8 +1215,11 @@ function toggleAllCh(id) {
 }
 
 function applyChFilter(id) {
+  // Update the th highlight without rebuilding headers
+  const th = document.getElementById('chth-' + id);
+  const hasFilter = chFilters[id]?.values?.size > 0;
+  if (th) th.classList.toggle('ch-filtered', hasFilter);
   document.getElementById('chdd-' + id)?.classList.remove('open');
-  renderListHeaders();
   applyFilters();
   updateFilterPills();
 }
@@ -1254,8 +1228,9 @@ function applyChNumFilter(id) {
   const op  = document.getElementById('chop-' + id)?.value;
   const val = document.getElementById('chval-' + id)?.value;
   if (op && val !== '') chFilters[id] = { type: 'num', op, val: parseFloat(val) };
+  const th = document.getElementById('chth-' + id);
+  if (th) th.classList.toggle('ch-filtered', !!(chFilters[id]?.op));
   document.getElementById('chdd-' + id)?.classList.remove('open');
-  renderListHeaders();
   applyFilters();
   updateFilterPills();
 }
@@ -1278,16 +1253,18 @@ function applyChDateFilter(id) {
   } else if (preset) {
     chFilters[id] = { type: 'date', preset };
   }
+  const th = document.getElementById('chth-' + id);
+  if (th) th.classList.toggle('ch-filtered', !!(chFilters[id]?.preset));
   document.getElementById('chdd-' + id)?.classList.remove('open');
-  renderListHeaders();
   applyFilters();
   updateFilterPills();
 }
 
 function clearChFilter(id) {
   delete chFilters[id];
+  const th = document.getElementById('chth-' + id);
+  if (th) th.classList.remove('ch-filtered');
   document.getElementById('chdd-' + id)?.classList.remove('open');
-  renderListHeaders();
   applyFilters();
   updateFilterPills();
 }
