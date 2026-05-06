@@ -451,7 +451,7 @@ if (localStorage.getItem('crm_theme') === 'light') {
     </div>
     <!-- Views dropdown -->
     <div class="ms-wrap" id="viewsWrap">
-      <div class="ms-btn" id="viewsBtn" onclick="toggleMs('viewsWrap')" style="min-width:90px">
+      <div class="ms-btn" id="viewsBtn" onclick="toggleViewsDropdown()" style="min-width:90px">
         <span id="viewsBtnLabel">⊞ Views</span><span class="ms-arrow">▾</span>
       </div>
       <div class="ms-dropdown" id="viewsDropdown" style="min-width:260px;padding:10px">
@@ -1094,6 +1094,16 @@ function closePanel() {
 // ── AUTH ──────────────────────────────────────────
 
 // Restore session from localStorage on page load
+// ── VIEWS DROPDOWN TOGGLE ─────────────────────────
+function toggleViewsDropdown() {
+  const wrap = document.getElementById('viewsWrap');
+  if (wrap) wrap.classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('viewsWrap');
+  if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
+});
+
 // ── COLUMN DEFINITIONS ────────────────────────────
 const LOCKED_COLS = ['opportunity_owner', 'account_name', 'stage', 'close_date'];
 const ALL_COLS = [
@@ -1118,6 +1128,14 @@ let activeViewName = null;
 function renderListHeaders() {
   const row = document.getElementById('listHeaderRow');
   if (!row) return;
+  // Safety: ensure colOrder contains valid column ids
+  const validIds = ALL_COLS.map(c => c.id);
+  if (!colOrder || colOrder.length === 0 || !colOrder.every(id => validIds.includes(id))) {
+    colOrder = [...validIds];
+  }
+  if (!colVisible || Object.keys(colVisible).length === 0) {
+    colVisible = Object.fromEntries(ALL_COLS.map(c => [c.id, true]));
+  }
   const visibleCols = colOrder.filter(id => colVisible[id]);
   row.innerHTML = visibleCols.map(id => {
     const col = ALL_COLS.find(c => c.id === id);
