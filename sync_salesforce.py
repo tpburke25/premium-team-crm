@@ -249,6 +249,56 @@ def sync_tasks(token, instance):
     return len(rows), upserted
 
 
+
+# ── ACTIVITIES SYNC ──────────────────────────────────
+def sync_activities(token, instance):
+    print("\nSyncing Activities...")
+    soql = """
+        SELECT
+            Id, AccountId, WhoId, Who.Name,
+            Subject, Type, Status,
+            ActivityDate, CreatedDate,
+            Owner.Name, Description,
+            Account.Name, Account.Industry,
+            Account.FTS_ID__c,
+            Account.Accounting_Package__c
+        FROM Task
+        WHERE IsDeleted = false
+        AND Status = 'Completed'
+        AND ActivityDate >= LAST_N_DAYS:180
+        AND Owner.LastName IN ('Burke', 'Adcock', 'Pottle', 'Cuellar', 'Behymer')
+        ORDER BY ActivityDate DESC
+    """
+    records = sf_query(token, instance, soql)
+    print(f"  Pulled {len(records)} activity records from Salesforce")
+
+    rows = []
+    for r in records:
+        acc = r.get('Account') or {}
+        who = r.get('Who') or {}
+        rows.append({
+            'activity_id':        r.get('Id'),
+            'account_id':         r.get('AccountId'),
+            'fts_id':             acc.get('FTS_ID__c'),
+            'account_name':       acc.get('Name'),
+            'subject':            r.get('Subject'),
+            'type':               r.get('Type'),
+            'status':             r.get('Status'),
+            'activity_date':      clean_date(r.get('ActivityDate')),
+            'created_date':       clean_date(r.get('CreatedDate')),
+            'assigned_to':        (r.get('Owner') or {}).get('Name'),
+            'comments':           r.get('Description'),
+            'industry':           acc.get('Industry'),
+            'accounting_package': acc.get('Accounting_Package__c'),
+            'contact_name':       who.get('Name') if (r.get('WhoId') or '').startswith('003') else None,
+            'synced_at':          now_iso(),
+        })
+
+    upserted = supabase_upsert('tbl_activities', rows)
+    print(f"  ✓ {upserted} activities upserted to Supabase")
+    return len(rows), upserted
+
+
 # ── MAIN ──────────────────────────────────────────────
 def main():
     print("=" * 50)
@@ -264,6 +314,9 @@ def main():
 
     pulled, upserted = sync_tasks(token, instance)
     results['tasks'] = {'pulled': pulled, 'upserted': upserted}
+
+    pulled, upserted = sync_activities(token, instance)
+    results['activities'] = {'pulled': pulled, 'upserted': upserted}
 
     print("\n" + "=" * 50)
     print("Sync Summary:")

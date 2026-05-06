@@ -187,6 +187,7 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
         <th onclick="sortBy('account_name')">Account <span class="sort-arrow" id="s-account_name"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('account_name','check')">▾</span><div class="cf-dd" id="cf-account_name"><div class="cf-title">Account</div><input class="cf-search" id="cfs-account_name" placeholder="Search..." oninput="renderCFList('account_name')"><span class="cf-sel-all" onclick="toggleAllCF('account_name')">Select/Deselect all</span><div class="cf-list" id="cfl-account_name"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('account_name')">Apply</button><button class="cf-clear-btn" onclick="clearCF('account_name')">Clear</button></div></div></th>
         <th onclick="sortBy('industry')">Industry <span class="sort-arrow" id="s-industry"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('industry','check')">▾</span><div class="cf-dd" id="cf-industry"><div class="cf-title">Industry</div><input class="cf-search" id="cfs-industry" placeholder="Search..." oninput="renderCFList('industry')"><span class="cf-sel-all" onclick="toggleAllCF('industry')">Select/Deselect all</span><div class="cf-list" id="cfl-industry"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('industry')">Apply</button><button class="cf-clear-btn" onclick="clearCF('industry')">Clear</button></div></div></th>
         <th onclick="sortBy('accounting_package')">Accounting Pkg <span class="sort-arrow" id="s-accounting_package"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('accounting_package','check')">▾</span><div class="cf-dd" id="cf-accounting_package"><div class="cf-title">Accounting Package</div><input class="cf-search" id="cfs-accounting_package" placeholder="Search..." oninput="renderCFList('accounting_package')"><span class="cf-sel-all" onclick="toggleAllCF('accounting_package')">Select/Deselect all</span><div class="cf-list" id="cfl-accounting_package"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('accounting_package')">Apply</button><button class="cf-clear-btn" onclick="clearCF('accounting_package')">Clear</button></div></div></th>
+        <th onclick="sortBy('last_activity_date')">Last Activity <span class="sort-arrow" id="s-last_activity_date"></span></th>
         <th onclick="sortBy('days_since_activity')">Days Since Act. <span class="sort-arrow" id="s-days_since_activity"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('days_since_activity','num')">▾</span><div class="cf-dd" id="cf-days_since_activity"><div class="cf-title">Days Since Activity</div><select class="cf-num-op" id="cfop-days_since_activity"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-days_since_activity" type="number" min="0" placeholder="e.g. 30"><div class="cf-btns"><button class="cf-apply" onclick="applyNumCF('days_since_activity')">Apply</button><button class="cf-clear-btn" onclick="clearNumCF('days_since_activity')">Clear</button></div></div></th>
         <th onclick="sortBy('city')">City <span class="sort-arrow" id="s-city"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('city','check')">▾</span><div class="cf-dd" id="cf-city"><div class="cf-title">City</div><input class="cf-search" id="cfs-city" placeholder="Search..." oninput="renderCFList('city')"><span class="cf-sel-all" onclick="toggleAllCF('city')">Select/Deselect all</span><div class="cf-list" id="cfl-city"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('city')">Apply</button><button class="cf-clear-btn" onclick="clearCF('city')">Clear</button></div></div></th>
         <th onclick="sortBy('state')">State <span class="sort-arrow" id="s-state"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('state','check')">▾</span><div class="cf-dd" id="cf-state"><div class="cf-title">State</div><input class="cf-search" id="cfs-state" placeholder="Search..." oninput="renderCFList('state')"><span class="cf-sel-all" onclick="toggleAllCF('state')">Select/Deselect all</span><div class="cf-list" id="cfl-state"></div><div class="cf-btns"><button class="cf-apply" onclick="applyCF('state')">Apply</button><button class="cf-clear-btn" onclick="clearCF('state')">Clear</button></div></div></th>
@@ -209,7 +210,7 @@ const SUPABASE_URL = 'https://idbnpxedwpjrflsqweyh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYm5weGVkd3BqcmZsc3F3ZXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNTY3MDYsImV4cCI6MjA5MjkzMjcwNn0.PL7ftdQbTtkCnfFa3Mwo2H3w_uPXuTh_0o75cu3_FLU';
 
 let currentUser = null;
-let allAccounts = [], filteredAccounts = [], allOpps = [], allTasks = [];
+let allAccounts = [], filteredAccounts = [], allOpps = [], allTasks = [], allActivities = [];
 let sortCol = 'account_name', sortDir = 1;
 const checkFilters = {}, numFilters = {}, cfValues = {};
 
@@ -294,8 +295,12 @@ async function fetchAll(table, ownerField) {
 
 async function loadData() {
   try {
-    const [opps,tasks] = await Promise.all([fetchAll('tbl_opportunities','opportunity_owner'),fetchAll('tbl_tasks','assigned_to')]);
-    allOpps=opps; allTasks=tasks;
+    const [opps,tasks,acts] = await Promise.all([
+      fetchAll('tbl_opportunities','opportunity_owner'),
+      fetchAll('tbl_tasks','assigned_to'),
+      fetchAll('tbl_activities','assigned_to')
+    ]);
+    allOpps=opps; allTasks=tasks; allActivities=acts;
     buildAccountList();
   } catch(e) { console.error('Load error:',e); }
 }
@@ -446,6 +451,15 @@ function updateStats(){
 function fmtDate(val){if(!val) return '—';const d=new Date(val);return `${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCFullYear()).slice(-2)}`;}
 function daysStyle(v){const n=parseFloat(v);if(isNaN(n)) return '';if(n>30) return 'color:var(--red)';if(n>14) return 'color:var(--orange)';return 'color:var(--green)';}
 
+function getLastActivity(accountId) {
+  const acts = allActivities.filter(a => a.account_id === accountId);
+  if (!acts.length) return '—';
+  const latest = acts.sort((a,b)=>(b.activity_date||'').localeCompare(a.activity_date||''))[0];
+  if (!latest.activity_date) return '—';
+  const d = new Date(latest.activity_date);
+  return `${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCFullYear()).slice(-2)}`;
+}
+
 function renderList(){
   const sorted=[...filteredAccounts].sort((a,b)=>{
     let av=a[sortCol]??'',bv=b[sortCol]??'';
@@ -460,6 +474,7 @@ function renderList(){
       <td class="primary">${a.account_name||'—'}</td>
       <td>${a.industry||'—'}</td>
       <td>${a.accounting_package||'—'}</td>
+      <td class="mono">${getLastActivity(a.account_id)}</td>
       <td class="mono" style="${ds}">${!isNaN(dv)?dv+'d':'—'}</td>
       <td>${a.city||'—'}</td><td>${a.state||'—'}</td>
       <td class="mono" style="${a.open_opps>0?'color:var(--accent)':''}">${a.open_opps}</td>
@@ -517,6 +532,23 @@ function openAccount(accountId){
     ${acctTasks.length===0?'<div class="empty-section">No open tasks</div>':`<table class="section-table"><thead><tr><th>Subject</th><th>Type</th><th>Due Date</th><th>Priority</th><th>Assigned To</th></tr></thead><tbody>
     ${acctTasks.map(t=>`<tr><td style="color:var(--text);font-weight:500">${t.subject||'—'}</td><td>${t.type||'—'}</td><td class="mono" style="${taskDateStyle(t)}">${fmtDate(t.due_date)}</td><td style="${t.priority==='High'?'color:var(--red);font-weight:500':''}">${t.priority||'—'}</td><td>${t.assigned_to||'—'}</td></tr>`).join('')}
     </tbody></table>`}</div>`;
+  // Activity history section
+  const acctActs = allActivities
+    .filter(a => a.account_id === accountId)
+    .sort((a,b)=>(b.activity_date||'').localeCompare(a.activity_date||''));
+  if (acctActs.length > 0) {
+    related += `<div class="section-card"><div class="section-header"><div class="section-title">Activity History</div><div class="section-count">${acctActs.length}</div></div>
+      <table class="section-table"><thead><tr><th>Date</th><th>Subject</th><th>Type</th><th>Contact</th><th>Assigned To</th></tr></thead><tbody>
+      ${acctActs.map(a=>`<tr>
+        <td class="mono">${fmtDate(a.activity_date)}</td>
+        <td style="color:var(--text);font-weight:500">${a.subject||'—'}</td>
+        <td>${a.type||'—'}</td>
+        <td>${a.contact_name||'—'}</td>
+        <td>${a.assigned_to||'—'}</td>
+      </tr>`).join('')}
+      </tbody></table></div>`;
+  }
+
   document.getElementById('acctRelated').innerHTML=related;
   document.getElementById('listSection').style.display='none';
   document.getElementById('detailSection').style.display='block';

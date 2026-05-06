@@ -504,6 +504,7 @@ if (localStorage.getItem('crm_theme') === 'light') {
           <th onclick="sortList('close_date')">Close Date <span class="sort-arrow" id="sort-close_date"></span></th>
           <th onclick="sortList('lead_source')" class="col-filter-wrap">Lead Source <span class="sort-arrow" id="sort-lead_source"></span><span class="col-filter-btn" onclick="event.stopPropagation();openLeadFilter()" title="Filter">▾</span><div class="col-filter-dropdown" id="colfilter-lead_source" style="min-width:220px"><div class="cf-title">Lead Source filter</div><input class="cf-search" id="cf-lead-search" placeholder="Search..." oninput="renderLeadOptions()"><span class="cf-select-all" onclick="toggleAllLeadSources()">Select / Deselect all</span><div class="cf-checklist" id="cf-lead-list"></div><div style="display:flex;gap:6px"><button class="cf-apply" onclick="applyLeadFilter()">Apply</button><button class="cf-clear" onclick="clearLeadFilter()">Clear</button></div></div></th>
           <th onclick="sortList('closed_reason')" class="col-filter-wrap">Closed Reason <span class="sort-arrow" id="sort-closed_reason"></span><span class="col-filter-btn" onclick="event.stopPropagation();openClosedReasonFilter()" title="Filter">▾</span><div class="col-filter-dropdown" id="colfilter-closed_reason" style="min-width:220px"><div class="cf-title">Closed Reason filter</div><input class="cf-search" id="cf-cr-search" placeholder="Search..." oninput="renderCROptions()"><span class="cf-select-all" onclick="toggleAllCR()">Select / Deselect all</span><div class="cf-checklist" id="cf-cr-list"></div><div style="display:flex;gap:6px"><button class="cf-apply" onclick="applyCRFilter()">Apply</button><button class="cf-clear" onclick="clearCRFilter()">Clear</button></div></div></th>
+          <th onclick="sortList('last_activity_date')">Last Activity <span class="sort-arrow" id="sort-last_activity_date"></span></th>
           <th onclick="sortList('days_since_activity')" class="col-filter-wrap">Days Since Act. <span class="sort-arrow" id="sort-days_since_activity"></span><span class="col-filter-btn" onclick="event.stopPropagation();toggleColFilter('days_since_activity')" title="Filter">▾</span><div class="col-filter-dropdown" id="colfilter-days_since_activity"><div class="cf-title">Days Since Activity filter</div><select class="cf-op" id="cfop-days_since_activity"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">Greater than or equal</option><option value="lt">Less than</option><option value="lte">Less than or equal</option><option value="eq">Equal to</option></select><input class="cf-val" id="cfval-days_since_activity" type="number" min="0" placeholder="e.g. 14"><button class="cf-apply" onclick="applyColFilter('days_since_activity')">Apply</button><button class="cf-clear" onclick="clearColFilter('days_since_activity')">Clear</button></div></th>
           <th onclick="sortList('asm_flat_rate')">ASM Rate <span class="sort-arrow" id="sort-asm_flat_rate"></span></th>
         </tr>
@@ -1011,6 +1012,44 @@ function fmt(val, type) {
   return val;
 }
 
+// ── ACTIVITY HELPERS ──────────────────────────────
+let allActivities = [];
+let activityByAccount = {};
+
+async function loadActivities() {
+  const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}` };
+  try {
+    let all = [], page = 0, size = 1000;
+    while (true) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/tbl_activities?select=*&order=activity_date.desc&limit=${size}&offset=${page*size}`, { headers });
+      if (!res.ok) break;
+      const data = await res.json();
+      if (!Array.isArray(data)) break;
+      all = all.concat(data); if (data.length < size) break; page++;
+    }
+    allActivities = all;
+    // Build lookup by account_id -> most recent activity
+    activityByAccount = {};
+    all.forEach(a => {
+      if (!a.account_id) return;
+      if (!activityByAccount[a.account_id] || a.activity_date > activityByAccount[a.account_id].activity_date) {
+        activityByAccount[a.account_id] = a;
+      }
+    });
+  } catch(e) { console.warn('Activities load error:', e); }
+}
+
+function fmtLastActivity(accountId) {
+  const a = activityByAccount[accountId];
+  if (!a || !a.activity_date) return '—';
+  return fmt(a.activity_date, 'date');
+}
+
+function getAccountActivities(accountId) {
+  return allActivities.filter(a => a.account_id === accountId)
+    .sort((a, b) => (b.activity_date || '').localeCompare(a.activity_date || ''));
+}
+
 function daysClass(d) {
   const v = parseFloat(d);
   if (isNaN(v)) return '';
@@ -1117,6 +1156,7 @@ function renderList() {
       <td class="mono" style="${isPastDue ? 'color:var(--red);font-weight:500' : isToday ? 'color:var(--gold);font-weight:500' : ''}">${closeDateStr}</td>
       <td>${d.lead_source || '—'}</td>
       <td>${d.closed_reason || '—'}</td>
+      <td class="mono">${d.last_activity_date ? fmtLastActivity(d.account_id) : '—'}</td>
       <td class="mono" style="${dc === 'danger' ? 'color:var(--red)' : dc === 'warn' ? 'color:var(--orange)' : dc === 'good' ? 'color:var(--green)' : ''}">${d.days_since_activity !== null && d.days_since_activity !== undefined ? d.days_since_activity+'d' : '—'}</td>
       <td class="mono">${d.asm_flat_rate ? '$'+parseFloat(d.asm_flat_rate).toLocaleString() : '—'}</td>
     </tr>`;
