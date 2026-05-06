@@ -1042,7 +1042,9 @@ async function loadActivities() {
 function fmtLastActivity(accountId) {
   const a = activityByAccount[accountId];
   if (!a || !a.activity_date) return '—';
-  return fmt(a.activity_date, 'date');
+  const date = fmt(a.activity_date, 'date');
+  const subject = a.subject ? `<span style="color:var(--text3);margin-left:6px;font-size:11px">${a.subject}</span>` : '';
+  return date + subject;
 }
 
 function getAccountActivities(accountId) {
@@ -1156,7 +1158,7 @@ function renderList() {
       <td class="mono" style="${isPastDue ? 'color:var(--red);font-weight:500' : isToday ? 'color:var(--gold);font-weight:500' : ''}">${closeDateStr}</td>
       <td>${d.lead_source || '—'}</td>
       <td>${d.closed_reason || '—'}</td>
-      <td class="mono">${d.last_activity_date ? fmtLastActivity(d.account_id) : '—'}</td>
+      <td class="mono">${fmtLastActivity(d.account_id)}</td>
       <td class="mono" style="${dc === 'danger' ? 'color:var(--red)' : dc === 'warn' ? 'color:var(--orange)' : dc === 'good' ? 'color:var(--green)' : ''}">${d.days_since_activity !== null && d.days_since_activity !== undefined ? d.days_since_activity+'d' : '—'}</td>
       <td class="mono">${d.asm_flat_rate ? '$'+parseFloat(d.asm_flat_rate).toLocaleString() : '—'}</td>
     </tr>`;
@@ -1720,7 +1722,7 @@ async function loadData() {
       page++;
     }
     allDeals = all;
-
+    await loadActivities();
     populateOwnerFilter();
     applyFilters();
   } catch(e) {
