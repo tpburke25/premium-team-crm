@@ -1883,7 +1883,9 @@ async function loadData() {
     }
     allDeals = all;
     await loadActivities();
+    renderListHeaders();
     applyFilters();
+    updateFilterPills();
   } catch(e) {
     console.error('Load failed:', e.message);
   }
