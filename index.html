@@ -650,7 +650,7 @@ function renderOwnerChecks() {
 }
 
 function applySort() {
-  listSortCol = document.getElementById('sortSelect').value;
+  listSortCol = // sortSelect removed //;
   applyFilters();
   if (currentView === 'list') renderList();
 }
@@ -1090,7 +1090,7 @@ function locClass(n) {
 }
 
 function renderKanban() {
-  const board = document.getElementById('kanbanBoard');
+  const board = document.getElementById('kanbanBoard'); if (!board) return;
   const activeStages = STAGES.filter(stage => filteredDeals.some(d => d.stage === stage.key));
   const stagesToShow = activeStages.length > 0 ? activeStages : STAGES;
   board.innerHTML = stagesToShow.map(stage => {
@@ -1211,10 +1211,7 @@ function sortList(col) {
 
 function switchView(view) {
   currentView = view;
-  document.getElementById('kanbanView').classList.toggle('hidden', view !== 'kanban');
-  document.getElementById('listView').classList.toggle('hidden', view !== 'list');
-  document.getElementById('tabKanban').classList.toggle('active', view === 'kanban');
-  document.getElementById('tabList').classList.toggle('active', view === 'list');
+  // Board view removed — list is always shown
   if (view === 'list') renderList();
 }
 
@@ -1901,7 +1898,7 @@ function doLogout() {
   const sfBtn = document.getElementById('sfSyncMenuItem');
   if (sfBtn) sfBtn.style.display = 'none';
   document.getElementById('loginOverlay').style.display = 'flex';
-  document.getElementById('kanbanBoard').innerHTML = '<div class="loading"><div class="spinner"></div>Loading pipeline...</div>';
+  // kanbanBoard removed
   document.getElementById('loginEmail').value = '';
   document.getElementById('loginPassword').value = '';
   document.getElementById('loginError').textContent = '';
@@ -2120,10 +2117,6 @@ async function pollSyncStatus() {
 }
 
 async function loadData() {
-  const btn   = document.getElementById('syncStatusBtn');
-  const label = document.getElementById('syncLabel');
-  btn.classList.add('syncing');
-  label.textContent = 'Loading...';
 
   const headers = {
     'apikey': SUPABASE_KEY,
@@ -2151,11 +2144,9 @@ async function loadData() {
     populateOwnerFilter();
     applyFilters();
   } catch(e) {
-    document.getElementById('kanbanBoard').innerHTML = `<div class="loading" style="color:var(--red)">Failed to load: ${e.message}</div>`;
+    console.error('Load failed:', e.message);
   }
 
-  btn.classList.remove('syncing');
-  label.textContent = 'Refresh';
 }
 restoreSession();
 </script>
