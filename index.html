@@ -51,10 +51,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .logo-sub { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
 .header-right { display: flex; align-items: center; gap: 12px; }
 .sync-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
-.main-nav { display: flex; align-items: center; gap: 4px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; }
-.main-nav-btn { padding: 7px 18px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: none; background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; font-weight: 500; }
-.main-nav-btn.active { background: var(--accent); color: #fff; }
-.main-nav-btn:hover:not(.active) { color: var(--text); background: var(--surface3); }
+/* old main-nav removed */
 .task-priority-high { color: var(--red); font-weight: 500; }
 .task-priority-normal { color: var(--text2); }
 .task-priority-low { color: var(--text3); }
@@ -286,7 +283,7 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
 .main-nav { display: flex; align-items: center; gap: 2px; }
 .main-nav-btn { padding: 7px 16px; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; border: none; background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; text-decoration: none; border-radius: 8px; }
 .main-nav-btn:hover { color: var(--text); background: var(--surface2); }
-.main-nav-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); border-radius: 0; font-size: 15px; }
+.main-nav-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); border-radius: 0; font-size: 15px; background: transparent; }
 
 /* VIEWS DROPDOWN */
 .views-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); font-weight: 600; margin-bottom: 6px; }
@@ -1128,60 +1125,70 @@ let activeViewName = null;
 function renderListHeaders() {
   const row = document.getElementById('listHeaderRow');
   if (!row) return;
-  // Safety: ensure colOrder contains valid column ids
   const validIds = ALL_COLS.map(c => c.id);
-  if (!colOrder || colOrder.length === 0 || !colOrder.every(id => validIds.includes(id))) {
-    colOrder = [...validIds];
-  }
-  if (!colVisible || Object.keys(colVisible).length === 0) {
+  if (!colOrder || colOrder.length === 0) colOrder = [...validIds];
+  if (!colVisible || Object.keys(colVisible).length === 0)
     colVisible = Object.fromEntries(ALL_COLS.map(c => [c.id, true]));
-  }
+
   const visibleCols = colOrder.filter(id => colVisible[id]);
-  row.innerHTML = visibleCols.map(id => {
+  const cells = visibleCols.map(id => {
     const col = ALL_COLS.find(c => c.id === id);
     if (!col) return '';
-    const isFiltered = chFilters[id] && (
+    const isFiltered = !!chFilters[id] && (
       (chFilters[id].values && chFilters[id].values.size > 0) ||
-      (chFilters[id].op && chFilters[id].val !== '' && chFilters[id].val !== undefined) ||
+      (chFilters[id].op && chFilters[id].val !== undefined) ||
       chFilters[id].from || chFilters[id].to
     );
-    let dd = '';
+    const cls = 'ch-wrap' + (isFiltered ? ' ch-filtered' : '');
+    const arrow = '<span class="sort-arrow" id="sort-' + id + '"></span>';
+    let filterBtn = '';
     if (col.type === 'check') {
-      dd = `<div class="ch-filter-dd" id="chdd-${id}">
-        <div class="cf-title">${col.label}</div>
-        <input class="cf-search" id="chsearch-${id}" placeholder="Search..." oninput="renderChList('${id}')">
-        <span class="cf-sel-all" onclick="toggleAllCh('${id}')">Select / Deselect all</span>
-        <div class="cf-list" id="chlist-${id}"></div>
-        <div class="cf-btns"><button class="cf-apply" onclick="applyChFilter('${id}')">Apply</button><button class="cf-clr" onclick="clearChFilter('${id}')">Clear</button></div>
-      </div>`;
+      filterBtn = '<span class="ch-filter-btn" onclick="event.stopPropagation();openChFilter(\'' + id + '\')">▾</span>' +
+        '<div class="ch-filter-dd" id="chdd-' + id + '">' +
+          '<div class="cf-title">' + col.label + '</div>' +
+          '<input class="cf-search" id="chsearch-' + id + '" placeholder="Search..." oninput="renderChList(\'' + id + '\')">' +
+          '<span class="cf-sel-all" onclick="toggleAllCh(\'' + id + '\')">Select / Deselect all</span>' +
+          '<div class="cf-list" id="chlist-' + id + '"></div>' +
+          '<div class="cf-btns">' +
+            '<button class="cf-apply" onclick="applyChFilter(\'' + id + '\')">Apply</button>' +
+            '<button class="cf-clr" onclick="clearChFilter(\'' + id + '\')">Clear</button>' +
+          '</div>' +
+        '</div>';
     } else if (col.type === 'num') {
-      dd = `<div class="ch-filter-dd" id="chdd-${id}">
-        <div class="cf-title">${col.label}</div>
-        <select class="cf-num-op" id="chop-${id}"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select>
-        <input class="cf-num-val" id="chval-${id}" type="number" min="0" placeholder="e.g. 14">
-        <div class="cf-btns"><button class="cf-apply" onclick="applyChNumFilter('${id}')">Apply</button><button class="cf-clr" onclick="clearChFilter('${id}')">Clear</button></div>
-      </div>`;
+      filterBtn = '<span class="ch-filter-btn" onclick="event.stopPropagation();openChFilter(\'' + id + '\')">▾</span>' +
+        '<div class="ch-filter-dd" id="chdd-' + id + '">' +
+          '<div class="cf-title">' + col.label + '</div>' +
+          '<select class="cf-num-op" id="chop-' + id + '"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select>' +
+          '<input class="cf-num-val" id="chval-' + id + '" type="number" min="0" placeholder="e.g. 14">' +
+          '<div class="cf-btns">' +
+            '<button class="cf-apply" onclick="applyChNumFilter(\'' + id + '\')">Apply</button>' +
+            '<button class="cf-clr" onclick="clearChFilter(\'' + id + '\')">Clear</button>' +
+          '</div>' +
+        '</div>';
     } else if (col.type === 'date') {
-      dd = `<div class="ch-filter-dd" id="chdd-${id}">
-        <div class="cf-title">${col.label}</div>
-        <select class="cf-num-op" id="chpreset-${id}" onchange="applyChDatePreset('${id}')">
-          <option value="">All dates</option>
-          <optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option><option value="this_quarter">This Quarter</option><option value="this_year">This Year</option></optgroup>
-          <optgroup label="Future"><option value="next_month">Next Month</option><option value="next_30">Next 30 Days</option><option value="next_60">Next 60 Days</option><option value="next_90">Next 90 Days</option><option value="future_all">All Future</option></optgroup>
-          <option value="custom">Custom range...</option>
-        </select>
-        <div id="chcustom-${id}" style="display:none">
-          <input class="cf-date-input" id="chfrom-${id}" type="date" placeholder="From">
-          <input class="cf-date-input" id="chto-${id}" type="date" placeholder="To">
-        </div>
-        <div class="cf-btns"><button class="cf-apply" onclick="applyChDateFilter('${id}')">Apply</button><button class="cf-clr" onclick="clearChFilter('${id}')">Clear</button></div>
-      </div>`;
+      filterBtn = '<span class="ch-filter-btn" onclick="event.stopPropagation();openChFilter(\'' + id + '\')">▾</span>' +
+        '<div class="ch-filter-dd" id="chdd-' + id + '">' +
+          '<div class="cf-title">' + col.label + '</div>' +
+          '<select class="cf-num-op" id="chpreset-' + id + '" onchange="applyChDatePreset(\'' + id + '\')">' +
+            '<option value="">All dates</option>' +
+            '<optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option><option value="this_quarter">This Quarter</option><option value="this_year">This Year</option></optgroup>' +
+            '<optgroup label="Future"><option value="next_month">Next Month</option><option value="next_30">Next 30 Days</option><option value="next_60">Next 60 Days</option><option value="next_90">Next 90 Days</option><option value="future_all">All Future</option></optgroup>' +
+            '<option value="custom">Custom range...</option>' +
+          '</select>' +
+          '<div id="chcustom-' + id + '" style="display:none">' +
+            '<input class="cf-date-input" id="chfrom-' + id + '" type="date">' +
+            '<input class="cf-date-input" id="chto-' + id + '" type="date">' +
+          '</div>' +
+          '<div class="cf-btns">' +
+            '<button class="cf-apply" onclick="applyChDateFilter(\'' + id + '\')">Apply</button>' +
+            '<button class="cf-clr" onclick="clearChFilter(\'' + id + '\')">Clear</button>' +
+          '</div>' +
+        '</div>';
     }
-    const filterBtn = col.type !== 'none' ? `<span class="ch-filter-btn" onclick="event.stopPropagation();openChFilter('${id}')">▾</span>${dd}` : '';
-    return `<th class="ch-wrap${isFiltered?' ch-filtered':''}" id="chth-${id}" onclick="sortList('${id}')">
-      ${col.label} <span class="sort-arrow" id="sort-${id}"></span>${filterBtn}
-    </th>`;
-  }).join('');
+    return '<th class="' + cls + '" id="chth-' + id + '" onclick="sortList(\'' + id + '\')">' +
+      col.label + ' ' + arrow + filterBtn + '</th>';
+  });
+  row.innerHTML = cells.join('');
 }
 
 // ── COLUMN FILTER LOGIC ────────────────────────────
