@@ -29,6 +29,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .header-right { display: flex; align-items: center; gap: 12px; }
 .nav-link { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; text-decoration: none; transition: all 0.15s; display: inline-flex; align-items: center; }
 .nav-link:hover { background: var(--surface2); color: var(--text); }
+.main-nav { display: flex; align-items: center; gap: 2px; }
+.main-nav-btn { padding: 7px 16px; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; border: none; background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; text-decoration: none; border-radius: 8px; }
+.main-nav-btn:hover { color: var(--text); background: var(--surface2); }
+.main-nav-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); border-radius: 0; font-size: 15px; }
 .user-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--surface2); border-radius: 20px; border: 1px solid var(--border); position: relative; cursor: pointer; }
 .user-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; }
 .user-name { font-size: 13px; color: var(--text2); }
@@ -177,10 +181,13 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
 </div>
 
 <div class="header">
-  <a class="logo" href="index.html"><div class="logo-mark">P</div><div><div class="logo-text">Premium Team CRM</div><div class="logo-sub">Tasks</div></div></a>
+  <a class="logo" href="index.html"><div class="logo-mark">P</div><div><div class="logo-text">Premium Team CRM</div></div></a>
+  <nav class="main-nav">
+    <a href="index.html" class="main-nav-btn">Opportunities</a>
+    <a href="tasks.html" class="main-nav-btn active">Tasks</a>
+    <a href="accounts.html" class="main-nav-btn">Accounts</a>
+  </nav>
   <div class="header-right">
-    <a href="index.html" class="nav-link">← Opportunities</a>
-    <a href="accounts.html" class="nav-link">🏢 Accounts</a>
     <div class="user-chip" id="userChip" onclick="toggleUserMenu()">
       <div class="user-avatar" id="userAvatar">T</div>
       <span class="user-name" id="userName">...</span>

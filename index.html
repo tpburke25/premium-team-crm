@@ -281,6 +281,60 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
 .login-back { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text3); cursor: pointer; margin-bottom: 1.5rem; transition: color 0.15s; border: none; background: none; font-family: 'DM Sans', sans-serif; padding: 0; }
 .login-back:hover { color: var(--text); }
 .success-box { background: color-mix(in srgb, var(--green) 12%, transparent); border: 1px solid color-mix(in srgb, var(--green) 30%, transparent); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--green); margin-top: 10px; text-align: center; line-height: 1.5; }
+
+/* NAV */
+.main-nav { display: flex; align-items: center; gap: 2px; }
+.main-nav-btn { padding: 7px 16px; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; border: none; background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; text-decoration: none; border-radius: 8px; }
+.main-nav-btn:hover { color: var(--text); background: var(--surface2); }
+.main-nav-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); border-radius: 0; font-size: 15px; }
+
+/* VIEWS DROPDOWN */
+.views-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); font-weight: 600; margin-bottom: 6px; }
+.views-save-btn { width: 100%; padding: 7px 10px; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--text2); cursor: pointer; text-align: left; transition: all 0.15s; }
+.views-save-btn:hover { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); border-color: var(--accent); }
+.view-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; transition: background 0.1s; }
+.view-item:hover { background: var(--surface3); color: var(--text); }
+.view-item.active-view { color: var(--accent); font-weight: 500; }
+.view-item-del { font-size: 11px; color: var(--text3); padding: 2px 6px; border-radius: 4px; opacity: 0; transition: opacity 0.15s; border: none; background: none; cursor: pointer; }
+.view-item:hover .view-item-del { opacity: 1; }
+.view-item-del:hover { color: var(--red); }
+.col-manager-item { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 4px; font-size: 12px; color: var(--text2); cursor: grab; user-select: none; }
+.col-manager-item:hover { background: var(--surface3); }
+.col-manager-item.locked { opacity: 0.5; cursor: not-allowed; }
+.col-manager-item input[type=checkbox] { accent-color: var(--accent); cursor: pointer; }
+.col-drag-handle { color: var(--text3); font-size: 12px; cursor: grab; }
+.col-manager-item.dragging { opacity: 0.4; }
+.col-manager-item.drag-over { border-top: 2px solid var(--accent); }
+
+/* FILTER PILLS */
+.filter-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px 3px 10px; background: color-mix(in srgb, var(--accent) 12%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); border-radius: 20px; font-size: 11px; color: var(--accent); white-space: nowrap; }
+.filter-pill-x { cursor: pointer; opacity: 0.7; font-size: 12px; margin-left: 2px; }
+.filter-pill-x:hover { opacity: 1; }
+
+/* COL HEADER FILTERS */
+.ch-wrap { position: relative; white-space: nowrap; cursor: pointer; }
+.ch-wrap .sort-arrow { margin-left: 3px; }
+.ch-filter-btn { margin-left: 3px; opacity: 0.35; font-size: 10px; cursor: pointer; vertical-align: middle; }
+.ch-filter-btn:hover { opacity: 1; color: var(--accent); }
+.ch-wrap.ch-filtered { color: var(--accent) !important; }
+.ch-filter-dd { position: absolute; top: calc(100% + 4px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 8px; min-width: 200px; z-index: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.ch-filter-dd.open { display: block; }
+.ch-filter-dd .cf-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); margin-bottom: 6px; font-weight: 500; }
+.ch-filter-dd .cf-search { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 5px; }
+.ch-filter-dd .cf-list { max-height: 160px; overflow-y: auto; margin-bottom: 6px; }
+.ch-filter-dd .cf-item { display: flex; align-items: center; gap: 7px; padding: 5px 6px; border-radius: 4px; font-size: 12px; color: var(--text2); cursor: pointer; }
+.ch-filter-dd .cf-item:hover { background: var(--surface3); color: var(--text); }
+.ch-filter-dd .cf-item.sel { color: var(--text); }
+.ch-filter-dd .cf-chk { width: 13px; height: 13px; border: 1px solid var(--border2); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; }
+.ch-filter-dd .cf-item.sel .cf-chk { background: var(--accent); border-color: var(--accent); color: #fff; }
+.ch-filter-dd .cf-sel-all { font-size: 11px; color: var(--text3); cursor: pointer; display: block; margin-bottom: 5px; }
+.ch-filter-dd .cf-sel-all:hover { color: var(--accent); }
+.ch-filter-dd .cf-num-op { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 5px; }
+.ch-filter-dd .cf-num-val { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Mono', monospace; outline: none; margin-bottom: 8px; }
+.ch-filter-dd .cf-date-input { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 5px; }
+.ch-filter-dd .cf-btns { display: flex; gap: 6px; }
+.ch-filter-dd .cf-apply { padding: 5px 12px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.ch-filter-dd .cf-clr { padding: 5px 12px; background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -361,20 +415,14 @@ if (localStorage.getItem('crm_theme') === 'light') {
     <div class="logo-mark">P</div>
     <div>
       <div class="logo-text">Premium Team CRM</div>
-      <div class="logo-sub" id="currentSection">Opportunities</div>
     </div>
   </div>
+  <nav class="main-nav">
+    <a href="index.html" class="main-nav-btn active">Opportunities</a>
+    <a href="tasks.html" class="main-nav-btn">Tasks</a>
+    <a href="accounts.html" class="main-nav-btn">Accounts</a>
+  </nav>
   <div class="header-right">
-    <button class="sync-btn" id="syncStatusBtn" onclick="loadData()">
-      <span id="syncIcon">↻</span>
-      <span id="syncLabel">Refresh</span>
-    </button>
-    <a href="tasks.html" class="sync-btn" style="text-decoration:none;">📋 Tasks</a>
-    <a href="accounts.html" class="sync-btn" style="text-decoration:none;">🏢 Accounts</a>
-    <button class="sf-sync-btn" id="sfSyncBtn" onclick="triggerSFSync()" title="Sync latest data from Salesforce">
-      <span id="sfSyncIcon">⟳</span>
-      <span id="sfSyncLabel">Sync from Salesforce</span>
-    </button>
     <div class="user-chip" id="userChip" onclick="toggleUserMenu()">
       <div class="user-avatar" id="userAvatar">T</div>
       <span class="user-name" id="userName">Tom Burke</span>
@@ -385,6 +433,10 @@ if (localStorage.getItem('crm_theme') === 'light') {
           <div class="dropdown-role" id="dropdownRole">—</div>
         </div>
         <button class="dropdown-item" onclick="toggleTheme()" id="themeToggleBtn">☀ Light mode</button>
+        <button class="dropdown-item" id="sfSyncMenuItem" onclick="triggerSFSync()" style="display:none">
+          <span id="sfSyncIcon">⟳</span>
+          <span id="sfSyncLabel">Sync from Salesforce</span>
+        </button>
         <button class="dropdown-item danger" onclick="doLogout()">⎋ Sign out</button>
       </div>
     </div>
@@ -397,92 +449,30 @@ if (localStorage.getItem('crm_theme') === 'light') {
       <span class="search-icon">⌕</span>
       <input class="search-input" id="searchInput" placeholder="Search accounts, FTS ID, contact..." oninput="applyFilters()">
     </div>
-    <!-- Stage multiselect -->
-    <div class="ms-wrap" id="stageWrap">
-      <div class="ms-btn" id="stageBtn" onclick="toggleMs('stageWrap')">
-        <span id="stageBtnLabel">All stages</span><span class="ms-arrow">▾</span>
+    <!-- Views dropdown -->
+    <div class="ms-wrap" id="viewsWrap">
+      <div class="ms-btn" id="viewsBtn" onclick="toggleMs('viewsWrap')" style="min-width:90px">
+        <span id="viewsBtnLabel">⊞ Views</span><span class="ms-arrow">▾</span>
       </div>
-      <div class="ms-dropdown" id="stageDropdown">
-        <div class="ms-group-label">Quick select</div>
-        <div class="ms-option" id="ms-stage-__open__" onclick="toggleStageGroup('open')">
-          <div class="ms-check" id="chk-stage-__open__"></div>Open
-        </div>
-        <div class="ms-option" id="ms-stage-__closed__" onclick="toggleStageGroup('closed')">
-          <div class="ms-check" id="chk-stage-__closed__"></div>Closed
-        </div>
-        <hr class="ms-divider">
-        <div class="ms-group-label">Individual stages</div>
-        <div class="ms-option" onclick="toggleStage('Sales Qualified Lead (SQL)')">
-          <div class="ms-check" id="chk-stage-sql"></div>SQL
-        </div>
-        <div class="ms-option" onclick="toggleStage('Value Selling')">
-          <div class="ms-check" id="chk-stage-vs"></div>Value Selling
-        </div>
-        <div class="ms-option" onclick="toggleStage('Enrolling')">
-          <div class="ms-check" id="chk-stage-enr"></div>Enrolling
-        </div>
-        <div class="ms-option" onclick="toggleStage('Lost')">
-          <div class="ms-check" id="chk-stage-lost"></div>Lost
-        </div>
-        <div class="ms-option" onclick="toggleStage('Closed Won')">
-          <div class="ms-check" id="chk-stage-won"></div>Closed Won
-        </div>
+      <div class="ms-dropdown" id="viewsDropdown" style="min-width:260px;padding:10px">
+        <div class="views-section-title">Saved views</div>
+        <div id="savedViewsList" style="margin-bottom:8px"></div>
+        <button class="views-save-btn" onclick="saveCurrentView()">+ Save current view</button>
+        <hr class="ms-divider" style="margin:10px 0">
+        <div class="views-section-title">Manage columns</div>
+        <div id="colManagerList" style="margin-bottom:8px"></div>
       </div>
-    </div>
-
-    <!-- Owner multiselect -->
-    <div class="ms-wrap" id="ownerWrap">
-      <div class="ms-btn" id="ownerBtn" onclick="toggleMs('ownerWrap')">
-        <span id="ownerBtnLabel">All reps</span><span class="ms-arrow">▾</span>
-      </div>
-      <div class="ms-dropdown" id="ownerDropdown"></div>
-    </div>
-    <div class="date-filter-wrap">
-      <select id="datePreset" onchange="applyDatePreset()">
-        <option value="">All dates</option>
-        <optgroup label="Past">
-        <option value="this_month">This Month</option>
-        <option value="last_30">Last 30 Days</option>
-        <option value="last_60">Last 60 Days</option>
-        <option value="last_90">Last 90 Days</option>
-        <option value="this_quarter">This Quarter</option>
-        <option value="this_year">This Year</option>
-        </optgroup>
-        <optgroup label="Future">
-        <option value="next_month">Next Month</option>
-        <option value="next_30">Next 30 Days</option>
-        <option value="next_60">Next 60 Days</option>
-        <option value="next_90">Next 90 Days</option>
-        <option value="future_all">All Future</option>
-        </optgroup>
-        <option value="custom">Custom range...</option>
-      </select>
-      <div class="date-inputs" id="customDateInputs" style="display:none">
-        <span class="date-sep">from</span>
-        <input type="date" class="date-input" id="dateFrom" onchange="applyFilters()">
-        <span class="date-sep">to</span>
-        <input type="date" class="date-input" id="dateTo" onchange="applyFilters()">
-      </div>
-    </div>
-    <div class="sort-wrap">
-      <label>Sort</label>
-      <select id="sortSelect" onchange="applySort()">
-        <option value="close_date">Close Date</option>
-        <option value="created_date">Created Date</option>
-        <option value="days_since_activity">Days Since Activity</option>
-        <option value="num_locations"># Locations</option>
-      </select>
-      <button class="sort-dir-btn" id="sortDirBtn" onclick="toggleSortDir()" title="Toggle direction">↑</button>
-    </div>
-    <div class="tab-group">
-      <button class="tab-btn" id="tabKanban" onclick="switchView('kanban')">⊞ Board</button>
-      <button class="tab-btn active" id="tabList" onclick="switchView('list')">≡ List</button>
     </div>
     <button class="clear-btn" id="clearBtn" onclick="clearFilters()" style="display:none">✕ Clear filters</button>
   </div>
-  <div class="stats-bar" id="statsBar"></div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="stats-bar" id="statsBar"></div>
+  </div>
 </div>
+<!-- Active filter pills -->
+<div id="filterPillsBar" style="display:none;padding:8px 28px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:6px;flex-wrap:wrap"></div>
 
+<!-- Board view removed — code preserved for future restoration
 <div id="kanbanView" class="hidden">
   <div class="kanban-wrap">
     <div class="kanban-board" id="kanbanBoard">
@@ -490,22 +480,13 @@ if (localStorage.getItem('crm_theme') === 'light') {
     </div>
   </div>
 </div>
+-->
 
 <div id="listView">
   <div class="list-wrap">
     <table class="list-table">
       <thead>
-        <tr>
-          <th onclick="sortList('opportunity_owner')">Owner <span class="sort-arrow" id="sort-opportunity_owner"></span></th>
-          <th onclick="sortList('account_name')">Account <span class="sort-arrow" id="sort-account_name"></span></th>
-          <th onclick="sortList('num_locations')" class="col-filter-wrap"># Locs <span class="sort-arrow" id="sort-num_locations"></span><span class="col-filter-btn" onclick="event.stopPropagation();toggleColFilter('num_locations')" title="Filter">▾</span><div class="col-filter-dropdown" id="colfilter-num_locations"><div class="cf-title"># Locations filter</div><select class="cf-op" id="cfop-num_locations"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">Greater than or equal</option><option value="lt">Less than</option><option value="lte">Less than or equal</option><option value="eq">Equal to</option></select><input class="cf-val" id="cfval-num_locations" type="number" min="0" placeholder="e.g. 5"><button class="cf-apply" onclick="applyColFilter('num_locations')">Apply</button><button class="cf-clear" onclick="clearColFilter('num_locations')">Clear</button></div></th>
-          <th onclick="sortList('stage')">Stage <span class="sort-arrow" id="sort-stage"></span></th>
-          <th onclick="sortList('close_date')">Close Date <span class="sort-arrow" id="sort-close_date"></span></th>
-          <th onclick="sortList('lead_source')" class="col-filter-wrap">Lead Source <span class="sort-arrow" id="sort-lead_source"></span><span class="col-filter-btn" onclick="event.stopPropagation();openLeadFilter()" title="Filter">▾</span><div class="col-filter-dropdown" id="colfilter-lead_source" style="min-width:220px"><div class="cf-title">Lead Source filter</div><input class="cf-search" id="cf-lead-search" placeholder="Search..." oninput="renderLeadOptions()"><span class="cf-select-all" onclick="toggleAllLeadSources()">Select / Deselect all</span><div class="cf-checklist" id="cf-lead-list"></div><div style="display:flex;gap:6px"><button class="cf-apply" onclick="applyLeadFilter()">Apply</button><button class="cf-clear" onclick="clearLeadFilter()">Clear</button></div></div></th>
-          <th onclick="sortList('last_activity_date')">Last Activity <span class="sort-arrow" id="sort-last_activity_date"></span></th>
-          <th onclick="sortList('next_task_date')">Next Task <span class="sort-arrow" id="sort-next_task_date"></span></th>
-          <th onclick="sortList('days_since_activity')" class="col-filter-wrap">Days Since Act. <span class="sort-arrow" id="sort-days_since_activity"></span><span class="col-filter-btn" onclick="event.stopPropagation();toggleColFilter('days_since_activity')" title="Filter">▾</span><div class="col-filter-dropdown" id="colfilter-days_since_activity"><div class="cf-title">Days Since Activity filter</div><select class="cf-op" id="cfop-days_since_activity"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">Greater than or equal</option><option value="lt">Less than</option><option value="lte">Less than or equal</option><option value="eq">Equal to</option></select><input class="cf-val" id="cfval-days_since_activity" type="number" min="0" placeholder="e.g. 14"><button class="cf-apply" onclick="applyColFilter('days_since_activity')">Apply</button><button class="cf-clear" onclick="clearColFilter('days_since_activity')">Clear</button></div></th>
-        </tr>
+        <tr id="listHeaderRow"></tr>
       </thead>
       <tbody id="listBody"></tbody>
     </table>
@@ -545,8 +526,8 @@ let filteredDeals = [];
 let currentView = 'list';
 let sortCol = 'close_date';
 let sortDir = 1;
-let globalSortCol = 'close_date';
-let globalSortDir = 1; // 1 = asc, -1 = desc
+let listSortCol = 'close_date';
+let listSortDir = 1; // 1 = asc, -1 = desc
 let openDeal = null;
 let selectedStages = new Set(['Sales Qualified Lead (SQL)', 'Value Selling', 'Enrolling']);
 let selectedOwners = new Set();
@@ -564,6 +545,9 @@ function populateOwnerFilter() {
 }
 
 function clearFilters() {
+  chFilters = {};
+  activeViewName = null;
+  document.getElementById('viewsBtnLabel').textContent = '⊞ Views';
   document.getElementById('searchInput').value = '';
   document.getElementById('datePreset').value = '';
   document.getElementById('dateFrom').value = '';
@@ -666,35 +650,34 @@ function renderOwnerChecks() {
 }
 
 function applySort() {
-  globalSortCol = document.getElementById('sortSelect').value;
+  listSortCol = document.getElementById('sortSelect').value;
   applyFilters();
   if (currentView === 'list') renderList();
 }
 
 function toggleSortDir() {
-  globalSortDir *= -1;
-  document.getElementById('sortDirBtn').textContent = globalSortDir === 1 ? '↑' : '↓';
-  applyFilters();
+  listSortDir *= -1;
+    applyFilters();
   if (currentView === 'list') renderList();
 }
 
 function sortDeals(deals) {
   return [...deals].sort((a, b) => {
-    let av = a[globalSortCol];
-    let bv = b[globalSortCol];
+    let av = a[listSortCol];
+    let bv = b[listSortCol];
     // Handle nulls — push to end regardless of direction
     if (av === null || av === undefined) return 1;
     if (bv === null || bv === undefined) return -1;
     // Numeric fields
-    if (['days_since_activity', 'num_locations', 'asm_flat_rate'].includes(globalSortCol)) {
-      return (parseFloat(av) - parseFloat(bv)) * globalSortDir;
+    if (['days_since_activity', 'num_locations', 'asm_flat_rate'].includes(listSortCol)) {
+      return (parseFloat(av) - parseFloat(bv)) * listSortDir;
     }
     // Date fields
-    if (['close_date', 'created_date'].includes(globalSortCol)) {
-      return (new Date(av) - new Date(bv)) * globalSortDir;
+    if (['close_date', 'created_date'].includes(listSortCol)) {
+      return (new Date(av) - new Date(bv)) * listSortDir;
     }
     // Text
-    return av.toString().toLowerCase().localeCompare(bv.toString().toLowerCase()) * globalSortDir;
+    return av.toString().toLowerCase().localeCompare(bv.toString().toLowerCase()) * listSortDir;
   });
 }
 
@@ -946,6 +929,10 @@ function applyFilters() {
   const openStages   = ['Sales Qualified Lead (SQL)', 'Value Selling', 'Enrolling'];
 
   filteredDeals = allDeals.filter(d => {
+    // Column header filters
+    for (const id of Object.keys(chFilters)) {
+      if (!passesChFilter(id, d)) return false;
+    }
     if (search) {
       const hay = [
         d.account_name, d.opportunity_name, d.fts_id,
@@ -1171,46 +1158,54 @@ function dealCard(d, stageCls) {
 
 function renderList() {
   const sorted = sortDeals(filteredDeals);
+  const visibleCols = colOrder.filter(id => colVisible[id]);
+  const today = new Date().toISOString().slice(0,10);
 
   document.getElementById('listBody').innerHTML = sorted.map(d => {
+    const isClosed = d.stage === 'Closed Won' || d.stage === 'Lost';
+    const cdDate   = d.close_date?.slice(0,10);
+    const isPastDue = cdDate && cdDate < today && !isClosed;
+    const isToday   = cdDate && cdDate === today && !isClosed;
+    const dc = !isClosed ? daysClass(d.days_since_activity) : '';
+    const lc = !isClosed ? locClass(d.num_locations) : '';
     const sc = stageClass(d.stage);
-    const closeDateStr = fmt(d.close_date,'date');
-    const cdDate = d.close_date ? new Date(d.close_date).toISOString().slice(0,10) : null;
-    const todayDate = new Date().toISOString().slice(0,10);
-    const isClosed  = d.stage === 'Closed Won' || d.stage === 'Lost';
-    const isPastDue = cdDate && cdDate < todayDate && !isClosed;
-    const isToday   = cdDate && cdDate === todayDate && !isClosed;
-    const dc        = !isClosed ? daysClass(d.days_since_activity) : '';
-    const lc        = !isClosed ? locClass(d.num_locations) : '';
-    return `
-    <tr onclick="openDetail('${d.opportunity_id}')">
-      <td>${d.opportunity_owner || '—'}</td>
-      <td class="primary">${d.account_name || '—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px;font-weight:400">${d.fts_id || ''}</span></td>
-      <td class="mono" style="${lc === 'loc-high' ? 'color:#16a34a;font-weight:500' : lc === 'loc-mid' ? 'color:#4ade80' : ''}">${d.num_locations || '—'}</td>
-      <td><span class="stage-badge ${sc}">${d.stage || '—'}</span></td>
-      <td class="mono" style="${isPastDue ? 'color:var(--red);font-weight:500' : isToday ? 'color:var(--gold);font-weight:500' : ''}">${closeDateStr}</td>
-      <td>${d.lead_source || '—'}</td>
-      <td class="mono">${fmtLastActivity(d.account_id)}</td>
-      <td class="mono">${fmtNextTask(d.account_id)}</td>
-      <td class="mono" style="${dc === 'danger' ? 'color:var(--red)' : dc === 'warn' ? 'color:var(--orange)' : dc === 'good' ? 'color:var(--green)' : ''}">${d.days_since_activity !== null && d.days_since_activity !== undefined ? d.days_since_activity+'d' : '—'}</td>
-    </tr>`;
+
+    const cells = visibleCols.map(id => {
+      switch(id) {
+        case 'opportunity_owner':
+          return `<td>${d.opportunity_owner||'—'}</td>`;
+        case 'account_name':
+          return `<td class="primary">${d.account_name||'—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px;font-weight:400">${d.fts_id||''}</span></td>`;
+        case 'num_locations':
+          return `<td class="mono" style="${lc==='loc-high'?'color:#16a34a;font-weight:500':lc==='loc-mid'?'color:#4ade80':''}">${d.num_locations||'—'}</td>`;
+        case 'stage':
+          return `<td><span class="stage-badge ${sc}">${d.stage||'—'}</span></td>`;
+        case 'close_date':
+          return `<td class="mono" style="${isPastDue?'color:var(--red);font-weight:500':isToday?'color:var(--gold);font-weight:500':''}">${fmt(d.close_date,'date')}</td>`;
+        case 'lead_source':
+          return `<td>${d.lead_source||'—'}</td>`;
+        case 'last_activity':
+          return `<td class="mono">${fmtLastActivity(d.account_id)}</td>`;
+        case 'next_task':
+          return `<td class="mono">${fmtNextTask(d.account_id)}</td>`;
+        case 'days_since_activity':
+          return `<td class="mono" style="${dc==='danger'?'color:var(--red)':dc==='warn'?'color:var(--orange)':dc==='good'?'color:var(--green)':''}">${d.days_since_activity!=null?d.days_since_activity+'d':'—'}</td>`;
+        default: return '<td>—</td>';
+      }
+    }).join('');
+    return `<tr onclick="openDetail('${d.opportunity_id}')">${cells}</tr>`;
   }).join('');
 
+  // Update sort arrows
   document.querySelectorAll('[id^="sort-"]').forEach(el => el.textContent = '');
-  const arrow = document.getElementById(`sort-${globalSortCol}`);
-  if (arrow) arrow.textContent = globalSortDir === 1 ? '↑' : '↓';
+  const arrow = document.getElementById(`sort-${listSortCol}`);
+  if (arrow) arrow.textContent = listSortDir === 1 ? '↑' : '↓';
 }
 
 function sortList(col) {
-  if (globalSortCol === col) {
-    globalSortDir *= -1;
-    document.getElementById('sortDirBtn').textContent = globalSortDir === 1 ? '↑' : '↓';
-  } else {
-    globalSortCol = col;
-    globalSortDir = 1;
-    document.getElementById('sortSelect').value = col;
-    document.getElementById('sortDirBtn').textContent = '↑';
-  }
+  if (listSortCol === col) listSortDir *= -1;
+  else { listSortCol = col; listSortDir = 1; }
+  renderListHeaders();
   renderList();
 }
 
@@ -1385,6 +1380,371 @@ function closePanel() {
 // ── AUTH ──────────────────────────────────────────
 
 // Restore session from localStorage on page load
+// ── COLUMN DEFINITIONS ────────────────────────────
+const LOCKED_COLS = ['opportunity_owner', 'account_name', 'stage', 'close_date'];
+const ALL_COLS = [
+  { id: 'opportunity_owner', label: 'Owner',         type: 'check' },
+  { id: 'account_name',      label: 'Account',       type: 'check' },
+  { id: 'num_locations',     label: '# Locs',        type: 'num'   },
+  { id: 'stage',             label: 'Stage',         type: 'check' },
+  { id: 'close_date',        label: 'Close Date',    type: 'date'  },
+  { id: 'lead_source',       label: 'Lead Source',   type: 'check' },
+  { id: 'last_activity',     label: 'Last Activity', type: 'none'  },
+  { id: 'next_task',         label: 'Next Task',     type: 'none'  },
+  { id: 'days_since_activity', label: 'Days Since Act.', type: 'num' },
+];
+
+let colOrder   = ALL_COLS.map(c => c.id);
+let colVisible = Object.fromEntries(ALL_COLS.map(c => [c.id, true]));
+let chFilters  = {}; // col -> { type, values/op/val/from/to }
+let savedViews = [];
+let activeViewName = null;
+
+// ── COLUMN HEADER RENDERING ────────────────────────
+function renderListHeaders() {
+  const row = document.getElementById('listHeaderRow');
+  if (!row) return;
+  const visibleCols = colOrder.filter(id => colVisible[id]);
+  row.innerHTML = visibleCols.map(id => {
+    const col = ALL_COLS.find(c => c.id === id);
+    if (!col) return '';
+    const isFiltered = chFilters[id] && (
+      (chFilters[id].values && chFilters[id].values.size > 0) ||
+      (chFilters[id].op && chFilters[id].val !== '' && chFilters[id].val !== undefined) ||
+      chFilters[id].from || chFilters[id].to
+    );
+    let dd = '';
+    if (col.type === 'check') {
+      dd = `<div class="ch-filter-dd" id="chdd-${id}">
+        <div class="cf-title">${col.label}</div>
+        <input class="cf-search" id="chsearch-${id}" placeholder="Search..." oninput="renderChList('${id}')">
+        <span class="cf-sel-all" onclick="toggleAllCh('${id}')">Select / Deselect all</span>
+        <div class="cf-list" id="chlist-${id}"></div>
+        <div class="cf-btns"><button class="cf-apply" onclick="applyChFilter('${id}')">Apply</button><button class="cf-clr" onclick="clearChFilter('${id}')">Clear</button></div>
+      </div>`;
+    } else if (col.type === 'num') {
+      dd = `<div class="ch-filter-dd" id="chdd-${id}">
+        <div class="cf-title">${col.label}</div>
+        <select class="cf-num-op" id="chop-${id}"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select>
+        <input class="cf-num-val" id="chval-${id}" type="number" min="0" placeholder="e.g. 14">
+        <div class="cf-btns"><button class="cf-apply" onclick="applyChNumFilter('${id}')">Apply</button><button class="cf-clr" onclick="clearChFilter('${id}')">Clear</button></div>
+      </div>`;
+    } else if (col.type === 'date') {
+      dd = `<div class="ch-filter-dd" id="chdd-${id}">
+        <div class="cf-title">${col.label}</div>
+        <select class="cf-num-op" id="chpreset-${id}" onchange="applyChDatePreset('${id}')">
+          <option value="">All dates</option>
+          <optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option><option value="this_quarter">This Quarter</option><option value="this_year">This Year</option></optgroup>
+          <optgroup label="Future"><option value="next_month">Next Month</option><option value="next_30">Next 30 Days</option><option value="next_60">Next 60 Days</option><option value="next_90">Next 90 Days</option><option value="future_all">All Future</option></optgroup>
+          <option value="custom">Custom range...</option>
+        </select>
+        <div id="chcustom-${id}" style="display:none">
+          <input class="cf-date-input" id="chfrom-${id}" type="date" placeholder="From">
+          <input class="cf-date-input" id="chto-${id}" type="date" placeholder="To">
+        </div>
+        <div class="cf-btns"><button class="cf-apply" onclick="applyChDateFilter('${id}')">Apply</button><button class="cf-clr" onclick="clearChFilter('${id}')">Clear</button></div>
+      </div>`;
+    }
+    const filterBtn = col.type !== 'none' ? `<span class="ch-filter-btn" onclick="event.stopPropagation();openChFilter('${id}')">▾</span>${dd}` : '';
+    return `<th class="ch-wrap${isFiltered?' ch-filtered':''}" id="chth-${id}" onclick="sortList('${id}')">
+      ${col.label} <span class="sort-arrow" id="sort-${id}"></span>${filterBtn}
+    </th>`;
+  }).join('');
+}
+
+// ── COLUMN FILTER LOGIC ────────────────────────────
+function openChFilter(id) {
+  document.querySelectorAll('.ch-filter-dd.open').forEach(d => d.classList.remove('open'));
+  const dd = document.getElementById('chdd-' + id);
+  if (!dd) return;
+  dd.classList.add('open');
+  const col = ALL_COLS.find(c => c.id === id);
+  if (col && col.type === 'check') renderChList(id);
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.ch-wrap') && !e.target.closest('.ch-filter-dd'))
+    document.querySelectorAll('.ch-filter-dd.open').forEach(d => d.classList.remove('open'));
+});
+
+function getChValues(id) {
+  const vals = new Set();
+  allDeals.forEach(d => {
+    const v = id === 'stage' ? d.stage : id === 'opportunity_owner' ? d.opportunity_owner :
+              id === 'account_name' ? d.account_name : id === 'lead_source' ? d.lead_source : null;
+    if (v) vals.add(v);
+  });
+  return [...vals].sort();
+}
+
+function renderChList(id) {
+  const search = (document.getElementById('chsearch-' + id)?.value || '').toLowerCase();
+  const sel = chFilters[id]?.values || new Set();
+  const vals = getChValues(id).filter(v => v.toLowerCase().includes(search));
+  const el = document.getElementById('chlist-' + id);
+  if (!el) return;
+  el.innerHTML = vals.map(v => `
+    <div class="cf-item ${sel.has(v)?'sel':''}" onclick="toggleChItem('${id}','${v.replace(/'/g,"\'")}')">
+      <div class="cf-chk">${sel.has(v)?'✓':''}</div>${v}
+    </div>`).join('');
+}
+
+function toggleChItem(id, val) {
+  if (!chFilters[id]) chFilters[id] = { type: 'check', values: new Set() };
+  if (chFilters[id].values.has(val)) chFilters[id].values.delete(val);
+  else chFilters[id].values.add(val);
+  renderChList(id);
+}
+
+function toggleAllCh(id) {
+  const search = (document.getElementById('chsearch-' + id)?.value || '').toLowerCase();
+  const visible = getChValues(id).filter(v => v.toLowerCase().includes(search));
+  if (!chFilters[id]) chFilters[id] = { type: 'check', values: new Set() };
+  const allSel = visible.every(v => chFilters[id].values.has(v));
+  visible.forEach(v => allSel ? chFilters[id].values.delete(v) : chFilters[id].values.add(v));
+  renderChList(id);
+}
+
+function applyChFilter(id) {
+  document.getElementById('chdd-' + id)?.classList.remove('open');
+  renderListHeaders();
+  applyFilters();
+  updateFilterPills();
+}
+
+function applyChNumFilter(id) {
+  const op  = document.getElementById('chop-' + id)?.value;
+  const val = document.getElementById('chval-' + id)?.value;
+  if (op && val !== '') chFilters[id] = { type: 'num', op, val: parseFloat(val) };
+  document.getElementById('chdd-' + id)?.classList.remove('open');
+  renderListHeaders();
+  applyFilters();
+  updateFilterPills();
+}
+
+function applyChDatePreset(id) {
+  const preset = document.getElementById('chpreset-' + id)?.value;
+  const customDiv = document.getElementById('chcustom-' + id);
+  if (customDiv) customDiv.style.display = preset === 'custom' ? 'block' : 'none';
+  if (preset && preset !== 'custom') {
+    chFilters[id] = { type: 'date', preset };
+  }
+}
+
+function applyChDateFilter(id) {
+  const preset = document.getElementById('chpreset-' + id)?.value;
+  const from   = document.getElementById('chfrom-' + id)?.value;
+  const to     = document.getElementById('chto-' + id)?.value;
+  if (preset === 'custom') {
+    if (from || to) chFilters[id] = { type: 'date', preset: 'custom', from, to };
+  } else if (preset) {
+    chFilters[id] = { type: 'date', preset };
+  }
+  document.getElementById('chdd-' + id)?.classList.remove('open');
+  renderListHeaders();
+  applyFilters();
+  updateFilterPills();
+}
+
+function clearChFilter(id) {
+  delete chFilters[id];
+  document.getElementById('chdd-' + id)?.classList.remove('open');
+  renderListHeaders();
+  applyFilters();
+  updateFilterPills();
+}
+
+function passesChFilter(id, deal) {
+  const f = chFilters[id];
+  if (!f) return true;
+  if (f.type === 'check') {
+    if (!f.values || f.values.size === 0) return true;
+    const v = id === 'stage' ? deal.stage : id === 'opportunity_owner' ? deal.opportunity_owner :
+              id === 'account_name' ? deal.account_name : id === 'lead_source' ? deal.lead_source : null;
+    return f.values.has(v);
+  }
+  if (f.type === 'num') {
+    const v = parseFloat(id === 'num_locations' ? deal.num_locations : deal.days_since_activity);
+    if (isNaN(v)) return false;
+    if (f.op === 'gt')  return v >  f.val;
+    if (f.op === 'gte') return v >= f.val;
+    if (f.op === 'lt')  return v <  f.val;
+    if (f.op === 'lte') return v <= f.val;
+    if (f.op === 'eq')  return v === f.val;
+  }
+  if (f.type === 'date') {
+    const dateStr = deal.close_date;
+    if (!dateStr) return false;
+    return passesDateFilter(dateStr, f);
+  }
+  return true;
+}
+
+function passesDateFilter(dateStr, f) {
+  const d = new Date(dateStr);
+  const now = new Date(); now.setHours(0,0,0,0);
+  const p = f.preset;
+  if (p === 'custom') {
+    if (f.from && dateStr < f.from) return false;
+    if (f.to && dateStr > f.to) return false;
+    return true;
+  }
+  const start = new Date(now), end = new Date(now);
+  if (p === 'this_month')  { start.setDate(1); end.setMonth(end.getMonth()+1,0); }
+  else if (p === 'last_30')  { start.setDate(start.getDate()-30); }
+  else if (p === 'last_60')  { start.setDate(start.getDate()-60); }
+  else if (p === 'last_90')  { start.setDate(start.getDate()-90); }
+  else if (p === 'this_quarter') { const q=Math.floor(now.getMonth()/3); start.setMonth(q*3,1); end.setMonth(q*3+3,0); }
+  else if (p === 'this_year')  { start.setMonth(0,1); end.setMonth(11,31); }
+  else if (p === 'next_month') { start.setDate(start.getDate()+1); end.setMonth(end.getMonth()+1,end.getDate()); end.setMonth(end.getMonth()+1,0); }
+  else if (p === 'next_30')  { start.setDate(start.getDate()+1); end.setDate(end.getDate()+30); }
+  else if (p === 'next_60')  { start.setDate(start.getDate()+1); end.setDate(end.getDate()+60); }
+  else if (p === 'next_90')  { start.setDate(start.getDate()+1); end.setDate(end.getDate()+90); }
+  else if (p === 'future_all') { start.setDate(start.getDate()+1); end.setFullYear(end.getFullYear()+10); }
+  return d >= start && d <= end;
+}
+
+// ── FILTER PILLS ──────────────────────────────────
+function updateFilterPills() {
+  const bar = document.getElementById('filterPillsBar');
+  if (!bar) return;
+  const pills = [];
+  const search = document.getElementById('searchInput')?.value;
+  if (search) pills.push({ label: `Search: ${search}`, clear: () => { document.getElementById('searchInput').value=''; applyFilters(); updateFilterPills(); } });
+  Object.entries(chFilters).forEach(([id, f]) => {
+    const col = ALL_COLS.find(c => c.id === id);
+    if (!col) return;
+    if (f.type === 'check' && f.values?.size > 0) {
+      [...f.values].forEach(v => pills.push({ label: `${col.label}: ${v}`, clear: () => { f.values.delete(v); if(f.values.size===0) delete chFilters[id]; renderListHeaders(); applyFilters(); updateFilterPills(); } }));
+    } else if (f.type === 'num' && f.op) {
+      const opLabel = {gt:'>',gte:'≥',lt:'<',lte:'≤',eq:'='};
+      pills.push({ label: `${col.label} ${opLabel[f.op]} ${f.val}`, clear: () => { clearChFilter(id); } });
+    } else if (f.type === 'date' && f.preset) {
+      const label = f.preset === 'custom' ? `${col.label}: ${f.from||''}–${f.to||''}` : `${col.label}: ${f.preset.replace(/_/g,' ')}`;
+      pills.push({ label, clear: () => { clearChFilter(id); } });
+    }
+  });
+  if (pills.length === 0) { bar.style.display = 'none'; document.getElementById('clearBtn').style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  document.getElementById('clearBtn').style.display = 'inline-flex';
+  bar.innerHTML = '<span style="font-size:11px;color:var(--text3);margin-right:4px">Filters:</span>' +
+    pills.map((p,i) => `<span class="filter-pill">${p.label}<span class="filter-pill-x" onclick="clearPill(${i})">✕</span></span>`).join('');
+  window._pillClears = pills.map(p => p.clear);
+}
+function clearPill(i) { if(window._pillClears && window._pillClears[i]) window._pillClears[i](); }
+
+// ── VIEWS / PRESETS ───────────────────────────────
+function loadViews() {
+  const key = 'crm_views_opps_' + (currentUser?.email || 'default');
+  try { savedViews = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) { savedViews = []; }
+  renderViewsList();
+  renderColManager();
+}
+
+function saveViews() {
+  const key = 'crm_views_opps_' + (currentUser?.email || 'default');
+  localStorage.setItem(key, JSON.stringify(savedViews));
+}
+
+function saveCurrentView() {
+  const name = prompt('Name this view:');
+  if (!name) return;
+  const view = {
+    name,
+    chFilters: JSON.parse(JSON.stringify(chFilters, (k,v) => v instanceof Set ? [...v] : v)),
+    listSortCol, listSortDir, colOrder: [...colOrder],
+    colVisible: {...colVisible}
+  };
+  const existing = savedViews.findIndex(v => v.name === name);
+  if (existing >= 0) savedViews[existing] = view; else savedViews.push(view);
+  activeViewName = name;
+  saveViews();
+  renderViewsList();
+  document.getElementById('viewsBtnLabel').textContent = `⊞ ${name}`;
+}
+
+function applyView(name) {
+  const view = savedViews.find(v => v.name === name);
+  if (!view) return;
+  activeViewName = name;
+  // Restore chFilters — convert arrays back to Sets
+  chFilters = {};
+  Object.entries(view.chFilters || {}).forEach(([id, f]) => {
+    chFilters[id] = {...f};
+    if (f.values) chFilters[id].values = new Set(f.values);
+  });
+  listSortCol = view.listSortCol || 'close_date';
+  listSortDir = view.listSortDir || 1;
+  colOrder = [...(view.colOrder || ALL_COLS.map(c=>c.id))];
+  colVisible = {...(view.colVisible || Object.fromEntries(ALL_COLS.map(c=>[c.id,true])))};
+  document.getElementById('viewsWrap').classList.remove('open');
+  document.getElementById('viewsBtnLabel').textContent = `⊞ ${name}`;
+  renderListHeaders();
+  renderColManager();
+  applyFilters();
+  updateFilterPills();
+}
+
+function deleteView(name, e) {
+  e.stopPropagation();
+  savedViews = savedViews.filter(v => v.name !== name);
+  if (activeViewName === name) { activeViewName = null; document.getElementById('viewsBtnLabel').textContent = '⊞ Views'; }
+  saveViews();
+  renderViewsList();
+}
+
+function renderViewsList() {
+  const el = document.getElementById('savedViewsList');
+  if (!el) return;
+  if (savedViews.length === 0) { el.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 6px">No saved views yet</div>'; return; }
+  el.innerHTML = savedViews.map(v => `
+    <div class="view-item ${activeViewName===v.name?'active-view':''}" onclick="applyView('${v.name.replace(/'/g,"\'")}')">
+      <span>${v.name}</span>
+      <button class="view-item-del" onclick="deleteView('${v.name.replace(/'/g,"\'")}',event)">✕</button>
+    </div>`).join('');
+}
+
+// ── COLUMN MANAGER ────────────────────────────────
+let dragSrcId = null;
+function renderColManager() {
+  const el = document.getElementById('colManagerList');
+  if (!el) return;
+  el.innerHTML = colOrder.map(id => {
+    const col = ALL_COLS.find(c => c.id === id);
+    if (!col) return '';
+    const locked = LOCKED_COLS.includes(id);
+    return `<div class="col-manager-item${locked?' locked':''}" data-col="${id}" draggable="${!locked}"
+      ondragstart="colDragStart(event,'${id}')" ondragover="colDragOver(event,'${id}')" ondrop="colDrop(event,'${id}')" ondragleave="colDragLeave(event)">
+      <span class="col-drag-handle">${locked?'🔒':'⠿'}</span>
+      <input type="checkbox" ${colVisible[id]?'checked':''} ${locked?'disabled':''} onchange="toggleColVisible('${id}',this.checked)">
+      <span style="font-size:12px">${col.label}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleColVisible(id, visible) {
+  if (LOCKED_COLS.includes(id)) return;
+  colVisible[id] = visible;
+  renderListHeaders();
+  renderList();
+}
+
+function colDragStart(e, id) { dragSrcId = id; e.dataTransfer.effectAllowed = 'move'; }
+function colDragOver(e, id) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; document.querySelector(`[data-col="${id}"]`)?.classList.add('drag-over'); }
+function colDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function colDrop(e, targetId) {
+  e.preventDefault();
+  document.querySelectorAll('.col-manager-item').forEach(el => el.classList.remove('drag-over'));
+  if (!dragSrcId || dragSrcId === targetId) return;
+  if (LOCKED_COLS.includes(dragSrcId) || LOCKED_COLS.includes(targetId)) return;
+  const srcIdx = colOrder.indexOf(dragSrcId);
+  const tgtIdx = colOrder.indexOf(targetId);
+  colOrder.splice(srcIdx, 1);
+  colOrder.splice(tgtIdx, 0, dragSrcId);
+  renderColManager();
+  renderListHeaders();
+  renderList();
+}
+
 function setUserUI(name, email, role) {
   document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
   document.getElementById('userName').textContent   = name;
@@ -1419,6 +1779,7 @@ async function restoreSession() {
     currentUser = { token: session.token, email: session.email, sfName: session.sfName, role: session.role };
     setUserUI(session.sfName, session.email, session.role);
     document.getElementById('loginOverlay').style.display = 'none';
+    loadViews();
     loadData();
   } catch(e) {
     console.warn('Session restore error:', e);
@@ -1537,7 +1898,7 @@ function doLogout() {
   allDeals = [];
   filteredDeals = [];
   localStorage.removeItem('crm_session');
-  const sfBtn = document.getElementById('sfSyncBtn');
+  const sfBtn = document.getElementById('sfSyncMenuItem');
   if (sfBtn) sfBtn.style.display = 'none';
   document.getElementById('loginOverlay').style.display = 'flex';
   document.getElementById('kanbanBoard').innerHTML = '<div class="loading"><div class="spinner"></div>Loading pipeline...</div>';
@@ -1599,7 +1960,7 @@ async function doLogin() {
     }));
 
     // Show/hide sync button based on role
-    const sfBtn = document.getElementById('sfSyncBtn');
+    const sfBtn = document.getElementById('sfSyncMenuItem');
     if (sfBtn) sfBtn.style.display = profile.role === 'admin' ? 'flex' : 'none';
 
     // Hide login, show portal
@@ -1629,7 +1990,7 @@ function getGHToken() {
 }
 
 async function triggerSFSync() {
-  const btn   = document.getElementById('sfSyncBtn');
+  const btn   = document.getElementById('sfSyncMenuItem');
   const icon  = document.getElementById('sfSyncIcon');
   const label = document.getElementById('sfSyncLabel');
 
@@ -1680,7 +2041,7 @@ async function triggerSFSync() {
 }
 
 async function pollSyncStatus() {
-  const btn        = document.getElementById('sfSyncBtn');
+  const btn        = document.getElementById('sfSyncMenuItem');
   const icon       = document.getElementById('sfSyncIcon');
   const label      = document.getElementById('sfSyncLabel');
   const triggeredAt = new Date(); // record when we triggered
