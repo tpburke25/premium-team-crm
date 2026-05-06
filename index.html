@@ -551,11 +551,6 @@ function clearFilters() {
   window._dateTo = null;
   selectedStages.clear();
   selectedOwners.clear();
-  renderStageChecks();
-  renderOwnerChecks();
-  Object.keys(colFilters).forEach(col => clearColFilter(col));
-  clearLeadFilter();
-  clearCRFilter();
   applyFilters();
 }
 
@@ -675,7 +670,6 @@ function applyFilters() {
       if (dateFrom && cd < dateFrom) return false;
       if (dateTo   && cd > dateTo)   return false;
     }
-    if (!passesColFilters(d)) return false;
     if (selectedLeadSources.size > 0 && !selectedLeadSources.has(d.lead_source)) return false;
     if (selectedClosedReasons.size > 0 && !selectedClosedReasons.has(d.closed_reason)) return false;
     return true;
@@ -1864,7 +1858,6 @@ async function loadData() {
     }
     allDeals = all;
     await loadActivities();
-    populateOwnerFilter();
     applyFilters();
   } catch(e) {
     console.error('Load failed:', e.message);
