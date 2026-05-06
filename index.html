@@ -537,6 +537,7 @@ let selectedOwners = new Set();
 function populateOwnerFilter() {
   const owners = [...new Set(allDeals.map(d => d.opportunity_owner).filter(Boolean))].sort();
   const dd = document.getElementById('ownerDropdown');
+  if (!dd) return;
   dd.innerHTML = owners.map(o => `
     <div class="ms-option ms-owner-opt" data-owner="${o}" onclick="toggleOwner('${o}')">
       <div class="ms-check"></div>${o}
@@ -971,7 +972,7 @@ function updateStats() {
   const active = filteredDeals.filter(d => d.stage !== 'Lost' && d.stage !== 'Closed Won');
   const totalRate = filteredDeals.reduce((s, d) => s + (parseFloat(d.total_flat_rate)||0), 0);
   const totalLocs = filteredDeals.reduce((s, d) => s + (parseInt(d.num_locations)||0), 0);
-  document.getElementById('statsBar').innerHTML = `
+  const sb = document.getElementById('statsBar'); if (!sb) return; sb.innerHTML = `
     <div class="stat-chip"><div class="stat-dot" style="background:var(--accent)"></div><strong>${filteredDeals.length}</strong> deals</div>
     <div class="stat-chip"><div class="stat-dot" style="background:var(--accent2)"></div><strong>${active.length}</strong> active</div>
     <div class="stat-chip"><div class="stat-dot" style="background:var(--gold)"></div><strong>${totalLocs.toLocaleString()}</strong> locations</div>
