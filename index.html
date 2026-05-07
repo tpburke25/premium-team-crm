@@ -532,9 +532,9 @@ let selectedOwners = new Set();
 
 
 function clearFilters() {
-  chFilters = {};
-  // Clear ch-filtered class from all headers
-  document.querySelectorAll('.ch-wrap.ch-filtered').forEach(th => th.classList.remove('ch-filtered'));
+  Object.keys(checkFilters).forEach(k => delete checkFilters[k]);
+  Object.keys(numFilters).forEach(k => delete numFilters[k]);
+  document.querySelectorAll('.th-filtered').forEach(th => th.classList.remove('th-filtered'));
   activeViewName = null;
   const vbl = document.getElementById('viewsBtnLabel');
   if (vbl) vbl.textContent = '⊞ Views';
@@ -627,8 +627,14 @@ function applyFilters() {
 
   filteredDeals = allDeals.filter(d => {
     // Column header filters (stage, owner, close date, locs, days, lead source)
-    for (const id of Object.keys(chFilters)) {
-      if (!passesChFilter(id, d)) return false;
+    for (const col of ['stage','opportunity_owner','account_name','lead_source']) {
+      if (checkFilters[col] && checkFilters[col].size > 0 && !checkFilters[col].has(d[col === 'stage' ? 'stage' : col === 'opportunity_owner' ? 'opportunity_owner' : col === 'account_name' ? 'account_name' : 'lead_source'])) return false;
+    }
+    if (!passesNum('num_locations', d.num_locations)) return false;
+    if (!passesNum('days_since_activity', d.days_since_activity)) return false;
+    if (numFilters['close_date']) {
+      if (!d.close_date) return false;
+      if (!passesDateCF(d.close_date, numFilters['close_date'])) return false;
     }
     // Search
     if (search) {
@@ -644,7 +650,7 @@ function applyFilters() {
     return true;
   });
 
-  const hasFilter = search || Object.keys(chFilters).length > 0;
+  const hasFilter = search || Object.values(checkFilters).some(s => s.size > 0) || Object.keys(numFilters).length > 0;
   const cb = document.getElementById('clearBtn');
   if (cb) cb.style.display = hasFilter ? 'inline-block' : 'none';
 
@@ -1088,7 +1094,9 @@ const ALL_COLS = [
 
 let colOrder   = ALL_COLS.map(c => c.id);
 let colVisible = Object.fromEntries(ALL_COLS.map(c => [c.id, true]));
-let chFilters  = {}; // col -> { type, values/op/val/from/to }
+const checkFilters = {};
+const numFilters = {};
+const cfValues = {};
 let savedViews = [];
 let activeViewName = null;
 
@@ -1101,212 +1109,109 @@ function renderListHeaders() {
   if (!colVisible || Object.keys(colVisible).length === 0)
     colVisible = Object.fromEntries(ALL_COLS.map(c => [c.id, true]));
 
+  // Build cfValues for check columns
+  ['stage','opportunity_owner','account_name','lead_source'].forEach(col => {
+    cfValues[col] = [...new Set(allDeals.map(d => d[col]).filter(Boolean))].sort();
+  });
+
   const visibleCols = colOrder.filter(id => colVisible[id]);
-  const cells = visibleCols.map(id => {
+  row.innerHTML = visibleCols.map(id => {
     const col = ALL_COLS.find(c => c.id === id);
     if (!col) return '';
-    const isFiltered = !!chFilters[id] && (
-      (chFilters[id].values && chFilters[id].values.size > 0) ||
-      (chFilters[id].op && chFilters[id].val !== undefined) ||
-      chFilters[id].from || chFilters[id].to
-    );
-    const cls = 'ch-wrap' + (isFiltered ? ' ch-filtered' : '');
-    const arrow = '<span class="sort-arrow" id="sort-' + id + '"></span>';
-    let filterBtn = '';
+    const sel = checkFilters[id];
+    const nf  = numFilters[id];
+    const filtered = (sel && sel.size > 0) || (nf && (nf.op || nf.preset));
+    const thCls = filtered ? 'th-filtered' : '';
+    const arrow = `<span class="sort-arrow" id="sort-${id}"></span>`;
+
     if (col.type === 'check') {
-      filterBtn = '<span class="ch-filter-btn" onclick="event.stopPropagation();openChFilter(\'' + id + '\')">▾</span>' +
-        '<div class="ch-filter-dd" id="chdd-' + id + '">' +
-          '<div class="cf-title">' + col.label + '</div>' +
-          '<input class="cf-search" id="chsearch-' + id + '" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderChList(\'' + id + '\')">' +
-          '<span class="cf-sel-all" onclick="event.stopPropagation();toggleAllChAndRefresh(\'' + id + '\')">Select / Deselect all</span>' +
-          '<div class="cf-list" id="chlist-' + id + '"></div>' +
-          '<div class="cf-btns">' +
-            '<button class="cf-apply" onclick="event.stopPropagation();applyChFilter(\'' + id + '\')">Apply</button>' +
-            '<button class="cf-clr" onclick="event.stopPropagation();clearChFilter(\'' + id + '\')">Clear</button>' +
-          '</div>' +
-        '</div>';
+      return `<th class="${thCls}" id="cfth-${id}" onclick="sortList('${id}')">
+        ${col.label} ${arrow}
+        <span class="cf-btn" onclick="event.stopPropagation();openCF('${id}','check')">▾</span>
+        <div class="cf-dd" id="cf-${id}">
+          <div class="cf-title">${col.label}</div>
+          <input class="cf-search" id="cfs-${id}" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('${id}')">
+          <span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('${id}')">Select / Deselect all</span>
+          <div class="cf-list" id="cfl-${id}"></div>
+          <div class="cf-btns">
+            <button class="cf-apply" onclick="event.stopPropagation();applyCF('${id}')">Apply</button>
+            <button class="cf-clr" onclick="event.stopPropagation();clearCF('${id}')">Clear</button>
+          </div>
+        </div>
+      </th>`;
     } else if (col.type === 'num') {
-      filterBtn = '<span class="ch-filter-btn" onclick="event.stopPropagation();openChFilter(\'' + id + '\')">▾</span>' +
-        '<div class="ch-filter-dd" id="chdd-' + id + '">' +
-          '<div class="cf-title">' + col.label + '</div>' +
-          '<select class="cf-num-op" id="chop-' + id + '"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select>' +
-          '<input class="cf-num-val" id="chval-' + id + '" type="number" min="0" placeholder="e.g. 14">' +
-          '<div class="cf-btns">' +
-            '<button class="cf-apply" onclick="event.stopPropagation();applyChNumFilter(\'' + id + '\')">Apply</button>' +
-            '<button class="cf-clr" onclick="event.stopPropagation();clearChFilter(\'' + id + '\')">Clear</button>' +
-          '</div>' +
-        '</div>';
+      return `<th class="${thCls}" id="cfth-${id}" onclick="sortList('${id}')">
+        ${col.label} ${arrow}
+        <span class="cf-btn" onclick="event.stopPropagation();openCF('${id}','num')">▾</span>
+        <div class="cf-dd" id="cf-${id}">
+          <div class="cf-title">${col.label}</div>
+          <select class="cf-num-op" id="cfop-${id}" onclick="event.stopPropagation()"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select>
+          <input class="cf-num-val" id="cfval-${id}" type="number" min="0" placeholder="e.g. 5" onclick="event.stopPropagation()">
+          <div class="cf-btns">
+            <button class="cf-apply" onclick="event.stopPropagation();applyNumCF('${id}')">Apply</button>
+            <button class="cf-clr" onclick="event.stopPropagation();clearNumCF('${id}')">Clear</button>
+          </div>
+        </div>
+      </th>`;
     } else if (col.type === 'date') {
-      filterBtn = '<span class="ch-filter-btn" onclick="event.stopPropagation();openChFilter(\'' + id + '\')">▾</span>' +
-        '<div class="ch-filter-dd" id="chdd-' + id + '">' +
-          '<div class="cf-title">' + col.label + '</div>' +
-          '<select class="cf-num-op" id="chpreset-' + id + '" onchange="applyChDatePreset(\'' + id + '\')">' +
-            '<option value="">All dates</option>' +
-            '<optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option><option value="this_quarter">This Quarter</option><option value="this_year">This Year</option></optgroup>' +
-            '<optgroup label="Future"><option value="next_month">Next Month</option><option value="next_30">Next 30 Days</option><option value="next_60">Next 60 Days</option><option value="next_90">Next 90 Days</option><option value="future_all">All Future</option></optgroup>' +
-            '<option value="custom">Custom range...</option>' +
-          '</select>' +
-          '<div id="chcustom-' + id + '" style="display:none">' +
-            '<input class="cf-date-input" id="chfrom-' + id + '" type="date">' +
-            '<input class="cf-date-input" id="chto-' + id + '" type="date">' +
-          '</div>' +
-          '<div class="cf-btns">' +
-            '<button class="cf-apply" onclick="applyChDateFilter(\'' + id + '\')">Apply</button>' +
-            '<button class="cf-clr" onclick="clearChFilter(\'' + id + '\')">Clear</button>' +
-          '</div>' +
-        '</div>';
+      return `<th class="${thCls}" id="cfth-${id}" onclick="sortList('${id}')">
+        ${col.label} ${arrow}
+        <span class="cf-btn" onclick="event.stopPropagation();openCF('${id}','date')">▾</span>
+        <div class="cf-dd" id="cf-${id}">
+          <div class="cf-title">${col.label}</div>
+          <select class="cf-num-op" id="cfpreset-${id}" onclick="event.stopPropagation()" onchange="handleDatePreset('${id}')">
+            <option value="">All dates</option>
+            <optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option><option value="this_quarter">This Quarter</option><option value="this_year">This Year</option></optgroup>
+            <optgroup label="Future"><option value="next_month">Next Month</option><option value="next_30">Next 30 Days</option><option value="next_60">Next 60 Days</option><option value="next_90">Next 90 Days</option><option value="future_all">All Future</option></optgroup>
+            <option value="custom">Custom range...</option>
+          </select>
+          <div id="cfcustom-${id}" style="display:none">
+            <input class="cf-date-input" id="cffrom-${id}" type="date" onclick="event.stopPropagation()">
+            <input class="cf-date-input" id="cfto-${id}" type="date" onclick="event.stopPropagation()">
+          </div>
+          <div class="cf-btns">
+            <button class="cf-apply" onclick="event.stopPropagation();applyDateCF('${id}')">Apply</button>
+            <button class="cf-clr" onclick="event.stopPropagation();clearNumCF('${id}')">Clear</button>
+          </div>
+        </div>
+      </th>`;
+    } else {
+      return `<th onclick="sortList('${id}')">${col.label} ${arrow}</th>`;
     }
-    return '<th class="' + cls + '" id="chth-' + id + '" onclick="sortList(\'' + id + '\')">' +
-      col.label + ' ' + arrow + filterBtn + '</th>';
-  });
-  row.innerHTML = cells.join('');
+  }).join('');
 }
+
+function handleDatePreset(id) {
+  const preset = document.getElementById('cfpreset-' + id)?.value;
+  const div = document.getElementById('cfcustom-' + id);
+  if (div) div.style.display = preset === 'custom' ? 'block' : 'none';
+}
+
+function applyDateCF(id) {
+  const preset = document.getElementById('cfpreset-' + id)?.value;
+  const from   = document.getElementById('cffrom-' + id)?.value;
+  const to     = document.getElementById('cfto-' + id)?.value;
+  if (!preset) { delete numFilters[id]; }
+  else if (preset === 'custom') { if (from || to) numFilters[id] = { preset: 'custom', from, to }; }
+  else { numFilters[id] = { preset }; }
+  const th = document.getElementById('cfth-' + id);
+  if (th) th.classList.toggle('th-filtered', !!numFilters[id]);
+  document.getElementById('cf-' + id)?.classList.remove('open');
+  applyFilters(); updateFilterPills();
+}
+
 
 // ── COLUMN FILTER LOGIC ────────────────────────────
-function openChFilter(id) {
-  const dd = document.getElementById('chdd-' + id);
-  if (!dd) return;
-  const isOpen = dd.classList.contains('open');
-  document.querySelectorAll('.ch-filter-dd.open').forEach(d => d.classList.remove('open'));
-  if (!isOpen) {
-    dd.classList.add('open');
-    const col = ALL_COLS.find(c => c.id === id);
-    if (col && col.type === 'check') renderChList(id);
-  }
-}
-document.addEventListener('click', e => {
-  // Only close if click is outside both the th header and the dropdown
-  if (!e.target.closest('th') && !e.target.closest('.ch-filter-dd'))
-    document.querySelectorAll('.ch-filter-dd.open').forEach(d => d.classList.remove('open'));
-});
 
-function getChValues(id) {
-  const vals = new Set();
-  allDeals.forEach(d => {
-    const v = id === 'stage' ? d.stage : id === 'opportunity_owner' ? d.opportunity_owner :
-              id === 'account_name' ? d.account_name : id === 'lead_source' ? d.lead_source : null;
-    if (v) vals.add(v);
-  });
-  return [...vals].sort();
-}
 
-function renderChList(id) {
-  const search = (document.getElementById('chsearch-' + id)?.value || '').toLowerCase();
-  const sel = chFilters[id]?.values || new Set();
-  const vals = getChValues(id).filter(v => v.toLowerCase().includes(search));
-  const el = document.getElementById('chlist-' + id);
-  if (!el) return;
-  el.innerHTML = vals.map(v => `
-    <div class="cf-item ${sel.has(v)?'sel':''}" onclick="toggleChItem('${id}','${v.replace(/'/g,"\'")}')">
-      <div class="cf-chk">${sel.has(v)?'✓':''}</div>${v}
-    </div>`).join('');
-}
 
-function toggleChItem(id, val, el) {
-  if (!chFilters[id]) chFilters[id] = { type: 'check', values: new Set() };
-  if (chFilters[id].values.has(val)) {
-    chFilters[id].values.delete(val);
-    el.classList.remove('sel');
-    el.querySelector('.cf-chk').textContent = '';
-  } else {
-    chFilters[id].values.add(val);
-    el.classList.add('sel');
-    el.querySelector('.cf-chk').textContent = '✓';
-  }
-}
 
-function toggleAllCh(id) {
-  const search = (document.getElementById('chsearch-' + id)?.value || '').toLowerCase();
-  const visible = getChValues(id).filter(v => v.toLowerCase().includes(search));
-  if (!chFilters[id]) chFilters[id] = { type: 'check', values: new Set() };
-  const allSel = visible.every(v => chFilters[id].values.has(v));
-  visible.forEach(v => allSel ? chFilters[id].values.delete(v) : chFilters[id].values.add(v));
-  renderChList(id);
-}
-function toggleAllChAndRefresh(id) {
-  toggleAllCh(id);
-}
 
-function applyChFilter(id) {
-  // Update the th highlight without rebuilding headers
-  const th = document.getElementById('chth-' + id);
-  const hasFilter = chFilters[id]?.values?.size > 0;
-  if (th) th.classList.toggle('ch-filtered', hasFilter);
-  document.getElementById('chdd-' + id)?.classList.remove('open');
-  applyFilters();
-  updateFilterPills();
-}
 
-function applyChNumFilter(id) {
-  const op  = document.getElementById('chop-' + id)?.value;
-  const val = document.getElementById('chval-' + id)?.value;
-  if (op && val !== '') chFilters[id] = { type: 'num', op, val: parseFloat(val) };
-  const th = document.getElementById('chth-' + id);
-  if (th) th.classList.toggle('ch-filtered', !!(chFilters[id]?.op));
-  document.getElementById('chdd-' + id)?.classList.remove('open');
-  applyFilters();
-  updateFilterPills();
-}
 
-function applyChDatePreset(id) {
-  const preset = document.getElementById('chpreset-' + id)?.value;
-  const customDiv = document.getElementById('chcustom-' + id);
-  if (customDiv) customDiv.style.display = preset === 'custom' ? 'block' : 'none';
-  if (preset && preset !== 'custom') {
-    chFilters[id] = { type: 'date', preset };
-  }
-}
 
-function applyChDateFilter(id) {
-  const preset = document.getElementById('chpreset-' + id)?.value;
-  const from   = document.getElementById('chfrom-' + id)?.value;
-  const to     = document.getElementById('chto-' + id)?.value;
-  if (preset === 'custom') {
-    if (from || to) chFilters[id] = { type: 'date', preset: 'custom', from, to };
-  } else if (preset) {
-    chFilters[id] = { type: 'date', preset };
-  }
-  const th = document.getElementById('chth-' + id);
-  if (th) th.classList.toggle('ch-filtered', !!(chFilters[id]?.preset));
-  document.getElementById('chdd-' + id)?.classList.remove('open');
-  applyFilters();
-  updateFilterPills();
-}
 
-function clearChFilter(id) {
-  delete chFilters[id];
-  const th = document.getElementById('chth-' + id);
-  if (th) th.classList.remove('ch-filtered');
-  document.getElementById('chdd-' + id)?.classList.remove('open');
-  applyFilters();
-  updateFilterPills();
-}
 
-function passesChFilter(id, deal) {
-  const f = chFilters[id];
-  if (!f) return true;
-  if (f.type === 'check') {
-    if (!f.values || f.values.size === 0) return true;
-    const v = id === 'stage' ? deal.stage : id === 'opportunity_owner' ? deal.opportunity_owner :
-              id === 'account_name' ? deal.account_name : id === 'lead_source' ? deal.lead_source : null;
-    return f.values.has(v);
-  }
-  if (f.type === 'num') {
-    const v = parseFloat(id === 'num_locations' ? deal.num_locations : deal.days_since_activity);
-    if (isNaN(v)) return false;
-    if (f.op === 'gt')  return v >  f.val;
-    if (f.op === 'gte') return v >= f.val;
-    if (f.op === 'lt')  return v <  f.val;
-    if (f.op === 'lte') return v <= f.val;
-    if (f.op === 'eq')  return v === f.val;
-  }
-  if (f.type === 'date') {
-    const dateStr = deal.close_date;
-    if (!dateStr) return false;
-    return passesDateFilter(dateStr, f);
-  }
-  return true;
-}
 
 function passesDateFilter(dateStr, f) {
   const d = new Date(dateStr);
@@ -1882,6 +1787,123 @@ async function loadData() {
 
 }
 restoreSession();
+
+
+function openCF(col,type){
+  document.querySelectorAll('.cf-dd.open').forEach(d=>d.classList.remove('open'));
+  const dd=document.getElementById('cf-'+col);
+  dd.classList.add('open');
+  if(type==='check') renderCFList(col);
+}
+
+function renderCFList(col){
+  const search=(document.getElementById('cfs-'+col)?.value||'').toLowerCase();
+  const sel=checkFilters[col]||new Set();
+  const vals=(cfValues[col]||[]).filter(v=>v.toLowerCase().includes(search));
+  document.getElementById('cfl-'+col).innerHTML=vals.map(v=>`
+    <div class="cf-item ${sel.has(v)?'sel':''}" onclick="event.stopPropagation();toggleCFItem('${col}','${v.replace(/'/g,"\\'")}')">
+      <div class="cf-chk">${sel.has(v)?'✓':''}</div>${v}
+    </div>`).join('');
+}
+
+function toggleCFItem(col,val){
+  if(!checkFilters[col]) checkFilters[col]=new Set();
+  if(checkFilters[col].has(val)) checkFilters[col].delete(val); else checkFilters[col].add(val);
+  renderCFList(col);
+}
+
+function toggleAllCF(col){
+  const search=(document.getElementById('cfs-'+col)?.value||'').toLowerCase();
+  const visible=(cfValues[col]||[]).filter(v=>v.toLowerCase().includes(search));
+  if(!checkFilters[col]) checkFilters[col]=new Set();
+  const allSel=visible.every(v=>checkFilters[col].has(v));
+  visible.forEach(v=>allSel?checkFilters[col].delete(v):checkFilters[col].add(v));
+  renderCFList(col);
+}
+
+function applyCF(col){
+  const th=document.getElementById('cf-'+col).closest('th');
+  if(th) th.classList.toggle('th-filtered',checkFilters[col]?.size>0);
+  document.querySelectorAll('.cf-dd.open').forEach(d=>d.classList.remove('open'));
+  applyFilters();
+}
+
+function clearCF(col){
+  if(checkFilters[col]) checkFilters[col].clear();
+  const th=document.getElementById('cf-'+col).closest('th');
+  if(th) th.classList.remove('th-filtered');
+  renderCFList(col);
+  document.querySelectorAll('.cf-dd.open').forEach(d=>d.classList.remove('open'));
+  applyFilters();
+}
+
+function applyNumCF(col){
+  const op=document.getElementById('cfop-'+col).value,val=parseFloat(document.getElementById('cfval-'+col).value);
+  if(op&&!isNaN(val)){numFilters[col]={op,val};const th=document.getElementById('cf-'+col).closest('th');if(th) th.classList.add('th-filtered');}
+  document.querySelectorAll('.cf-dd.open').forEach(d=>d.classList.remove('open'));
+  applyFilters();
+}
+
+function clearNumCF(col){
+  delete numFilters[col];
+  document.getElementById('cfop-'+col).value=''; document.getElementById('cfval-'+col).value='';
+  const th=document.getElementById('cf-'+col).closest('th');
+  if(th) th.classList.remove('th-filtered');
+  document.querySelectorAll('.cf-dd.open').forEach(d=>d.classList.remove('open'));
+  applyFilters();
+}
+
+function passesNum(col,val){
+  const f=numFilters[col]; if(!f) return true;
+  const v=parseFloat(val); if(isNaN(v)) return false;
+  if(f.op==='gt') return v>f.val; if(f.op==='gte') return v>=f.val;
+  if(f.op==='lt') return v<f.val; if(f.op==='lte') return v<=f.val;
+  if(f.op==='eq') return v===f.val; return true;
+}
+
+function clearAllCFFilters(){
+  document.getElementById('searchInput').value='';
+  ['fts_id','account_name','industry','accounting_package','city','state'].forEach(col=>{
+    if(checkFilters[col]) checkFilters[col].clear();
+    const th=document.getElementById('cfth-'+col); if(th) th.classList.remove('th-filtered');
+  });
+  ['days_since_activity','open_opps','open_tasks'].forEach(col=>{
+    delete numFilters[col];
+    const op=document.getElementById('cfop-'+col),vl=document.getElementById('cfval-'+col);
+    if(op) op.value=''; if(vl) vl.value='';
+    const th=document.getElementById('cfth-'+col); if(th) th.classList.remove('th-filtered');
+  });
+  applyFilters();
+}
+function passesDateCF(dateStr, f) {
+  const d = new Date(dateStr);
+  const now = new Date(); now.setHours(0,0,0,0);
+  const p = f.preset;
+  if (p === 'custom') {
+    if (f.from && dateStr < f.from) return false;
+    if (f.to && dateStr > f.to) return false;
+    return true;
+  }
+  const start = new Date(now), end = new Date(now);
+  if (p === 'this_month')  { start.setDate(1); end.setMonth(end.getMonth()+1,0); }
+  else if (p === 'last_30') { start.setDate(start.getDate()-30); }
+  else if (p === 'last_60') { start.setDate(start.getDate()-60); }
+  else if (p === 'last_90') { start.setDate(start.getDate()-90); }
+  else if (p === 'this_quarter') { const q=Math.floor(now.getMonth()/3); start.setMonth(q*3,1); end.setMonth(q*3+3,0); }
+  else if (p === 'this_year') { start.setMonth(0,1); end.setMonth(11,31); }
+  else if (p === 'next_month') { start.setDate(start.getDate()+1); end.setMonth(end.getMonth()+1,0); }
+  else if (p === 'next_30') { start.setDate(start.getDate()+1); end.setDate(end.getDate()+30); }
+  else if (p === 'next_60') { start.setDate(start.getDate()+1); end.setDate(end.getDate()+60); }
+  else if (p === 'next_90') { start.setDate(start.getDate()+1); end.setDate(end.getDate()+90); }
+  else if (p === 'future_all') { start.setDate(start.getDate()+1); end.setFullYear(end.getFullYear()+10); }
+  return d >= start && d <= end;
+}
+
+// Close CF dropdowns when clicking outside
+document.addEventListener('click', e => {
+  if (!e.target.closest('th')) 
+    document.querySelectorAll('.cf-dd.open').forEach(d => d.classList.remove('open'));
+});
 </script>
 </body>
 </html>
