@@ -184,6 +184,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .cf-clear-btn { padding: 5px 12px; background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
 .th-filtered { color: var(--accent) !important; }
 .list-table th { position: relative; }
+.clear-btn { padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text3); font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
+.clear-btn:hover { background: var(--surface2); color: var(--red); border-color: var(--red); }
 </style>
 </head>
 <body>
@@ -233,7 +235,7 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
       <button class="tab-btn" id="tabCal" onclick="switchView('calendar')">📅 Month</button>
       <button class="tab-btn" id="tabWeek" onclick="switchView('week')">📋 Work Week</button>
     </div>
-    <button class="clear-btn" id="clearBtn" onclick="clearAllFilters()" style="display:none">✕ Clear filters</button>
+    <button class="clear-btn" id="clearBtn" onclick="clearFilters()" style="display:none">✕ Clear filters</button>
   </div>
   <div class="stats-bar" id="statsBar"></div>
 </div>
@@ -591,6 +593,17 @@ function openPanel(id){
   document.getElementById('detailPanel').classList.add('open');
 }
 function closePanel(){document.getElementById('panelOverlay').classList.remove('open');document.getElementById('detailPanel').classList.remove('open');}
+
+function clearFilters() {
+  Object.keys(checkFilters).forEach(k => { if(checkFilters[k]) checkFilters[k].clear(); });
+  Object.keys(numFilters).forEach(k => delete numFilters[k]);
+  document.querySelectorAll('.th-filtered').forEach(th => th.classList.remove('th-filtered'));
+  const si = document.getElementById('taskSearch'); if (si) si.value = '';
+  // Reset any date preset selects
+  document.querySelectorAll('[id^="cfpreset-"]').forEach(el => el.value = '');
+  document.querySelectorAll('[id^="cfcustom-"]').forEach(el => el.style.display = 'none');
+  applyFilters();
+}
 
 restoreSession();
 
