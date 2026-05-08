@@ -398,12 +398,11 @@ async function loadTasks() {
     allTasks = all;
     document.getElementById('loadingMsg').style.display = 'none';
     document.getElementById('taskTable').style.display = 'table';
-    populateFilters();
     applyFilters();
   } catch(e) { console.error('Tasks load error:', e); }
 }
 
-document.addEventListener('click', e => { document.querySelectorAll('.ms-wrap').forEach(w => { if (!w.contains(e.target)) w.classList.remove('open'); }); });
+
 
 
 
