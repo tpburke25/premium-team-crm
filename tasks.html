@@ -160,6 +160,30 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .spinner { width: 28px; height: 28px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 14px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .hidden { display: none !important; }
+
+/* Column filter dropdowns - same pattern as Opportunities and Accounts */
+.cf-btn { margin-left: 3px; opacity: 0.4; cursor: pointer; font-size: 10px; vertical-align: middle; }
+.cf-btn:hover { opacity: 1; color: var(--accent); }
+.cf-dd { position: absolute; top: calc(100% + 4px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 8px; min-width: 200px; z-index: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.cf-dd.open { display: block; }
+.cf-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); margin-bottom: 6px; font-weight: 500; }
+.cf-search { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 5px; }
+.cf-list { max-height: 160px; overflow-y: auto; margin-bottom: 6px; }
+.cf-item { display: flex; align-items: center; gap: 7px; padding: 5px 6px; border-radius: 4px; font-size: 12px; color: var(--text2); cursor: pointer; }
+.cf-item:hover { background: var(--surface3); color: var(--text); }
+.cf-item.sel { color: var(--text); }
+.cf-chk { width: 13px; height: 13px; border: 1px solid var(--border2); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; }
+.cf-item.sel .cf-chk { background: var(--accent); border-color: var(--accent); color: #fff; }
+.cf-sel-all { font-size: 11px; color: var(--text3); cursor: pointer; display: block; margin-bottom: 5px; }
+.cf-sel-all:hover { color: var(--accent); }
+.cf-num-op { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 5px; }
+.cf-num-val { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Mono', monospace; outline: none; margin-bottom: 8px; }
+.cf-date-input { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 5px; }
+.cf-btns { display: flex; gap: 6px; }
+.cf-apply { padding: 5px 12px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.cf-clear-btn { padding: 5px 12px; background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.th-filtered { color: var(--accent) !important; }
+.list-table th { position: relative; }
 </style>
 </head>
 <body>
@@ -204,18 +228,12 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
 <div class="toolbar">
   <div class="toolbar-left">
     <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" id="taskSearch" placeholder="Search tasks, accounts..." oninput="applyFilters()"></div>
-    <select class="filter-select" id="statusFilter" onchange="applyFilters()">
-      <option value="open">Open tasks</option>
-      <option value="">All tasks</option>
-      <option value="Completed">Completed</option>
-    </select>
-    <div class="ms-wrap" id="typeWrap"><div class="ms-btn" id="typeBtn" onclick="toggleMs('typeWrap')"><span id="typeBtnLabel">All types</span><span style="font-size:10px;opacity:.5">▾</span></div><div class="ms-dropdown" id="typeDropdown"></div></div>
-    <div class="ms-wrap" id="ownerWrap"><div class="ms-btn" id="ownerBtn" onclick="toggleMs('ownerWrap')"><span id="ownerBtnLabel">All reps</span><span style="font-size:10px;opacity:.5">▾</span></div><div class="ms-dropdown" id="ownerDropdown"></div></div>
     <div class="tab-group">
       <button class="tab-btn active" id="tabList" onclick="switchView('list')">≡ List</button>
       <button class="tab-btn" id="tabCal" onclick="switchView('calendar')">📅 Month</button>
       <button class="tab-btn" id="tabWeek" onclick="switchView('week')">📋 Work Week</button>
     </div>
+    <button class="clear-btn" id="clearBtn" onclick="clearAllFilters()" style="display:none">✕ Clear filters</button>
   </div>
   <div class="stats-bar" id="statsBar"></div>
 </div>
@@ -224,14 +242,14 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
   <div class="loading" id="loadingMsg"><div class="spinner"></div>Loading tasks...</div>
   <table class="list-table" id="taskTable" style="display:none">
     <thead><tr>
-      <th onclick="sortBy('due_date')">Due Date <span class="sort-arrow" id="s-due_date"></span></th>
-      <th onclick="sortBy('type')">Type <span class="sort-arrow" id="s-type"></span></th>
+      <th onclick="sortBy('due_date')">Due Date <span class="sort-arrow" id="s-due_date"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('due_date','date')">▾</span><div class="cf-dd" id="cf-due_date"><div class="cf-title">Due Date</div><select class="cf-num-op" id="cfpreset-due_date" onclick="event.stopPropagation()" onchange="handleDatePreset('due_date')"><option value="">All dates</option><optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option></optgroup><optgroup label="Future"><option value="next_month">Next Month</option><option value="next_30">Next 30 Days</option><option value="next_60">Next 60 Days</option><option value="next_90">Next 90 Days</option><option value="future_all">All Future</option></optgroup><option value="custom">Custom range...</option></select><div id="cfcustom-due_date" style="display:none"><input class="cf-date-input" id="cffrom-due_date" type="date" onclick="event.stopPropagation()"><input class="cf-date-input" id="cfto-due_date" type="date" onclick="event.stopPropagation()"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('due_date')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('due_date')">Clear</button></div></div></th>
+      <th onclick="sortBy('type')">Type <span class="sort-arrow" id="s-type"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('type','check')">▾</span><div class="cf-dd" id="cf-type"><div class="cf-title">Type</div><input class="cf-search" id="cfs-type" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('type')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('type')">Select / Deselect all</span><div class="cf-list" id="cfl-type"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('type')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('type')">Clear</button></div></div></th>
       <th onclick="sortBy('subject')">Subject <span class="sort-arrow" id="s-subject"></span></th>
-      <th onclick="sortBy('account_name')">Account <span class="sort-arrow" id="s-account_name"></span></th>
-      <th onclick="sortBy('contact_name')">Primary Contact <span class="sort-arrow" id="s-contact_name"></span></th>
-      <th onclick="sortBy('days_since_activity')">Days Since Act. <span class="sort-arrow" id="s-days_since_activity"></span></th>
-      <th onclick="sortBy('priority')">Priority <span class="sort-arrow" id="s-priority"></span></th>
-      <th onclick="sortBy('assigned_to')">Assigned To <span class="sort-arrow" id="s-assigned_to"></span></th>
+      <th onclick="sortBy('account_name')">Account <span class="sort-arrow" id="s-account_name"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('account_name','check')">▾</span><div class="cf-dd" id="cf-account_name"><div class="cf-title">Account</div><input class="cf-search" id="cfs-account_name" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('account_name')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('account_name')">Select / Deselect all</span><div class="cf-list" id="cfl-account_name"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('account_name')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('account_name')">Clear</button></div></div></th>
+      <th onclick="sortBy('contact_name')">Primary Contact <span class="sort-arrow" id="s-contact_name"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('contact_name','check')">▾</span><div class="cf-dd" id="cf-contact_name"><div class="cf-title">Primary Contact</div><input class="cf-search" id="cfs-contact_name" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('contact_name')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('contact_name')">Select / Deselect all</span><div class="cf-list" id="cfl-contact_name"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('contact_name')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('contact_name')">Clear</button></div></div></th>
+      <th onclick="sortBy('days_since_activity')">Days Since Act. <span class="sort-arrow" id="s-days_since_activity"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('days_since_activity','num')">▾</span><div class="cf-dd" id="cf-days_since_activity"><div class="cf-title">Days Since Act.</div><select class="cf-num-op" id="cfop-days_since_activity" onclick="event.stopPropagation()"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-days_since_activity" type="number" min="0" onclick="event.stopPropagation()"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('days_since_activity')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('days_since_activity')">Clear</button></div></div></th>
+      <th onclick="sortBy('priority')">Priority <span class="sort-arrow" id="s-priority"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('priority','check')">▾</span><div class="cf-dd" id="cf-priority"><div class="cf-title">Priority</div><input class="cf-search" id="cfs-priority" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('priority')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('priority')">Select / Deselect all</span><div class="cf-list" id="cfl-priority"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('priority')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('priority')">Clear</button></div></div></th>
+      <th onclick="sortBy('assigned_to')">Assigned To <span class="sort-arrow" id="s-assigned_to"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('assigned_to','check')">▾</span><div class="cf-dd" id="cf-assigned_to"><div class="cf-title">Assigned To</div><input class="cf-search" id="cfs-assigned_to" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('assigned_to')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('assigned_to')">Select / Deselect all</span><div class="cf-list" id="cfl-assigned_to"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('assigned_to')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('assigned_to')">Clear</button></div></div></th>
     </tr></thead>
     <tbody id="taskBody"></tbody>
   </table>
@@ -270,12 +288,15 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 let currentUser = null;
 let allTasks = [], filteredTasks = [];
+const checkFilters = {};
+const numFilters   = {};
+const cfValues     = {};
 let sortCol = 'due_date', sortDir = 1;
 let currentView = 'list';
 let calViewMode = 'month';
 let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
 let weekStart = null;
-let selectedTypes = new Set(), selectedOwners = new Set();
+
 let activePopup = null;
 
 function toggleTheme() {
@@ -382,56 +403,58 @@ async function loadTasks() {
   } catch(e) { console.error('Tasks load error:', e); }
 }
 
-function toggleMs(wrapId) {
-  const wrap = document.getElementById(wrapId);
-  const isOpen = wrap.classList.contains('open');
-  document.querySelectorAll('.ms-wrap.open').forEach(w => w.classList.remove('open'));
-  if (!isOpen) wrap.classList.add('open');
-}
 document.addEventListener('click', e => { document.querySelectorAll('.ms-wrap').forEach(w => { if (!w.contains(e.target)) w.classList.remove('open'); }); });
 
-function populateFilters() {
-  const types  = [...new Set(allTasks.map(t => t.type).filter(Boolean))].sort();
-  const owners = [...new Set(allTasks.map(t => t.assigned_to).filter(Boolean))].sort();
-  renderMs('typeDropdown', types, selectedTypes, 'type');
-  renderMs('ownerDropdown', owners, selectedOwners, 'owner');
-}
 
-function renderMs(ddId, values, sel, kind) {
-  document.getElementById(ddId).innerHTML = values.map(v => `
-    <div class="ms-option ${sel.has(v)?'sel':''}" onclick="toggleMsOpt('${kind}','${v.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">
-      <div class="ms-chk">${sel.has(v)?'✓':''}</div>${v}
-    </div>`).join('');
-}
 
-function toggleMsOpt(kind, val) {
-  const sel = kind==='type' ? selectedTypes : selectedOwners;
-  if (sel.has(val)) sel.delete(val); else sel.add(val);
-  const values = [...new Set(allTasks.map(t => kind==='type'?t.type:t.assigned_to).filter(Boolean))].sort();
-  renderMs(kind==='type'?'typeDropdown':'ownerDropdown', values, sel, kind);
-  const lbl = document.getElementById(kind==='type'?'typeBtnLabel':'ownerBtnLabel');
-  const btn = document.getElementById(kind==='type'?'typeBtn':'ownerBtn');
-  const label = kind==='type'?'All types':'All reps';
-  const plural = kind==='type'?'Types':'Reps';
-  if (sel.size===0) { lbl.innerHTML=label; btn.classList.remove('active'); }
-  else if (sel.size===1) { lbl.innerHTML=[...sel][0]; btn.classList.add('active'); }
-  else { lbl.innerHTML=`${plural} <span class="ms-badge">${sel.size}</span>`; btn.classList.add('active'); }
-  applyFilters();
-}
 
 function applyFilters() {
-  const search = document.getElementById('taskSearch').value.toLowerCase();
-  const status = document.getElementById('statusFilter').value;
+  const search = (document.getElementById('taskSearch')?.value || '').toLowerCase();
+  const today  = new Date().toISOString().slice(0,10);
+
   filteredTasks = allTasks.filter(t => {
-    if (search) { const hay=[t.subject,t.account_name,t.contact_name,t.assigned_to,t.type,t.comments,t.fts_id].map(v=>(v||'').toLowerCase()).join(' '); if (!hay.includes(search)) return false; }
-    if (status==='open' && t.status==='Completed') return false;
-    if (status==='Completed' && t.status!=='Completed') return false;
-    if (selectedTypes.size>0 && !selectedTypes.has(t.type)) return false;
-    if (selectedOwners.size>0 && !selectedOwners.has(t.assigned_to)) return false;
+    // Checkbox filters
+    for (const col of Object.keys(checkFilters)) {
+      const sel = checkFilters[col];
+      if (!sel || sel.size === 0) continue;
+      const val = t[col];
+      if (!sel.has(val)) return false;
+    }
+    // Numeric / date filters
+    for (const col of Object.keys(numFilters)) {
+      const f = numFilters[col];
+      if (!f) continue;
+      if (f.preset !== undefined) {
+        if (!t.due_date) return false;
+        if (!passesDateCF(t.due_date, f)) return false;
+      } else if (f.op) {
+        const v = parseFloat(t[col]);
+        if (isNaN(v)) return false;
+        if (f.op === 'gt'  && !(v >  f.val)) return false;
+        if (f.op === 'gte' && !(v >= f.val)) return false;
+        if (f.op === 'lt'  && !(v <  f.val)) return false;
+        if (f.op === 'lte' && !(v <= f.val)) return false;
+        if (f.op === 'eq'  && !(v === f.val)) return false;
+      }
+    }
+    // Search
+    if (search) {
+      const hay = [t.subject, t.account_name, t.contact_name, t.assigned_to, t.type, t.comments, t.fts_id]
+        .map(v => (v||'').toLowerCase()).join(' ');
+      if (!hay.includes(search)) return false;
+    }
     return true;
   });
-  updateStats(); renderList();
-  if (currentView==='calendar'||currentView==='week') renderCalendar();
+
+  const hasFilter = search ||
+    Object.values(checkFilters).some(s => s && s.size > 0) ||
+    Object.keys(numFilters).length > 0;
+  const cb = document.getElementById('clearBtn');
+  if (cb) cb.style.display = hasFilter ? 'inline-block' : 'none';
+
+  updateStats();
+  renderList();
+  if (currentView === 'calendar' || currentView === 'week') renderCalendar();
 }
 
 function updateStats() {
@@ -571,6 +594,135 @@ function openPanel(id){
 function closePanel(){document.getElementById('panelOverlay').classList.remove('open');document.getElementById('detailPanel').classList.remove('open');}
 
 restoreSession();
+
+// ── COLUMN FILTERS (same pattern as Opportunities/Accounts) ────────────
+function openCF(col, type) {
+  const dd = document.getElementById('cf-' + col);
+  if (!dd) return;
+  const isOpen = dd.classList.contains('open');
+  document.querySelectorAll('.cf-dd.open').forEach(d => d.classList.remove('open'));
+  if (!isOpen) {
+    dd.classList.add('open');
+    if (type === 'check') {
+      const fieldFn = {
+        type:         t => t.type,
+        account_name: t => t.account_name,
+        contact_name: t => t.contact_name,
+        priority:     t => t.priority,
+        assigned_to:  t => t.assigned_to,
+      };
+      const fn = fieldFn[col];
+      if (fn) cfValues[col] = [...new Set(allTasks.map(fn).filter(Boolean))].sort();
+      renderCFList(col);
+    }
+  }
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('th'))
+    document.querySelectorAll('.cf-dd.open').forEach(d => d.classList.remove('open'));
+});
+
+function renderCFList(col) {
+  const search = (document.getElementById('cfs-' + col)?.value || '').toLowerCase();
+  const sel = checkFilters[col] || new Set();
+  const vals = (cfValues[col] || []).filter(v => v.toLowerCase().includes(search));
+  const el = document.getElementById('cfl-' + col);
+  if (!el) return;
+  el.innerHTML = vals.map(v => `
+    <div class="cf-item ${sel.has(v)?'sel':''}" onclick="event.stopPropagation();toggleCFItem('${col}','${v.replace(/'/g,"\'")}')">
+      <div class="cf-chk">${sel.has(v)?'✓':''}</div>${v}
+    </div>`).join('');
+}
+
+function toggleCFItem(col, val) {
+  if (!checkFilters[col]) checkFilters[col] = new Set();
+  if (checkFilters[col].has(val)) checkFilters[col].delete(val);
+  else checkFilters[col].add(val);
+  renderCFList(col);
+}
+
+function toggleAllCF(col) {
+  const search = (document.getElementById('cfs-' + col)?.value || '').toLowerCase();
+  const visible = (cfValues[col] || []).filter(v => v.toLowerCase().includes(search));
+  if (!checkFilters[col]) checkFilters[col] = new Set();
+  const allSel = visible.every(v => checkFilters[col].has(v));
+  visible.forEach(v => allSel ? checkFilters[col].delete(v) : checkFilters[col].add(v));
+  renderCFList(col);
+}
+
+function applyCF(col) {
+  const dd = document.getElementById('cf-' + col);
+  if (dd) { dd.classList.remove('open'); const th = dd.closest('th'); if (th) th.classList.toggle('th-filtered', (checkFilters[col]?.size||0) > 0); }
+  applyFilters();
+}
+
+function clearCF(col) {
+  if (checkFilters[col]) checkFilters[col].clear();
+  const dd = document.getElementById('cf-' + col);
+  if (dd) { dd.classList.remove('open'); const th = dd.closest('th'); if (th) th.classList.remove('th-filtered'); }
+  applyFilters();
+}
+
+function applyNumCF(col) {
+  const op  = document.getElementById('cfop-' + col)?.value;
+  const val = parseFloat(document.getElementById('cfval-' + col)?.value);
+  if (op && !isNaN(val)) numFilters[col] = {op, val};
+  const dd = document.getElementById('cf-' + col);
+  if (dd) { dd.classList.remove('open'); const th = dd.closest('th'); if (th) th.classList.toggle('th-filtered', !!numFilters[col]); }
+  applyFilters();
+}
+
+function clearNumCF(col) {
+  delete numFilters[col];
+  const op = document.getElementById('cfop-' + col); if (op) op.value = '';
+  const vl = document.getElementById('cfval-' + col); if (vl) vl.value = '';
+  const pr = document.getElementById('cfpreset-' + col); if (pr) pr.value = '';
+  const cu = document.getElementById('cfcustom-' + col); if (cu) cu.style.display = 'none';
+  const dd = document.getElementById('cf-' + col);
+  if (dd) { dd.classList.remove('open'); const th = dd.closest('th'); if (th) th.classList.remove('th-filtered'); }
+  applyFilters();
+}
+
+function handleDatePreset(col) {
+  const preset = document.getElementById('cfpreset-' + col)?.value;
+  const div = document.getElementById('cfcustom-' + col);
+  if (div) div.style.display = preset === 'custom' ? 'block' : 'none';
+}
+
+function applyDateCF(col) {
+  const preset = document.getElementById('cfpreset-' + col)?.value;
+  const from   = document.getElementById('cffrom-' + col)?.value;
+  const to     = document.getElementById('cfto-' + col)?.value;
+  if (!preset) { delete numFilters[col]; }
+  else if (preset === 'custom') { if (from || to) numFilters[col] = {preset: 'custom', from, to}; }
+  else { numFilters[col] = {preset}; }
+  const dd = document.getElementById('cf-' + col);
+  if (dd) { dd.classList.remove('open'); const th = dd.closest('th'); if (th) th.classList.toggle('th-filtered', !!numFilters[col]); }
+  applyFilters();
+}
+
+function passesDateCF(dateStr, f) {
+  const d = new Date(dateStr);
+  const now = new Date(); now.setHours(0,0,0,0);
+  const p = f.preset;
+  if (p === 'custom') {
+    if (f.from && dateStr < f.from) return false;
+    if (f.to   && dateStr > f.to)   return false;
+    return true;
+  }
+  const start = new Date(now), end = new Date(now);
+  if (p === 'this_month')  { start.setDate(1); end.setMonth(end.getMonth()+1,0); }
+  else if (p === 'last_30') { start.setDate(start.getDate()-30); }
+  else if (p === 'last_60') { start.setDate(start.getDate()-60); }
+  else if (p === 'last_90') { start.setDate(start.getDate()-90); }
+  else if (p === 'next_month') { start.setDate(start.getDate()+1); end.setMonth(end.getMonth()+1,0); }
+  else if (p === 'next_30') { start.setDate(start.getDate()+1); end.setDate(end.getDate()+30); }
+  else if (p === 'next_60') { start.setDate(start.getDate()+1); end.setDate(end.getDate()+60); }
+  else if (p === 'next_90') { start.setDate(start.getDate()+1); end.setDate(end.getDate()+90); }
+  else if (p === 'future_all') { start.setDate(start.getDate()+1); end.setFullYear(end.getFullYear()+10); }
+  return d >= start && d <= end;
+}
 </script>
 </body>
 </html>
