@@ -332,6 +332,30 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
 .ch-filter-dd .cf-btns { display: flex; gap: 6px; }
 .ch-filter-dd .cf-apply { padding: 5px 12px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
 .ch-filter-dd .cf-clr { padding: 5px 12px; background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+
+/* Column filter dropdowns */
+.cf-btn { margin-left: 3px; opacity: 0.4; cursor: pointer; font-size: 10px; vertical-align: middle; }
+.cf-btn:hover { opacity: 1; color: var(--accent); }
+.cf-dd { position: absolute; top: calc(100% + 4px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 8px; min-width: 200px; z-index: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.cf-dd.open { display: block; }
+.cf-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); margin-bottom: 6px; font-weight: 500; }
+.cf-search { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 5px; }
+.cf-list { max-height: 160px; overflow-y: auto; margin-bottom: 6px; }
+.cf-item { display: flex; align-items: center; gap: 7px; padding: 5px 6px; border-radius: 4px; font-size: 12px; color: var(--text2); cursor: pointer; }
+.cf-item:hover { background: var(--surface3); color: var(--text); }
+.cf-item.sel { color: var(--text); }
+.cf-chk { width: 13px; height: 13px; border: 1px solid var(--border2); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; }
+.cf-item.sel .cf-chk { background: var(--accent); border-color: var(--accent); color: #fff; }
+.cf-sel-all { font-size: 11px; color: var(--text3); cursor: pointer; display: block; margin-bottom: 5px; }
+.cf-sel-all:hover { color: var(--accent); }
+.cf-num-op { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 5px; }
+.cf-num-val { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Mono', monospace; outline: none; margin-bottom: 8px; }
+.cf-date-input { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 5px; }
+.cf-btns { display: flex; gap: 6px; }
+.cf-apply { padding: 5px 12px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.cf-clear-btn { padding: 5px 12px; background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.th-filtered { color: var(--accent) !important; }
+.list-table th { position: relative; }
 </style>
 </head>
 <body>
@@ -1261,17 +1285,24 @@ function updateFilterPills() {
   const pills = [];
   const search = document.getElementById('searchInput')?.value;
   if (search) pills.push({ label: `Search: ${search}`, clear: () => { document.getElementById('searchInput').value=''; applyFilters(); updateFilterPills(); } });
-  Object.entries(chFilters).forEach(([id, f]) => {
+  // Check filters (checkbox)
+  Object.entries(checkFilters).forEach(([id, sel]) => {
+    if (!sel || sel.size === 0) return;
     const col = ALL_COLS.find(c => c.id === id);
     if (!col) return;
-    if (f.type === 'check' && f.values?.size > 0) {
-      [...f.values].forEach(v => pills.push({ label: `${col.label}: ${v}`, clear: () => { f.values.delete(v); if(f.values.size===0) delete chFilters[id]; renderListHeaders(); applyFilters(); updateFilterPills(); } }));
-    } else if (f.type === 'num' && f.op) {
+    [...sel].forEach(v => pills.push({ label: `${col.label}: ${v}`, clear: () => { sel.delete(v); applyFilters(); updateFilterPills(); } }));
+  });
+  // Numeric / date filters
+  Object.entries(numFilters).forEach(([id, f]) => {
+    if (!f) return;
+    const col = ALL_COLS.find(c => c.id === id);
+    if (!col) return;
+    if (f.preset) {
+      const lbl = f.preset === 'custom' ? `${col.label}: ${f.from||''}–${f.to||''}` : `${col.label}: ${f.preset.replace(/_/g,' ')}`;
+      pills.push({ label: lbl, clear: () => { clearNumCF(id); } });
+    } else if (f.op) {
       const opLabel = {gt:'>',gte:'≥',lt:'<',lte:'≤',eq:'='};
-      pills.push({ label: `${col.label} ${opLabel[f.op]} ${f.val}`, clear: () => { clearChFilter(id); } });
-    } else if (f.type === 'date' && f.preset) {
-      const label = f.preset === 'custom' ? `${col.label}: ${f.from||''}–${f.to||''}` : `${col.label}: ${f.preset.replace(/_/g,' ')}`;
-      pills.push({ label, clear: () => { clearChFilter(id); } });
+      pills.push({ label: `${col.label} ${opLabel[f.op]} ${f.val}`, clear: () => { clearNumCF(id); } });
     }
   });
   if (pills.length === 0) { bar.style.display = 'none'; document.getElementById('clearBtn').style.display = 'none'; return; }
@@ -1301,7 +1332,8 @@ function saveCurrentView() {
   if (!name) return;
   const view = {
     name,
-    chFilters: JSON.parse(JSON.stringify(chFilters, (k,v) => v instanceof Set ? [...v] : v)),
+    checkFilters: JSON.parse(JSON.stringify(checkFilters, (k,v) => v instanceof Set ? [...v] : v)),
+    numFilters: JSON.parse(JSON.stringify(numFilters)),
     listSortCol, listSortDir, colOrder: [...colOrder],
     colVisible: {...colVisible}
   };
@@ -1317,12 +1349,13 @@ function applyView(name) {
   const view = savedViews.find(v => v.name === name);
   if (!view) return;
   activeViewName = name;
-  // Restore chFilters — convert arrays back to Sets
-  chFilters = {};
-  Object.entries(view.chFilters || {}).forEach(([id, f]) => {
-    chFilters[id] = {...f};
-    if (f.values) chFilters[id].values = new Set(f.values);
+  // Restore checkFilters and numFilters
+  Object.keys(checkFilters).forEach(k => delete checkFilters[k]);
+  Object.keys(numFilters).forEach(k => delete numFilters[k]);
+  Object.entries(view.checkFilters || {}).forEach(([id, vals]) => {
+    checkFilters[id] = new Set(vals);
   });
+  Object.assign(numFilters, view.numFilters || {});
   listSortCol = view.listSortCol || 'close_date';
   listSortDir = view.listSortDir || 1;
   colOrder = [...(view.colOrder || ALL_COLS.map(c=>c.id))];
