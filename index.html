@@ -1363,6 +1363,7 @@ function applyView(name) {
   document.getElementById('viewsWrap').classList.remove('open');
   document.getElementById('viewsBtnLabel').textContent = `⊞ ${name}`;
   renderListHeaders();
+  applyColVisibility();
   renderColManager();
   applyFilters();
   updateFilterPills();
@@ -1408,8 +1409,15 @@ function renderColManager() {
 function toggleColVisible(id, visible) {
   if (LOCKED_COLS.includes(id)) return;
   colVisible[id] = visible;
-  renderListHeaders();
+  applyColVisibility();
   renderList();
+}
+
+function applyColVisibility() {
+  ALL_COLS.forEach(col => {
+    const th = document.getElementById('sort-' + col.id)?.closest('th');
+    if (th) th.style.display = colVisible[col.id] ? '' : 'none';
+  });
 }
 
 function colDragStart(e, id) { dragSrcId = id; e.dataTransfer.effectAllowed = 'move'; }
@@ -1828,6 +1836,7 @@ async function loadData() {
     }
     allDeals = all;
     await loadActivities();
+    applyColVisibility();
     renderListHeaders();
     applyFilters();
     updateFilterPills();
