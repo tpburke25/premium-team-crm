@@ -1470,6 +1470,8 @@ async function restoreSession() {
 
     currentUser = { token: session.token, email: session.email, sfName: session.sfName, role: session.role };
     setUserUI(session.sfName, session.email, session.role);
+    const sfBtn = document.getElementById('sfSyncMenuItem');
+    if (sfBtn) sfBtn.style.display = session.role === 'admin' ? 'flex' : 'none';
     document.getElementById('loginOverlay').style.display = 'none';
     loadViews();
     loadData();
