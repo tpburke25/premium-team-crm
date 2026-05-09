@@ -105,6 +105,58 @@ def supabase_upsert(table, rows):
     return upserted
 
 
+# ── SUPABASE DELETE STALE ─────────────────────────────
+def supabase_delete_stale(table, id_field, current_ids):
+    """Delete rows from table whose id_field value is not in current_ids."""
+    headers = {
+        'apikey':        SUPABASE_KEY,
+        'Authorization': f'Bearer {SUPABASE_KEY}',
+        'Content-Type':  'application/json',
+    }
+
+    # Fetch all IDs currently in the table (paginated)
+    existing_ids = []
+    page, size = 0, 1000
+    while True:
+        res = requests.get(
+            f"{SUPABASE_URL}/rest/v1/{table}?select={id_field}&limit={size}&offset={page * size}",
+            headers=headers
+        )
+        if not res.ok:
+            print(f"  Could not fetch existing IDs from {table}: {res.text[:200]}")
+            return 0
+        batch = res.json()
+        if not isinstance(batch, list):
+            break
+        existing_ids.extend(r[id_field] for r in batch if r.get(id_field))
+        if len(batch) < size:
+            break
+        page += 1
+
+    current_set = set(current_ids)
+    stale_ids   = [i for i in existing_ids if i not in current_set]
+
+    if not stale_ids:
+        print(f"  No stale rows to delete from {table}")
+        return 0
+
+    deleted = 0
+    for i in range(0, len(stale_ids), BATCH_SIZE):
+        batch    = stale_ids[i:i + BATCH_SIZE]
+        id_list  = ','.join(f'"{id}"' for id in batch)
+        res = requests.delete(
+            f"{SUPABASE_URL}/rest/v1/{table}?{id_field}=in.({id_list})",
+            headers=headers
+        )
+        if res.ok:
+            deleted += len(batch)
+        else:
+            print(f"  Delete batch error: {res.text[:200]}")
+
+    print(f"  Deleted {deleted} stale rows from {table}")
+    return deleted
+
+
 # ── HELPERS ───────────────────────────────────────────
 def clean_date(val):
     if not val: return None
@@ -245,9 +297,13 @@ def sync_tasks(token, instance):
         })
 
     upserted = supabase_upsert('tbl_tasks', rows)
-    print(f"  ✓ {upserted} tasks upserted to Supabase")
-    return len(rows), upserted
 
+    # Remove any tasks that are no longer open in Salesforce (e.g. completed or deleted)
+    current_ids = [r['activity_id'] for r in rows]
+    deleted     = supabase_delete_stale('tbl_tasks', 'activity_id', current_ids)
+
+    print(f"  ✓ {upserted} tasks upserted, {deleted} stale tasks removed")
+    return len(rows), upserted
 
 
 # ── ACTIVITIES SYNC ──────────────────────────────────
