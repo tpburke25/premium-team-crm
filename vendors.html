@@ -241,6 +241,7 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
         <div class="cf-dd" id="cf-funding"><div class="cf-title">Funding</div><input class="cf-search" id="cfs-funding" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('funding')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('funding')">Select/Deselect all</span><div class="cf-list" id="cfl-funding"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('funding')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('funding')">Clear</button></div></div>
       </th>
       <th>Coverage States <span style="font-size:10px;color:var(--text3);font-weight:400;">(click state pills above to filter)</span></th>
+      <th onclick="sortBy('notes')">Notes <span class="sort-arrow" id="s-notes"></span></th>
     </tr></thead>
     <tbody id="vendorBody"></tbody>
   </table>
@@ -346,6 +347,7 @@ async function loadVendors() {
     const iFunding  = headers.findIndex(h => h === 'funding');
     const iCoverage = headers.findIndex(h => h === 'coverage');
     const iFts      = headers.findIndex(h => h === 'fts' || h === 'fts id' || h === 'fts_id');
+    const iNotes    = headers.findIndex(h => h === 'notes');
 
     allVendors = data.rows.slice(1)
       .filter(r => r[iVendor > -1 ? iVendor : 0]) // skip empty rows
@@ -354,7 +356,8 @@ async function loadVendors() {
         status:   iStatus   > -1 ? String(r[iStatus]||'')   : '',
         funding:  normFunding(iFunding > -1 ? r[iFunding] : ''),
         coverage: iCoverage > -1 ? String(r[iCoverage]||'') : '',
-        fts:      iFts      > -1 ? String(r[iFts]||'')      : ''
+        fts:      iFts      > -1 ? String(r[iFts]||'')      : '',
+        notes:    iNotes    > -1 ? String(r[iNotes]||'')    : ''
       }));
     buildStateList();
     buildCFValues();
@@ -370,8 +373,8 @@ async function loadVendors() {
 
 function normFunding(val) {
   const s = String(val).trim();
-  if (s === '0' || s.toLowerCase() === 'eft') return 'EFT';
-  if (s === '4' || s.toLowerCase().includes('non')) return 'NON-EFT';
+  if (s === '0' || s === '0-day' || s.toLowerCase() === 'eft') return 'EFT';
+  if (s === '4' || s === '4-day' || s.toLowerCase().includes('non')) return 'NON-EFT';
   return s;
 }
 
@@ -539,6 +542,7 @@ function renderTable() {
       <td><span class="status-badge" style="${statusStyle(v.status)}">${v.status||'—'}</span></td>
       <td class="mono">${v.funding||'—'}</td>
       <td class="coverage-cell">${highlightCoverage(v.coverage)}</td>
+      <td style="font-size:12px;color:var(--text3);max-width:220px;">${v.notes||'—'}</td>
     </tr>`).join('');
   document.querySelectorAll('[id^="s-"]').forEach(el=>el.textContent='');
   const arrow=document.getElementById(`s-${sortCol}`); if(arrow) arrow.textContent=sortDir===1?'↑':'↓';
