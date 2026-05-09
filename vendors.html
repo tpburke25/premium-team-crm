@@ -225,23 +225,23 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
     <div>Failed to load vendor data.</div>
     <button class="retry-btn" onclick="loadVendors()">↺ Retry</button>
   </div>
-  <table class="list-table" id="vendorTable" style="display:none">
+  <table class="list-table" id="vendorTable" style="display:none;table-layout:fixed;width:100%;">
     <thead><tr>
       <th style="width:36px;text-align:center;"><input type="checkbox" id="selectAllChk" onchange="toggleSelectAll(this.checked)" style="cursor:pointer;width:13px;height:13px;accent-color:var(--accent);"></th>
-      <th onclick="sortBy('name')">Vendor Name <span class="sort-arrow" id="s-name"></span>
+      <th style="width:20%" onclick="sortBy('name')">Vendor Name <span class="sort-arrow" id="s-name"></span>
         <span class="cf-btn" onclick="event.stopPropagation();openCF('name')">▾</span>
         <div class="cf-dd" id="cf-name"><div class="cf-title">Vendor Name</div><input class="cf-search" id="cfs-name" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('name')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('name')">Select/Deselect all</span><div class="cf-list" id="cfl-name"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('name')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('name')">Clear</button></div></div>
       </th>
-      <th onclick="sortBy('status')">Status <span class="sort-arrow" id="s-status"></span>
+      <th style="width:9%" onclick="sortBy('status')">Status <span class="sort-arrow" id="s-status"></span>
         <span class="cf-btn" onclick="event.stopPropagation();openCF('status')">▾</span>
         <div class="cf-dd" id="cf-status"><div class="cf-title">Status</div><input class="cf-search" id="cfs-status" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('status')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('status')">Select/Deselect all</span><div class="cf-list" id="cfl-status"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('status')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('status')">Clear</button></div></div>
       </th>
-      <th onclick="sortBy('funding')">Funding <span class="sort-arrow" id="s-funding"></span>
+      <th style="width:9%" onclick="sortBy('funding')">Funding <span class="sort-arrow" id="s-funding"></span>
         <span class="cf-btn" onclick="event.stopPropagation();openCF('funding')">▾</span>
         <div class="cf-dd" id="cf-funding"><div class="cf-title">Funding</div><input class="cf-search" id="cfs-funding" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('funding')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('funding')">Select/Deselect all</span><div class="cf-list" id="cfl-funding"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('funding')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('funding')">Clear</button></div></div>
       </th>
-      <th>Coverage States <span style="font-size:10px;color:var(--text3);font-weight:400;">(click state pills above to filter)</span></th>
-      <th onclick="sortBy('notes')">Notes <span class="sort-arrow" id="s-notes"></span></th>
+      <th style="width:35%">Coverage States</th>
+      <th style="width:27%" onclick="sortBy('notes')">Notes <span class="sort-arrow" id="s-notes"></span></th>
     </tr></thead>
     <tbody id="vendorBody"></tbody>
   </table>
@@ -542,7 +542,7 @@ function renderTable() {
       <td><span class="status-badge" style="${statusStyle(v.status)}">${v.status||'—'}</span></td>
       <td class="mono">${v.funding||'—'}</td>
       <td class="coverage-cell">${highlightCoverage(v.coverage)}</td>
-      <td style="font-size:12px;color:var(--text3);max-width:220px;">${v.notes||'—'}</td>
+      <td style="font-size:12px;color:var(--text3);">${v.notes||'—'}</td>
     </tr>`).join('');
   document.querySelectorAll('[id^="s-"]').forEach(el=>el.textContent='');
   const arrow=document.getElementById(`s-${sortCol}`); if(arrow) arrow.textContent=sortDir===1?'↑':'↓';
