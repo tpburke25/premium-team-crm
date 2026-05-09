@@ -109,6 +109,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .sort-arrow { margin-left: 4px; opacity: 0.5; }
 .status-badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 8px; white-space: nowrap; }
 
+/* Copy buttons */
+.copy-btn { padding: 6px 13px; border-radius: 8px; border: none; font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
+.copy-btn-fts { background: var(--green); color: #fff; }
+.copy-btn-fts:hover { opacity: 0.85; }
+.copy-btn-names { background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); }
+.copy-btn-names:hover { background: var(--surface2); color: var(--text); }
+.copy-btn.copied { background: var(--text3); color: #fff; border-color: var(--text3); }
+
 /* Coverage cell highlights */
 .coverage-cell { line-height: 1.6; }
 .state-highlight { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent); border-radius: 3px; padding: 0 3px; font-weight: 600; }
@@ -195,8 +203,14 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
     </div>
     <button class="clear-btn" id="clearBtn" onclick="clearAllFilters()" style="display:none">✕ Clear filters</button>
   </div>
-  <div class="stats-bar" id="statsBar"></div>
-</div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span id="nationalNote" style="font-size:11px;color:var(--gold);font-weight:500;display:none;"></span>
+    <span id="copyBar" style="display:none;align-items:center;gap:6px;">
+      <button class="copy-btn copy-btn-fts" id="copyBtn" onclick="copySelected()">📋 Copy (FTS + Funding)</button>
+      <button class="copy-btn copy-btn-names" id="copyNamesBtn" onclick="copyNamesOnly()">📄 Copy (Names Only)</button>
+    </span>
+    <div class="stats-bar" id="statsBar"></div>
+  </div>
 
 <!-- State filter row -->
 <div class="state-filter-wrap" id="stateFilterWrap" style="display:none">
@@ -213,6 +227,7 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
   </div>
   <table class="list-table" id="vendorTable" style="display:none">
     <thead><tr>
+      <th style="width:36px;text-align:center;"><input type="checkbox" id="selectAllChk" onchange="toggleSelectAll(this.checked)" style="cursor:pointer;width:13px;height:13px;accent-color:var(--accent);"></th>
       <th onclick="sortBy('name')">Vendor Name <span class="sort-arrow" id="s-name"></span>
         <span class="cf-btn" onclick="event.stopPropagation();openCF('name')">▾</span>
         <div class="cf-dd" id="cf-name"><div class="cf-title">Vendor Name</div><input class="cf-search" id="cfs-name" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('name')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('name')">Select/Deselect all</span><div class="cf-list" id="cfl-name"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('name')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('name')">Clear</button></div></div>
@@ -243,6 +258,7 @@ const checkFilters = {}, cfValues = {};
 let activeStatuses = new Set();
 let activeStates = new Set();
 let allStates = [];
+let selectedVendors = new Set();
 
 // ── Theme ──────────────────────────────────────────────────
 function toggleTheme() {
@@ -329,6 +345,7 @@ async function loadVendors() {
     const iStatus   = headers.findIndex(h => h === 'status');
     const iFunding  = headers.findIndex(h => h === 'funding');
     const iCoverage = headers.findIndex(h => h === 'coverage');
+    const iFts      = headers.findIndex(h => h === 'fts' || h === 'fts id' || h === 'fts_id');
 
     allVendors = data.rows.slice(1)
       .filter(r => r[iVendor > -1 ? iVendor : 0]) // skip empty rows
@@ -336,7 +353,8 @@ async function loadVendors() {
         name:     iVendor   > -1 ? String(r[iVendor]||'')   : '',
         status:   iStatus   > -1 ? String(r[iStatus]||'')   : '',
         funding:  normFunding(iFunding > -1 ? r[iFunding] : ''),
-        coverage: iCoverage > -1 ? String(r[iCoverage]||'') : ''
+        coverage: iCoverage > -1 ? String(r[iCoverage]||'') : '',
+        fts:      iFts      > -1 ? String(r[iFts]||'')      : ''
       }));
     buildStateList();
     buildCFValues();
@@ -451,11 +469,10 @@ function applyFilters() {
     if (activeStatuses.size > 0 && !activeStatuses.has(v.status)) return false;
     if (activeStates.size > 0) {
       const cov = (v.coverage || '').toUpperCase();
-      const hasAll = [...activeStates].every(s => {
-        const re = new RegExp('\\b'+s+'\\b');
-        return re.test(cov);
-      });
-      if (!hasAll) return false;
+      // National vendors always match when any state is selected
+      if (/\bNATIONAL\b/.test(cov)) return true;
+      const hasMatch = [...activeStates].every(s => new RegExp('\\b'+s+'\\b').test(cov));
+      if (!hasMatch) return false;
     }
     for (const col of ['name','status','funding']) {
       if (checkFilters[col]?.size > 0 && !checkFilters[col].has(v[col])) return false;
@@ -471,6 +488,7 @@ function clearAllFilters() {
   document.getElementById('searchInput').value = '';
   activeStatuses.clear();
   activeStates.clear();
+  selectedVendors.clear();
   ['Live','Pending','On Hold'].forEach(s => {
     const cls = s==='Live'?'active-live':s==='Pending'?'active-pending':'active-hold';
     document.getElementById('pill-'+s)?.classList.remove(cls);
@@ -515,7 +533,8 @@ function renderTable() {
       : (av+'').toLowerCase() > (bv+'').toLowerCase() ? sortDir : 0;
   });
   document.getElementById('vendorBody').innerHTML = sorted.map(v => `
-    <tr>
+    <tr data-vendor="${v.name.replace(/"/g,'&quot;')}">
+      <td style="text-align:center;vertical-align:middle;"><input type="checkbox" class="row-chk" onchange="toggleVendorSelection(this)" style="cursor:pointer;width:13px;height:13px;accent-color:var(--accent);" ${selectedVendors.has(v.name)?'checked':''}></td>
       <td class="primary">${v.name||'—'}</td>
       <td><span class="status-badge" style="${statusStyle(v.status)}">${v.status||'—'}</span></td>
       <td class="mono">${v.funding||'—'}</td>
@@ -523,12 +542,21 @@ function renderTable() {
     </tr>`).join('');
   document.querySelectorAll('[id^="s-"]').forEach(el=>el.textContent='');
   const arrow=document.getElementById(`s-${sortCol}`); if(arrow) arrow.textContent=sortDir===1?'↑':'↓';
+  updateCopyBar();
 }
 
 function renderStats() {
   const live = filteredVendors.filter(v=>v.status==='Live').length;
   const pending = filteredVendors.filter(v=>v.status==='Pending').length;
   const hold = filteredVendors.filter(v=>v.status==='On Hold').length;
+  const natCount = filteredVendors.filter(v=>/\bNational\b/i.test(v.coverage)).length;
+  const noteEl = document.getElementById('nationalNote');
+  if (natCount > 0 && activeStates.size > 0) {
+    noteEl.textContent = `⭐ ${natCount} National vendor${natCount>1?'s':''} always shown`;
+    noteEl.style.display = 'inline';
+  } else {
+    noteEl.style.display = 'none';
+  }
   document.getElementById('statsBar').innerHTML = `
     <div class="stat-chip"><div class="stat-dot" style="background:var(--text3)"></div><strong>${filteredVendors.length}</strong> vendors</div>
     <div class="stat-chip"><div class="stat-dot" style="background:var(--green)"></div><strong>${live}</strong> live</div>
@@ -537,6 +565,88 @@ function renderStats() {
 }
 
 function sortBy(col) { if(sortCol===col) sortDir*=-1; else{sortCol=col;sortDir=1;} renderTable(); }
+
+// ── Selection & Copy ──────────────────────────────────────────
+function toggleVendorSelection(chk) {
+  const vendor = chk.closest('tr').dataset.vendor;
+  if (chk.checked) selectedVendors.add(vendor); else selectedVendors.delete(vendor);
+  updateCopyBar();
+}
+
+function toggleSelectAll(checked) {
+  document.querySelectorAll('.row-chk').forEach(chk => {
+    chk.checked = checked;
+    const vendor = chk.closest('tr').dataset.vendor;
+    if (checked) selectedVendors.add(vendor); else selectedVendors.delete(vendor);
+  });
+  updateCopyBar();
+}
+
+function updateCopyBar() {
+  const count = selectedVendors.size;
+  const bar = document.getElementById('copyBar');
+  const btn = document.getElementById('copyBtn');
+  const btn2 = document.getElementById('copyNamesBtn');
+  if (count > 0) {
+    bar.style.display = 'inline-flex';
+    btn.textContent = `📋 Copy ${count} (FTS + Funding)`;
+    btn2.textContent = `📄 Copy ${count} (Names Only)`;
+    btn.classList.remove('copied'); btn2.classList.remove('copied');
+  } else {
+    bar.style.display = 'none';
+  }
+  const all = document.querySelectorAll('.row-chk');
+  const checked = document.querySelectorAll('.row-chk:checked');
+  const selectAllChk = document.getElementById('selectAllChk');
+  if (selectAllChk) {
+    selectAllChk.checked = all.length > 0 && checked.length === all.length;
+    selectAllChk.indeterminate = checked.length > 0 && checked.length < all.length;
+  }
+}
+
+function getSelectedRows() {
+  return allVendors.filter(v => selectedVendors.has(v.name));
+}
+
+function copySelected() {
+  const vendors = getSelectedRows();
+  if (!vendors.length) return;
+  const lines = vendors.map(v => `FTS ${v.fts||''} ${v.name} - ${v.funding}`);
+  const text = lines.join('\n');
+  const btn = document.getElementById('copyBtn');
+  const confirm = () => {
+    btn.textContent = `✓ Copied ${lines.length} line${lines.length>1?'s':''}`;
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = `📋 Copy ${lines.length} (FTS + Funding)`; btn.classList.remove('copied'); }, 2000);
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(confirm).catch(() => fallbackCopy(text, confirm));
+  } else { fallbackCopy(text, confirm); }
+}
+
+function copyNamesOnly() {
+  const vendors = getSelectedRows();
+  if (!vendors.length) return;
+  const lines = vendors.map(v => v.name);
+  const text = lines.join('\n');
+  const btn = document.getElementById('copyNamesBtn');
+  const confirm = () => {
+    btn.textContent = `✓ Copied ${lines.length} name${lines.length>1?'s':''}`;
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = `📄 Copy ${lines.length} (Names Only)`; btn.classList.remove('copied'); }, 2000);
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(confirm).catch(() => fallbackCopy(text, confirm));
+  } else { fallbackCopy(text, confirm); }
+}
+
+function fallbackCopy(text, callback) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); callback(); } catch(e) { alert('Copy failed. Here is your text:\n\n' + text); }
+  document.body.removeChild(ta);
+}
 
 restoreSession();
 </script>
