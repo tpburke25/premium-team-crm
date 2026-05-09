@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premium Team CRM — Vendors</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f11; --surface: #1a1a1f; --surface2: #222228; --surface3: #2a2a32;
+  --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+  --text: #f0f0f2; --text2: #9090a0; --text3: #606070;
+  --accent: #ff7a2f; --gold: #f5c842; --red: #ff6b6b; --green: #5ce65c; --orange: #ff9f43;
+  --radius: 10px; --radius-lg: 14px;
+}
+body.light {
+  --bg: #f4f4f6; --surface: #ffffff; --surface2: #f0f0f3; --surface3: #e5e5ea;
+  --border: rgba(0,0,0,0.08); --border2: rgba(0,0,0,0.14);
+  --text: #111113; --text2: #4a4a58; --text3: #8a8a98;
+  --red: #d93025; --green: #1a7f37; --orange: #cc7a00; --gold: #b08800;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.header { display: flex; align-items: center; justify-content: space-between; padding: 16px 28px; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 100; }
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.logo-mark { width: 30px; height: 30px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #fff; }
+.logo-text { font-size: 15px; font-weight: 600; color: var(--text); }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.main-nav { display: flex; align-items: center; gap: 2px; }
+.main-nav-btn { padding: 7px 16px; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; border: none; background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; text-decoration: none; border-radius: 8px; }
+.main-nav-btn:hover { color: var(--text); background: var(--surface2); }
+.main-nav-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); border-radius: 0; font-size: 15px; }
+.user-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--surface2); border-radius: 20px; border: 1px solid var(--border); position: relative; cursor: pointer; }
+.user-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; }
+.user-name { font-size: 13px; color: var(--text2); }
+.user-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 6px; min-width: 180px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.user-chip.open .user-dropdown { display: block; }
+.dropdown-header { padding: 8px 10px 6px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+.dropdown-email { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dropdown-role { font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+.dropdown-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; transition: all 0.15s; border: none; background: none; font-family: 'DM Sans', sans-serif; width: 100%; text-align: left; }
+.dropdown-item:hover { background: var(--surface3); color: var(--text); }
+.dropdown-item.danger:hover { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); }
+
+/* Toolbar */
+.toolbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-bottom: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
+.toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.search-wrap { position: relative; }
+.search-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px 8px 34px; font-size: 13px; color: var(--text); font-family: 'DM Sans', sans-serif; width: 240px; outline: none; transition: border 0.15s; }
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: var(--text3); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; }
+.clear-btn { padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text3); font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
+.clear-btn:hover { background: var(--surface2); color: var(--red); border-color: var(--red); }
+
+/* Status filter pills */
+.status-filters { display: flex; align-items: center; gap: 6px; }
+.status-pill { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border2); font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; background: transparent; color: var(--text3); }
+.status-pill:hover { background: var(--surface2); color: var(--text); }
+.status-pill.active-live { background: color-mix(in srgb, var(--green) 18%, transparent); border-color: var(--green); color: var(--green); }
+.status-pill.active-pending { background: color-mix(in srgb, var(--gold) 18%, transparent); border-color: var(--gold); color: var(--gold); }
+.status-pill.active-hold { background: color-mix(in srgb, var(--red) 18%, transparent); border-color: var(--red); color: var(--red); }
+
+/* State pills */
+.state-filter-wrap { padding: 10px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.state-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+.state-pill { padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border2); font-size: 12px; font-family: 'DM Mono', monospace; cursor: pointer; transition: all 0.15s; background: transparent; color: var(--text3); }
+.state-pill:hover { background: var(--surface2); color: var(--text); }
+.state-pill.active { background: color-mix(in srgb, var(--accent) 18%, transparent); border-color: var(--accent); color: var(--accent); }
+
+/* Stats */
+.stats-bar { display: flex; gap: 16px; flex-wrap: wrap; }
+.stat-chip { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text3); }
+.stat-chip strong { color: var(--text); font-weight: 500; }
+.stat-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* Column filter */
+.cf-wrap { position: relative; display: inline; }
+.cf-btn { margin-left: 3px; opacity: 0.4; cursor: pointer; font-size: 10px; }
+.cf-btn:hover { opacity: 1; color: var(--accent); }
+.cf-dd { position: absolute; top: calc(100% + 4px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 8px; min-width: 220px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.cf-dd.open { display: block; }
+.cf-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); margin-bottom: 6px; font-weight: 500; }
+.cf-search { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 5px; }
+.cf-list { max-height: 160px; overflow-y: auto; margin-bottom: 6px; }
+.cf-item { display: flex; align-items: center; gap: 7px; padding: 5px 6px; border-radius: 4px; font-size: 12px; color: var(--text2); cursor: pointer; }
+.cf-item:hover { background: var(--surface3); color: var(--text); }
+.cf-item.sel { color: var(--text); }
+.cf-chk { width: 13px; height: 13px; border: 1px solid var(--border2); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; }
+.cf-item.sel .cf-chk { background: var(--accent); border-color: var(--accent); color: #fff; }
+.cf-sel-all { font-size: 11px; color: var(--text3); cursor: pointer; display: block; margin-bottom: 5px; }
+.cf-sel-all:hover { color: var(--accent); }
+.cf-btns { display: flex; gap: 6px; }
+.cf-apply { padding: 5px 12px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.cf-clear-btn { padding: 5px 12px; background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+
+/* Table */
+.list-wrap { padding: 20px 28px; }
+.list-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.list-table thead tr { border-bottom: 1px solid var(--border2); }
+.list-table th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); cursor: pointer; white-space: nowrap; user-select: none; position: relative; }
+.list-table th:hover { color: var(--text2); }
+.list-table th.th-filtered { color: var(--accent); }
+.list-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+.list-table tbody tr:hover { background: var(--surface2); }
+.list-table td { padding: 11px 14px; color: var(--text2); }
+.list-table td.primary { color: var(--text); font-weight: 500; }
+.mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+.sort-arrow { margin-left: 4px; opacity: 0.5; }
+.status-badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 8px; white-space: nowrap; }
+
+/* Coverage cell highlights */
+.coverage-cell { line-height: 1.6; }
+.state-highlight { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent); border-radius: 3px; padding: 0 3px; font-weight: 600; }
+
+/* Login */
+.login-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+.login-box { width: 100%; max-width: 380px; padding: 2rem; }
+.login-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; }
+.login-logo-mark { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #fff; }
+.login-logo-text { font-size: 18px; font-weight: 600; color: var(--text); }
+.login-logo-sub { font-size: 12px; color: var(--text3); }
+.login-title { font-size: 22px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+.login-sub { font-size: 14px; color: var(--text3); margin-bottom: 2rem; }
+.login-field { margin-bottom: 14px; }
+.login-label { font-size: 12px; color: var(--text3); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.04em; }
+.login-input { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 11px 14px; font-size: 14px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; transition: border 0.15s; }
+.login-input:focus { border-color: var(--accent); }
+.login-input::placeholder { color: var(--text3); }
+.login-submit { width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: opacity 0.15s; }
+.login-submit:hover { opacity: 0.85; }
+.login-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+.login-error { font-size: 13px; color: var(--red); margin-top: 10px; text-align: center; min-height: 20px; }
+.loading { text-align: center; padding: 80px 20px; color: var(--text3); }
+.spinner { width: 28px; height: 28px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 14px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.load-error { text-align: center; padding: 60px 20px; color: var(--text3); }
+.retry-btn { margin-top: 14px; padding: 8px 18px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<script>
+if (localStorage.getItem('crm_session')) { document.addEventListener('DOMContentLoaded', function() { var o=document.getElementById('loginOverlay'); if(o) o.style.display='none'; }); }
+if (localStorage.getItem('crm_theme') === 'light') document.documentElement.style.background = '#f4f4f6';
+</script>
+
+<!-- Login overlay -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo"><div class="login-logo-mark">P</div><div><div class="login-logo-text">Premium Team CRM</div><div class="login-logo-sub">Vendors</div></div></div>
+    <div class="login-title">Welcome back</div>
+    <div class="login-sub">Sign in to access vendor coverage</div>
+    <div class="login-field"><label class="login-label">Email</label><input class="login-input" id="loginEmail" type="email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="login-field"><label class="login-label">Password</label><input class="login-input" id="loginPassword" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="login-submit" id="loginBtn" onclick="doLogin()">Sign in</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <a class="logo" href="index.html"><div class="logo-mark">P</div><div><div class="logo-text">Premium Team CRM</div></div></a>
+  <nav class="main-nav">
+    <a href="index.html" class="main-nav-btn">Opportunities</a>
+    <a href="tasks.html" class="main-nav-btn">Tasks</a>
+    <a href="accounts.html" class="main-nav-btn">Accounts</a>
+    <a href="vendors.html" class="main-nav-btn active">Vendors</a>
+  </nav>
+  <div class="header-right">
+    <div class="user-chip" id="userChip" onclick="toggleUserMenu()">
+      <div class="user-avatar" id="userAvatar">T</div>
+      <span class="user-name" id="userName">...</span>
+      <span style="font-size:10px;color:var(--text3);margin-left:2px;">▾</span>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="dropdown-header"><div class="dropdown-email" id="dropdownEmail">—</div><div class="dropdown-role" id="dropdownRole">—</div></div>
+        <button class="dropdown-item" onclick="toggleTheme()" id="themeToggleBtn">☀ Light mode</button>
+        <button class="dropdown-item danger" onclick="doLogout()">⎋ Sign out</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <div class="toolbar-left">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input class="search-input" id="searchInput" placeholder="Search vendors, coverage..." oninput="applyFilters()">
+    </div>
+    <div class="status-filters" id="statusFilters">
+      <button class="status-pill" id="pill-Live" onclick="toggleStatus('Live')">Live</button>
+      <button class="status-pill" id="pill-Pending" onclick="toggleStatus('Pending')">Pending</button>
+      <button class="status-pill" id="pill-On Hold" onclick="toggleStatus('On Hold')">On Hold</button>
+    </div>
+    <button class="clear-btn" id="clearBtn" onclick="clearAllFilters()" style="display:none">✕ Clear filters</button>
+  </div>
+  <div class="stats-bar" id="statsBar"></div>
+</div>
+
+<!-- State filter row -->
+<div class="state-filter-wrap" id="stateFilterWrap" style="display:none">
+  <span class="state-label">Filter by state:</span>
+  <div id="statePills"></div>
+</div>
+
+<!-- Table -->
+<div class="list-wrap">
+  <div class="loading" id="loadingMsg"><div class="spinner"></div>Loading vendors...</div>
+  <div class="load-error hidden" id="loadError">
+    <div>Failed to load vendor data.</div>
+    <button class="retry-btn" onclick="loadVendors()">↺ Retry</button>
+  </div>
+  <table class="list-table" id="vendorTable" style="display:none">
+    <thead><tr>
+      <th onclick="sortBy('name')">Vendor Name <span class="sort-arrow" id="s-name"></span>
+        <span class="cf-btn" onclick="event.stopPropagation();openCF('name')">▾</span>
+        <div class="cf-dd" id="cf-name"><div class="cf-title">Vendor Name</div><input class="cf-search" id="cfs-name" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('name')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('name')">Select/Deselect all</span><div class="cf-list" id="cfl-name"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('name')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('name')">Clear</button></div></div>
+      </th>
+      <th onclick="sortBy('status')">Status <span class="sort-arrow" id="s-status"></span>
+        <span class="cf-btn" onclick="event.stopPropagation();openCF('status')">▾</span>
+        <div class="cf-dd" id="cf-status"><div class="cf-title">Status</div><input class="cf-search" id="cfs-status" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('status')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('status')">Select/Deselect all</span><div class="cf-list" id="cfl-status"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('status')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('status')">Clear</button></div></div>
+      </th>
+      <th onclick="sortBy('funding')">Funding <span class="sort-arrow" id="s-funding"></span>
+        <span class="cf-btn" onclick="event.stopPropagation();openCF('funding')">▾</span>
+        <div class="cf-dd" id="cf-funding"><div class="cf-title">Funding</div><input class="cf-search" id="cfs-funding" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('funding')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('funding')">Select/Deselect all</span><div class="cf-list" id="cfl-funding"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('funding')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('funding')">Clear</button></div></div>
+      </th>
+      <th>Coverage States <span style="font-size:10px;color:var(--text3);font-weight:400;">(click state pills above to filter)</span></th>
+    </tr></thead>
+    <tbody id="vendorBody"></tbody>
+  </table>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://idbnpxedwpjrflsqweyh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYm5weGVkd3BqcmZsc3F3ZXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNTY3MDYsImV4cCI6MjA5MjkzMjcwNn0.PL7ftdQbTtkCnfFa3Mwo2H3w_uPXuTh_0o75cu3_FLU';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzAMyU1XR3hWz62Icfm7KSe2M-v8cXuh5pKjexCIUtQ1m6MTzJ1UN1ulA28iwkixJ63Rw/exec';
+
+let currentUser = null;
+let allVendors = [], filteredVendors = [];
+let sortCol = 'name', sortDir = 1;
+const checkFilters = {}, cfValues = {};
+let activeStatuses = new Set();
+let activeStates = new Set();
+let allStates = [];
+
+// ── Theme ──────────────────────────────────────────────────
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  localStorage.setItem('crm_theme', isLight ? 'light' : 'dark');
+  document.getElementById('themeToggleBtn').textContent = isLight ? '🌙 Dark mode' : '☀ Light mode';
+}
+if (localStorage.getItem('crm_theme') === 'light') {
+  document.body.classList.add('light');
+  document.addEventListener('DOMContentLoaded', () => { const b=document.getElementById('themeToggleBtn'); if(b) b.textContent='🌙 Dark mode'; });
+}
+
+// ── User menu ──────────────────────────────────────────────
+function toggleUserMenu() { document.getElementById('userChip').classList.toggle('open'); }
+document.addEventListener('click', e => { if (!e.target.closest('.user-chip')) document.getElementById('userChip').classList.remove('open'); });
+
+function setUserUI(name, email, role) {
+  document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('userName').textContent = name;
+  document.getElementById('dropdownEmail').textContent = email;
+  document.getElementById('dropdownRole').textContent = role === 'admin' ? 'Administrator' : 'Sales Rep';
+}
+
+function doLogout() {
+  currentUser = null; localStorage.removeItem('crm_session');
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('loginEmail').value = ''; document.getElementById('loginPassword').value = '';
+}
+
+// ── Auth ───────────────────────────────────────────────────
+async function doLogin() {
+  const email=document.getElementById('loginEmail').value.trim(), password=document.getElementById('loginPassword').value;
+  const btn=document.getElementById('loginBtn'), errEl=document.getElementById('loginError');
+  errEl.textContent=''; btn.disabled=true; btn.textContent='Signing in...';
+  try {
+    const res=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify({email,password})});
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.error_description||'Login failed');
+    const pr=await fetch(`${SUPABASE_URL}/rest/v1/tbl_users?email=eq.${encodeURIComponent(email)}&select=*`,{headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${data.access_token}`}});
+    const profiles=await pr.json();
+    if(!profiles?.length) throw new Error('User profile not found.');
+    const profile=profiles[0];
+    currentUser={token:data.access_token,refresh_token:data.refresh_token,email,sfName:profile.sf_owner_name,role:profile.role};
+    localStorage.setItem('crm_session',JSON.stringify(currentUser));
+    setUserUI(profile.sf_owner_name,email,profile.role);
+    document.getElementById('loginOverlay').style.display='none';
+    loadVendors();
+  } catch(e) { errEl.textContent=e.message; btn.disabled=false; btn.textContent='Sign in'; }
+}
+
+async function restoreSession() {
+  const saved=localStorage.getItem('crm_session');
+  if(!saved) return;
+  try {
+    const session=JSON.parse(saved);
+    if(!session.token||!session.sfName) return;
+    if(session.refresh_token) {
+      try {
+        const ref=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify({refresh_token:session.refresh_token})});
+        if(ref.ok){const ns=await ref.json();session.token=ns.access_token;session.refresh_token=ns.refresh_token;localStorage.setItem('crm_session',JSON.stringify(session));}
+      } catch(e){}
+    }
+    currentUser={token:session.token,refresh_token:session.refresh_token,email:session.email,sfName:session.sfName,role:session.role};
+    setUserUI(session.sfName,session.email,session.role);
+    document.getElementById('loginOverlay').style.display='none';
+    loadVendors();
+  } catch(e) { console.warn('Session restore error:',e); document.getElementById('loginOverlay').style.display='flex'; }
+}
+
+// ── Load vendors from Google Sheets via Apps Script ────────
+async function loadVendors() {
+  document.getElementById('loadingMsg').style.display='block';
+  document.getElementById('loadError').classList.add('hidden');
+  document.getElementById('vendorTable').style.display='none';
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=get_vendors`);
+    if (!res.ok) throw new Error('Network error');
+    const data = await res.json();
+    if (!data || !Array.isArray(data.vendors)) throw new Error('Invalid response');
+    // Normalise: map funding 0→EFT, 4→NON-EFT
+    allVendors = data.vendors.map(v => ({
+      name: v.name || v['Vendor Name'] || v['vendor_name'] || '',
+      status: v.status || v['Status'] || '',
+      funding: normFunding(v.funding ?? v['Funding'] ?? v['Days'] ?? ''),
+      coverage: v.coverage || v['Coverage'] || v['States'] || v['coverage_states'] || ''
+    }));
+    buildStateList();
+    buildCFValues();
+    applyFilters();
+    document.getElementById('loadingMsg').style.display='none';
+    document.getElementById('vendorTable').style.display='table';
+  } catch(e) {
+    console.error('Vendor load error:', e);
+    document.getElementById('loadingMsg').style.display='none';
+    document.getElementById('loadError').classList.remove('hidden');
+  }
+}
+
+function normFunding(val) {
+  const s = String(val).trim();
+  if (s === '0' || s.toLowerCase() === 'eft') return 'EFT';
+  if (s === '4' || s.toLowerCase().includes('non')) return 'NON-EFT';
+  return s;
+}
+
+function buildStateList() {
+  const stateSet = new Set();
+  allVendors.forEach(v => {
+    if (!v.coverage) return;
+    v.coverage.split(/[,\s]+/).forEach(s => { const t=s.trim().toUpperCase(); if(t.length===2) stateSet.add(t); });
+  });
+  allStates = [...stateSet].sort();
+  const wrap = document.getElementById('statePills');
+  wrap.innerHTML = allStates.map(s =>
+    `<button class="state-pill" id="sp-${s}" onclick="toggleState('${s}')">${s}</button>`
+  ).join('');
+  document.getElementById('stateFilterWrap').style.display = allStates.length ? 'flex' : 'none';
+}
+
+function buildCFValues() {
+  ['name','status','funding'].forEach(col => {
+    cfValues[col] = [...new Set(allVendors.map(v=>v[col]).filter(Boolean))].sort();
+  });
+}
+
+// ── Status pill filters ────────────────────────────────────
+function toggleStatus(s) {
+  if (activeStatuses.has(s)) activeStatuses.delete(s); else activeStatuses.add(s);
+  const pill = document.getElementById('pill-'+s);
+  const cls = s==='Live'?'active-live':s==='Pending'?'active-pending':'active-hold';
+  pill.classList.toggle(cls, activeStatuses.has(s));
+  applyFilters();
+}
+
+// ── State pill filters ─────────────────────────────────────
+function toggleState(s) {
+  if (activeStates.has(s)) activeStates.delete(s); else activeStates.add(s);
+  document.getElementById('sp-'+s).classList.toggle('active', activeStates.has(s));
+  applyFilters();
+}
+
+// ── Column filters ─────────────────────────────────────────
+function openCF(col) {
+  document.querySelectorAll('.cf-dd.open').forEach(d=>d.classList.remove('open'));
+  document.getElementById('cf-'+col).classList.add('open');
+  renderCFList(col);
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('th')) document.querySelectorAll('.cf-dd.open').forEach(d=>d.classList.remove('open'));
+});
+
+function renderCFList(col) {
+  const search=(document.getElementById('cfs-'+col)?.value||'').toLowerCase();
+  const sel=checkFilters[col]||new Set();
+  const vals=(cfValues[col]||[]).filter(v=>v.toLowerCase().includes(search));
+  document.getElementById('cfl-'+col).innerHTML=vals.map(v=>`
+    <div class="cf-item ${sel.has(v)?'sel':''}" onclick="event.stopPropagation();toggleCFItem('${col}','${v.replace(/'/g,"\\'")}')">
+      <div class="cf-chk">${sel.has(v)?'✓':''}</div>${v}
+    </div>`).join('');
+}
+function toggleCFItem(col,val) {
+  if(!checkFilters[col]) checkFilters[col]=new Set();
+  if(checkFilters[col].has(val)) checkFilters[col].delete(val); else checkFilters[col].add(val);
+  renderCFList(col);
+}
+function toggleAllCF(col) {
+  const search=(document.getElementById('cfs-'+col)?.value||'').toLowerCase();
+  const visible=(cfValues[col]||[]).filter(v=>v.toLowerCase().includes(search));
+  if(!checkFilters[col]) checkFilters[col]=new Set();
+  const allSel=visible.every(v=>checkFilters[col].has(v));
+  visible.forEach(v=>allSel?checkFilters[col].delete(v):checkFilters[col].add(v));
+  renderCFList(col);
+}
+function applyCF(col) {
+  const th=document.getElementById('cf-'+col).closest('th');
+  if(th) th.classList.toggle('th-filtered', checkFilters[col]?.size>0);
+  document.querySelectorAll('.cf-dd.open').forEach(d=>d.classList.remove('open'));
+  applyFilters();
+}
+function clearCF(col) {
+  if(checkFilters[col]) checkFilters[col].clear();
+  const th=document.getElementById('cf-'+col).closest('th');
+  if(th) th.classList.remove('th-filtered');
+  renderCFList(col);
+  document.querySelectorAll('.cf-dd.open').forEach(d=>d.classList.remove('open'));
+  applyFilters();
+}
+
+// ── Main filter + render ───────────────────────────────────
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  filteredVendors = allVendors.filter(v => {
+    if (search) {
+      const hay = [v.name, v.status, v.funding, v.coverage].map(x=>(x||'').toLowerCase()).join(' ');
+      if (!hay.includes(search)) return false;
+    }
+    if (activeStatuses.size > 0 && !activeStatuses.has(v.status)) return false;
+    if (activeStates.size > 0) {
+      const cov = (v.coverage || '').toUpperCase();
+      const hasAll = [...activeStates].every(s => {
+        const re = new RegExp('\\b'+s+'\\b');
+        return re.test(cov);
+      });
+      if (!hasAll) return false;
+    }
+    for (const col of ['name','status','funding']) {
+      if (checkFilters[col]?.size > 0 && !checkFilters[col].has(v[col])) return false;
+    }
+    return true;
+  });
+  renderTable();
+  renderStats();
+  updateClearBtn();
+}
+
+function clearAllFilters() {
+  document.getElementById('searchInput').value = '';
+  activeStatuses.clear();
+  activeStates.clear();
+  ['Live','Pending','On Hold'].forEach(s => {
+    const cls = s==='Live'?'active-live':s==='Pending'?'active-pending':'active-hold';
+    document.getElementById('pill-'+s)?.classList.remove(cls);
+  });
+  allStates.forEach(s => document.getElementById('sp-'+s)?.classList.remove('active'));
+  ['name','status','funding'].forEach(col => {
+    if(checkFilters[col]) checkFilters[col].clear();
+    const th=document.getElementById('cf-'+col)?.closest('th'); if(th) th.classList.remove('th-filtered');
+  });
+  applyFilters();
+}
+
+function updateClearBtn() {
+  const active = document.getElementById('searchInput').value
+    || activeStatuses.size > 0 || activeStates.size > 0
+    || ['name','status','funding'].some(c=>checkFilters[c]?.size>0);
+  document.getElementById('clearBtn').style.display = active ? 'inline-flex' : 'none';
+}
+
+function statusStyle(s) {
+  if (!s) return '';
+  const l = s.toLowerCase();
+  if (l === 'live') return `background:color-mix(in srgb,var(--green) 18%,transparent);color:var(--green);border:1px solid color-mix(in srgb,var(--green) 30%,transparent)`;
+  if (l === 'pending') return `background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--gold);border:1px solid color-mix(in srgb,var(--gold) 30%,transparent)`;
+  return `background:color-mix(in srgb,var(--red) 18%,transparent);color:var(--red);border:1px solid color-mix(in srgb,var(--red) 30%,transparent)`;
+}
+
+function highlightCoverage(coverage) {
+  if (!coverage) return '—';
+  if (activeStates.size === 0) return coverage;
+  let result = coverage;
+  activeStates.forEach(s => {
+    result = result.replace(new RegExp('\\b'+s+'\\b','g'), `<span class="state-highlight">${s}</span>`);
+  });
+  return result;
+}
+
+function renderTable() {
+  const sorted = [...filteredVendors].sort((a,b) => {
+    let av=a[sortCol]??'', bv=b[sortCol]??'';
+    return (av+'').toLowerCase() < (bv+'').toLowerCase() ? -sortDir
+      : (av+'').toLowerCase() > (bv+'').toLowerCase() ? sortDir : 0;
+  });
+  document.getElementById('vendorBody').innerHTML = sorted.map(v => `
+    <tr>
+      <td class="primary">${v.name||'—'}</td>
+      <td><span class="status-badge" style="${statusStyle(v.status)}">${v.status||'—'}</span></td>
+      <td class="mono">${v.funding||'—'}</td>
+      <td class="coverage-cell">${highlightCoverage(v.coverage)}</td>
+    </tr>`).join('');
+  document.querySelectorAll('[id^="s-"]').forEach(el=>el.textContent='');
+  const arrow=document.getElementById(`s-${sortCol}`); if(arrow) arrow.textContent=sortDir===1?'↑':'↓';
+}
+
+function renderStats() {
+  const live = filteredVendors.filter(v=>v.status==='Live').length;
+  const pending = filteredVendors.filter(v=>v.status==='Pending').length;
+  const hold = filteredVendors.filter(v=>v.status==='On Hold').length;
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--text3)"></div><strong>${filteredVendors.length}</strong> vendors</div>
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--green)"></div><strong>${live}</strong> live</div>
+    <div class="stat-chip"><div class="stat-dot" style="background:var(--gold)"></div><strong>${pending}</strong> pending</div>
+    ${hold>0?`<div class="stat-chip"><div class="stat-dot" style="background:var(--red)"></div><strong>${hold}</strong> on hold</div>`:''}`;
+}
+
+function sortBy(col) { if(sortCol===col) sortDir*=-1; else{sortCol=col;sortDir=1;} renderTable(); }
+
+restoreSession();
+</script>
+</body>
+</html>
