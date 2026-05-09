@@ -318,17 +318,26 @@ async function loadVendors() {
   document.getElementById('loadError').classList.add('hidden');
   document.getElementById('vendorTable').style.display='none';
   try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?action=get_vendors`);
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=get_vendors&t=${Date.now()}`);
     if (!res.ok) throw new Error('Network error');
     const data = await res.json();
-    if (!data || !Array.isArray(data.vendors)) throw new Error('Invalid response');
-    // Normalise: map funding 0→EFT, 4→NON-EFT
-    allVendors = data.vendors.map(v => ({
-      name: v.name || v['Vendor Name'] || v['vendor_name'] || '',
-      status: v.status || v['Status'] || '',
-      funding: normFunding(v.funding ?? v['Funding'] ?? v['Days'] ?? ''),
-      coverage: v.coverage || v['Coverage'] || v['States'] || v['coverage_states'] || ''
-    }));
+    if (!data || !Array.isArray(data.rows) || data.rows.length < 2) throw new Error('Invalid response');
+
+    // data.rows is a 2D array: row 0 = headers, rows 1+ = data
+    const headers = data.rows[0].map(h => String(h).toLowerCase().trim());
+    const iVendor   = headers.findIndex(h => h === 'vendor' || h === 'vendor name' || h === 'name');
+    const iStatus   = headers.findIndex(h => h === 'status');
+    const iFunding  = headers.findIndex(h => h === 'funding');
+    const iCoverage = headers.findIndex(h => h === 'coverage');
+
+    allVendors = data.rows.slice(1)
+      .filter(r => r[iVendor > -1 ? iVendor : 0]) // skip empty rows
+      .map(r => ({
+        name:     iVendor   > -1 ? String(r[iVendor]||'')   : '',
+        status:   iStatus   > -1 ? String(r[iStatus]||'')   : '',
+        funding:  normFunding(iFunding > -1 ? r[iFunding] : ''),
+        coverage: iCoverage > -1 ? String(r[iCoverage]||'') : ''
+      }));
     buildStateList();
     buildCFValues();
     applyFilters();
