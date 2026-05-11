@@ -213,31 +213,7 @@ body.light .loc-high { color: #14532d; }
 .date-input::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
 
 /* DETAIL PANEL */
-.panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-.panel-overlay.open { opacity: 1; pointer-events: all; }
-.detail-panel { position: fixed; right: 0; top: 0; bottom: 0; width: 420px; background: var(--surface); border-left: 1px solid var(--border2); z-index: 201; transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.16,1,0.3,1); overflow-y: auto; }
-.detail-panel.open { transform: translateX(0); }
-.panel-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 10; }
-.panel-close { position: absolute; right: 20px; top: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--text3); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
-.panel-close:hover { color: var(--text); }
-.panel-account { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 4px; line-height: 1.3; padding-right: 36px; }
-.panel-opp { font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; }
-.panel-body { padding: 20px 24px; }
-.panel-section { margin-bottom: 22px; }
-.panel-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 10px; font-weight: 500; }
-.panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.panel-field { background: var(--surface2); border-radius: 8px; padding: 10px 12px; border: 1px solid var(--border); }
-.panel-field.full { grid-column: 1 / -1; }
-.pf-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
-.pf-value { font-size: 13px; color: var(--text); line-height: 1.4; }
-.pf-value.mono { font-family: 'DM Mono', monospace; font-size: 12px; }
-.enrich-input { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 8px 10px; font-size: 13px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-top: 4px; transition: border 0.15s; }
-.enrich-input:focus { border-color: var(--accent); }
-textarea.enrich-input { resize: vertical; min-height: 80px; }
-.save-btn { margin-top: 10px; padding: 8px 18px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
-.save-btn:hover { opacity: 0.85; }
-.save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.save-msg { font-size: 12px; color: var(--green); margin-left: 10px; }
+/* Panel CSS lives in shared adp block below */
 
 /* EMPTY / LOADING */
 .loading { text-align: center; padding: 80px 20px; color: var(--text3); }
@@ -356,6 +332,86 @@ textarea.enrich-input { resize: vertical; min-height: 80px; }
 .cf-clear-btn { padding: 5px 12px; background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
 .th-filtered { color: var(--accent) !important; }
 .list-table th { position: relative; }
+
+/* ── Shared account detail panel ── */
+.panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:300;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+.panel-overlay.open{opacity:1;pointer-events:all;}
+.acct-detail-panel{position:fixed;right:0;top:0;bottom:0;width:50%;min-width:560px;max-width:900px;background:var(--surface);border-left:1px solid var(--border2);z-index:301;transform:translateX(100%);transition:transform 0.28s cubic-bezier(0.16,1,0.3,1);overflow-y:auto;display:flex;flex-direction:column;}
+.acct-detail-panel.open{transform:translateX(0);}
+.adp-header{padding:20px 28px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:10;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.adp-header-left{flex:1;min-width:0;}
+.adp-account-name{font-size:18px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:3px;}
+.adp-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px;}
+.adp-fts{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;}
+.adp-state-badge{font-size:11px;color:var(--text3);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;}
+.adp-sf-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--accent);text-decoration:none;background:color-mix(in srgb,var(--accent) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:5px;padding:2px 8px;transition:opacity 0.15s;}
+.adp-sf-link:hover{opacity:0.75;}
+.adp-header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.adp-close{background:var(--surface2);border:1px solid var(--border2);color:var(--text3);width:30px;height:30px;border-radius:7px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0;}
+.adp-close:hover{color:var(--text);background:var(--surface3);}
+.adp-body{padding:0;flex:1;}
+.adp-loading{text-align:center;padding:60px 20px;color:var(--text3);}
+.adp-spinner{width:26px;height:26px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:adp-spin 0.7s linear infinite;margin:0 auto 12px;}
+@keyframes adp-spin{to{transform:rotate(360deg);}}
+.adp-section{border-bottom:1px solid var(--border);}
+.adp-section-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.1s;}
+.adp-section-toggle:hover{background:var(--surface2);}
+.adp-section-label{display:flex;align-items:center;gap:8px;}
+.adp-section-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);}
+.adp-section-count{font-size:10px;background:var(--surface3);color:var(--text3);border-radius:10px;padding:1px 7px;font-family:'DM Mono',monospace;}
+.adp-section-arrow{font-size:10px;color:var(--text3);transition:transform 0.2s;}
+.adp-section.collapsed .adp-section-arrow{transform:rotate(-90deg);}
+.adp-section-body{padding:0 28px 20px;}
+.adp-section.collapsed .adp-section-body{display:none;}
+.adp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;}
+.adp-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px;}
+.adp-field{background:var(--surface2);border-radius:8px;padding:9px 12px;border:1px solid var(--border);}
+.adp-field.full{grid-column:1/-1;}
+.adp-label{font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text3);margin-bottom:3px;font-weight:500;}
+.adp-value{font-size:13px;color:var(--text);font-weight:500;}
+.adp-value.mono{font-family:'DM Mono',monospace;font-size:12px;}
+.adp-value.muted{color:var(--text2);font-weight:400;}
+.adp-days-ok{color:var(--green);}
+.adp-days-warn{color:var(--orange);}
+.adp-days-bad{color:var(--red);}
+.adp-opp-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;border-left:3px solid transparent;}
+.adp-opp-card.open-opp{border-left-color:var(--accent);}
+.adp-opp-card.closed-won{border-left-color:var(--green);}
+.adp-opp-card.closed-lost{border-left-color:var(--text3);}
+.adp-opp-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.adp-opp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px;}
+.adp-opp-field{background:var(--surface3);border-radius:6px;padding:6px 9px;}
+.adp-opp-label{font-size:9px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text3);margin-bottom:2px;}
+.adp-opp-value{font-size:12px;color:var(--text);font-weight:500;}
+.adp-opp-value.mono{font-family:'DM Mono',monospace;}
+.adp-stage-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;}
+.adp-sub-section{margin-top:10px;border-top:1px solid var(--border);padding-top:10px;}
+.adp-sub-title{font-size:9px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);margin-bottom:6px;font-weight:600;}
+.adp-activity-item{display:flex;flex-direction:column;gap:2px;padding:7px 10px;background:var(--surface3);border-radius:7px;margin-bottom:5px;border-left:2px solid var(--accent);}
+.adp-task-item{display:flex;flex-direction:column;gap:2px;padding:7px 10px;background:var(--surface3);border-radius:7px;margin-bottom:5px;border-left:2px solid var(--gold);}
+.adp-item-subject{font-size:12px;font-weight:500;color:var(--text);}
+.adp-item-meta{font-size:11px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap;}
+.adp-item-comments{font-size:11px;color:var(--text2);margin-top:3px;line-height:1.5;font-style:italic;}
+.adp-task-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;border-left:3px solid var(--gold);}
+.adp-task-card.high{border-left-color:var(--red);}
+.adp-task-subject{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;}
+.adp-task-meta{font-size:11px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap;}
+.adp-vendor-filters{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.adp-vendor-pill{padding:4px 11px;border-radius:16px;border:1px solid var(--border2);font-size:11px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;background:transparent;color:var(--text3);}
+.adp-vendor-pill:hover{background:var(--surface2);color:var(--text);}
+.adp-vendor-pill.av-live{background:color-mix(in srgb,var(--green) 18%,transparent);border-color:var(--green);color:var(--green);}
+.adp-vendor-pill.av-pending{background:color-mix(in srgb,var(--gold) 18%,transparent);border-color:var(--gold);color:var(--gold);}
+.adp-vendor-pill.av-hold{background:color-mix(in srgb,var(--red) 18%,transparent);border-color:var(--red);color:var(--red);}
+.adp-vendor-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;}
+.adp-vendor-row.national{border-left:3px solid var(--gold);}
+.adp-vendor-name{font-size:13px;font-weight:500;color:var(--text);}
+.adp-vendor-badges{display:flex;align-items:center;gap:6px;}
+.adp-vendor-status{font-size:10px;font-weight:600;padding:2px 7px;border-radius:6px;}
+.adp-vendor-funding{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);background:var(--surface3);padding:2px 7px;border-radius:5px;}
+.adp-empty{font-size:12px;color:var(--text3);padding:10px 0;font-style:italic;}
+.adp-closed-toggle{margin-top:10px;display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text3);user-select:none;}
+.adp-closed-toggle:hover{color:var(--text2);}
+
 </style>
 </head>
 <body>
@@ -525,19 +581,25 @@ if (localStorage.getItem('crm_theme') === 'light') {
   </div>
 </div>
 
-<!-- Detail panel -->
-<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
-<div class="detail-panel" id="detailPanel">
-  <div class="panel-header">
-    <div class="panel-account" id="panelAccount"></div>
-    <div class="panel-opp" id="panelOpp"></div>
-    <a id="panelSFLink" href="#" target="_blank" rel="noopener" style="display:none;align-items:center;gap:5px;font-size:12px;color:var(--accent);text-decoration:none;margin-top:8px;padding:5px 10px;background:color-mix(in srgb, var(--accent) 12%, transparent);border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);border-radius:6px;width:fit-content;transition:opacity 0.15s" onmouseover="this.style.opacity='0.75'" onmouseout="this.style.opacity='1'">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-      View in Salesforce
-    </a>
-    <button class="panel-close" onclick="closePanel()">✕</button>
+<!-- Shared Account Detail Panel -->
+<div class="panel-overlay" id="adpOverlay" onclick="adpClose()"></div>
+<div class="acct-detail-panel" id="adpPanel">
+  <div class="adp-header">
+    <div class="adp-header-left">
+      <div class="adp-account-name" id="adpAccountName">—</div>
+      <div class="adp-meta" id="adpMeta"></div>
+    </div>
+    <div class="adp-header-right">
+      <a class="adp-sf-link" id="adpSFLink" href="#" target="_blank" rel="noopener" style="display:none">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Salesforce
+      </a>
+      <button class="adp-close" onclick="adpClose()">✕</button>
+    </div>
   </div>
-  <div class="panel-body" id="panelBody"></div>
+  <div class="adp-body" id="adpBody">
+    <div class="adp-loading"><div class="adp-spinner"></div>Loading...</div>
+  </div>
 </div>
 
 <script>
@@ -951,161 +1013,12 @@ function switchView(view) {
 function openDetail(id) {
   const d = allDeals.find(x => x.opportunity_id === id);
   if (!d) return;
-  openDeal = d;
-  document.getElementById('panelAccount').textContent = d.account_name || '—';
-  document.getElementById('panelOpp').textContent = d.opportunity_name || '';
-  const sfLink = document.getElementById('panelSFLink');
-  if (d.account_id) {
-    sfLink.href = `https://fintech.lightning.force.com/lightning/r/Account/${d.account_id}/view`;
-    sfLink.style.display = 'inline-flex';
-  } else {
-    sfLink.style.display = 'none';
-  }
-
-  const sc = stageClass(d.stage);
-  document.getElementById('panelBody').innerHTML = `
-    <div class="panel-section">
-      <div class="panel-section-title">Pipeline</div>
-      <div class="panel-grid">
-        <div class="panel-field"><div class="pf-label">Stage</div><div class="pf-value"><span class="stage-badge ${sc}">${d.stage||'—'}</span></div></div>
-        <div class="panel-field"><div class="pf-label">Close Date</div><div class="pf-value mono">${fmt(d.close_date,'date')}</div></div>
-        <div class="panel-field"><div class="pf-label">ASM / Flat Rate</div><div class="pf-value mono">${fmt(d.asm_flat_rate,'currency')}</div></div>
-        <div class="panel-field"><div class="pf-label">Total Flat Rate</div><div class="pf-value mono">${fmt(d.total_flat_rate,'currency')}</div></div>
-        <div class="panel-field"><div class="pf-label">Setup Amount</div><div class="pf-value mono">${fmt(d.setup_amount,'currency')}</div></div>
-        <div class="panel-field"><div class="pf-label">Total Setup</div><div class="pf-value mono">${fmt(d.total_setup_amount,'currency')}</div></div>
-        <div class="panel-field"><div class="pf-label"># Locations</div><div class="pf-value mono">${d.num_locations||'—'}</div></div>
-        <div class="panel-field"><div class="pf-label">Days Since Activity</div><div class="pf-value mono">${d.days_since_activity !== null ? d.days_since_activity+'d' : '—'}</div></div>
-        <div class="panel-field full"><div class="pf-label">Closed Reason</div><div class="pf-value">${d.closed_reason||'—'}</div></div>
-      </div>
-    </div>
-    <div class="panel-section">
-      <div class="panel-section-title">Account</div>
-      <div class="panel-grid">
-        <div class="panel-field"><div class="pf-label">Owner</div><div class="pf-value">${d.opportunity_owner||'—'}</div></div>
-        <div class="panel-field"><div class="pf-label">Additional Rep</div><div class="pf-value">${d.additional_rep||'—'}</div></div>
-        <div class="panel-field"><div class="pf-label">Industry</div><div class="pf-value">${d.industry||'—'}</div></div>
-        <div class="panel-field"><div class="pf-label">Accounting Pkg</div><div class="pf-value">${d.accounting_package||'—'}</div></div>
-        <div class="panel-field"><div class="pf-label">Lead Source</div><div class="pf-value">${d.lead_source||'—'}</div></div>
-        <div class="panel-field"><div class="pf-label">Product</div><div class="pf-value">${d.product_name||'—'}</div></div>
-        <div class="panel-field full"><div class="pf-label">Location</div><div class="pf-value">${[d.city,d.state,d.zip].filter(Boolean).join(', ')||'—'}</div></div>
-      </div>
-    </div>
-    <div class="panel-section">
-      <div class="panel-section-title">Contact</div>
-      <div class="panel-grid">
-        <div class="panel-field"><div class="pf-label">Name</div><div class="pf-value">${d.contact_name||'—'}</div></div>
-        <div class="panel-field"><div class="pf-label">Title</div><div class="pf-value">${d.contact_title||'—'}</div></div>
-        <div class="panel-field"><div class="pf-label">Phone</div><div class="pf-value mono">${d.contact_phone||'—'}</div></div>
-        <div class="panel-field"><div class="pf-label">Email</div><div class="pf-value">${d.contact_email||'—'}</div></div>
-      </div>
-    </div>
-    <div class="panel-section">
-      <div class="panel-section-title">Notes & Enrichment</div>
-      <div class="panel-grid">
-        <div class="panel-field full">
-          <div class="pf-label">Current Price</div>
-          <input class="enrich-input" id="enrichPrice" type="number" step="0.01" placeholder="Enter current price..." value="">
-        </div>
-        <div class="panel-field full">
-          <div class="pf-label">Notes</div>
-          <textarea class="enrich-input" id="enrichNotes" placeholder="Add notes..."></textarea>
-        </div>
-      </div>
-      <button class="save-btn" id="saveEnrichBtn" onclick="saveEnrichment()">Save</button>
-      <span class="save-msg hidden" id="saveMsg">Saved ✓</span>
-    </div>
-    ${d.description ? `<div class="panel-section"><div class="panel-section-title">Description</div><div class="panel-field" style="grid-column:1/-1"><div class="pf-value" style="white-space:pre-wrap;font-size:12px;color:var(--text2);line-height:1.6">${d.description}</div></div></div>` : ''}
-    ${(() => {
-      // Open tasks for this account
-      const acctTasks = allActivities.length >= 0 ? 
-        Object.values(taskByAccount).filter ? 
-          (window._allOpenTasks || []).filter(t => t.account_id === d.account_id) : [] : [];
-      if (!acctTasks.length) return '';
-      return `<div class="panel-section"><div class="panel-section-title">Open Tasks</div><div style="display:flex;flex-direction:column;gap:6px">` +
-        acctTasks.sort((a,b)=>(a.due_date||'').localeCompare(b.due_date||'')).slice(0,5).map(t => {
-          const today = new Date().toISOString().slice(0,10);
-          const dc = t.due_date ? (t.due_date < today ? 'color:var(--red)' : t.due_date === today ? 'color:var(--gold)' : '') : '';
-          return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;border-left:3px solid var(--gold)">
-            <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px">${t.subject||'—'}</div>
-            <div style="font-size:11px;color:var(--text3);display:flex;gap:10px">
-              <span style="${dc}">${t.due_date ? fmt(t.due_date,'date') : '—'}</span>
-              ${t.type?`<span>${t.type}</span>`:''}${t.assigned_to?`<span>${t.assigned_to}</span>`:''}
-            </div>
-          </div>`;
-        }).join('') + `</div></div>`;
-    })()}
-    ${(() => {
-      const acts = getAccountActivities(d.account_id);
-      if (!acts.length) return '';
-      return `<div class="panel-section"><div class="panel-section-title">Recent Activity</div><div style="display:flex;flex-direction:column;gap:6px">` +
-        acts.slice(0,10).map(a => `
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;border-left:3px solid var(--accent)">
-            <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px">${a.subject||'—'}</div>
-            <div style="font-size:11px;color:var(--text3);display:flex;gap:10px">
-              <span>${fmt(a.activity_date,'date')}</span>
-              ${a.type?`<span>${a.type}</span>`:''}${a.assigned_to?`<span>${a.assigned_to}</span>`:''}
-            </div>
-          </div>`).join('') + `</div></div>`;
-    })()}
-  `;
-
-  loadEnrichment((d.fts_id || d.account_id || '').toString().trim());
-  document.getElementById('panelOverlay').classList.add('open');
-  document.getElementById('detailPanel').classList.add('open');
+  adpOpen(d.account_id, d.account_name, d.account_id);
 }
 
-async function loadEnrichment(key) {
-  if (!key) return;
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/tbl_enrichment?or=(fts_id.eq.${encodeURIComponent(key)},opportunity_id.eq.${encodeURIComponent(openDeal ? openDeal.opportunity_id : key)})&select=*`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-    });
-    const data = await res.json();
-    if (data && data[0]) {
-      document.getElementById('enrichPrice').value = data[0].current_price || '';
-      document.getElementById('enrichNotes').value = data[0].notes || '';
-      // Cache notes on deal object so search can find them
-      if (openDeal) openDeal._notes = data[0].notes || '';
-      const deal = allDeals.find(x => x.opportunity_id === (openDeal ? openDeal.opportunity_id : ''));
-      if (deal) deal._notes = data[0].notes || '';
-    }
-  } catch(e) {}
-}
+function closePanel() { adpClose(); }
 
-async function saveEnrichment() {
-  const btn = document.getElementById('saveEnrichBtn');
-  const msg = document.getElementById('saveMsg');
-  btn.disabled = true;
-  const key = (openDeal.fts_id || openDeal.account_id || '').toString().trim();
-  const payload = {
-    fts_id: key,
-    account_id: openDeal.account_id,
-    opportunity_id: openDeal.opportunity_id,
-    current_price: parseFloat(document.getElementById('enrichPrice').value) || null,
-    notes: document.getElementById('enrichNotes').value || null,
-    updated_at: new Date().toISOString(),
-    updated_by: 'Tom Burke'
-  };
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/tbl_enrichment`, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates'
-      },
-      body: JSON.stringify(payload)
-    });
-    msg.classList.remove('hidden');
-    setTimeout(() => msg.classList.add('hidden'), 2500);
-  } catch(e) { alert('Save failed: ' + e.message); }
-  btn.disabled = false;
-}
 
-function closePanel() {
-  document.getElementById('panelOverlay').classList.remove('open');
-  document.getElementById('detailPanel').classList.remove('open');
-  openDeal = null;
-}
 
 // ── AUTH ──────────────────────────────────────────
 
@@ -1983,6 +1896,365 @@ document.addEventListener('click', e => {
   if (!e.target.closest('th')) 
     document.querySelectorAll('.cf-dd.open').forEach(d => d.classList.remove('open'));
 });
+
+
+// ── SHARED PANEL ──────────────────────────
+// ══════════════════════════════════════════════════
+// SHARED ACCOUNT DETAIL PANEL
+// ══════════════════════════════════════════════════
+const ADP_URL  = 'https://idbnpxedwpjrflsqweyh.supabase.co';
+const ADP_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYm5weGVkd3BqcmZsc3F3ZXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNTY3MDYsImV4cCI6MjA5MjkzMjcwNn0.PL7ftdQbTtkCnfFa3Mwo2H3w_uPXuTh_0o75cu3_FLU';
+const ADP_GAS  = 'https://script.google.com/macros/s/AKfycbzAMyU1XR3hWz62Icfm7KSe2M-v8cXuh5pKjexCIUtQ1m6MTzJ1UN1ulA28iwkixJ63Rw/exec';
+
+let _adpOpen = false;
+let _adpVendors = null;          // cached vendor list
+let _adpVendorStatus = new Set(); // active vendor status filters
+
+// ── helpers ──────────────────────────────────────
+function adpFmt(val, type) {
+  if (val === null || val === undefined || val === '') return '—';
+  if (type === 'currency') return '$' + parseFloat(val).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  if (type === 'date') {
+    const d = new Date(val);
+    return `${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCFullYear()).slice(-2)}`;
+  }
+  return val;
+}
+function adpDaysClass(d) {
+  const v = parseFloat(d);
+  if (isNaN(v)) return '';
+  if (v > 30) return 'adp-days-bad';
+  if (v > 14) return 'adp-days-warn';
+  return 'adp-days-ok';
+}
+function adpStageStyle(stage) {
+  if (!stage) return '';
+  const s = stage.toLowerCase();
+  if (s.includes('won'))      return 'background:color-mix(in srgb,var(--green) 18%,transparent);color:var(--green);border:1px solid color-mix(in srgb,var(--green) 30%,transparent)';
+  if (s.includes('lost'))     return 'background:color-mix(in srgb,var(--text3) 18%,transparent);color:var(--text3);border:1px solid color-mix(in srgb,var(--text3) 30%,transparent)';
+  if (s.includes('sql')||s.includes('qualified')) return 'background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent)';
+  if (s.includes('value'))    return 'background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--gold);border:1px solid color-mix(in srgb,var(--gold) 30%,transparent)';
+  if (s.includes('enroll'))   return 'background:color-mix(in srgb,#5ce6e6 18%,transparent);color:#5ce6e6;border:1px solid color-mix(in srgb,#5ce6e6 30%,transparent)';
+  return 'background:var(--surface3);color:var(--text2);border:1px solid var(--border2)';
+}
+function adpOppCardClass(stage) {
+  if (!stage) return '';
+  const s = stage.toLowerCase();
+  if (s.includes('won')) return 'closed-won';
+  if (s.includes('lost')) return 'closed-lost';
+  return 'open-opp';
+}
+function adpVendorStatusStyle(s) {
+  if (!s) return '';
+  const l = s.toLowerCase();
+  if (l === 'live')    return 'background:color-mix(in srgb,var(--green) 18%,transparent);color:var(--green)';
+  if (l === 'pending') return 'background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--gold)';
+  return 'background:color-mix(in srgb,var(--red) 18%,transparent);color:var(--red)';
+}
+function adpSection(id, title, count, html, collapsed=false) {
+  const countBadge = count !== null ? `<span class="adp-section-count">${count}</span>` : '';
+  return `
+    <div class="adp-section${collapsed?' collapsed':''}" id="adps-${id}">
+      <button class="adp-section-toggle" onclick="adpToggleSection('${id}')">
+        <div class="adp-section-label">
+          <span class="adp-section-title">${title}</span>${countBadge}
+        </div>
+        <span class="adp-section-arrow">▾</span>
+      </button>
+      <div class="adp-section-body">${html}</div>
+    </div>`;
+}
+function adpToggleSection(id) {
+  document.getElementById('adps-'+id)?.classList.toggle('collapsed');
+}
+
+// ── open / close ─────────────────────────────────
+async function adpOpen(accountId, accountName, accountIdSF) {
+  // Show panel immediately with loading state
+  document.getElementById('adpAccountName').textContent = accountName || '—';
+  document.getElementById('adpMeta').innerHTML = '';
+  document.getElementById('adpSFLink').style.display = accountIdSF ? 'inline-flex' : 'none';
+  if (accountIdSF) document.getElementById('adpSFLink').href = `https://fintech.lightning.force.com/lightning/r/Account/${accountIdSF}/view`;
+  document.getElementById('adpBody').innerHTML = '<div class="adp-loading"><div class="adp-spinner"></div>Loading account details...</div>';
+  document.getElementById('adpOverlay').classList.add('open');
+  document.getElementById('adpPanel').classList.add('open');
+  _adpOpen = true;
+  _adpVendorStatus = new Set();
+
+  try {
+    const tok = (() => { try { return JSON.parse(localStorage.getItem('crm_session'))?.token; } catch(e){return null;} })();
+    const hdrs = { 'apikey': ADP_KEY, 'Authorization': `Bearer ${tok||ADP_KEY}` };
+
+    // Fetch all data in parallel
+    const [oppsRes, tasksRes, actsRes] = await Promise.all([
+      fetch(`${ADP_URL}/rest/v1/tbl_opportunities?account_id=eq.${accountId}&select=*&order=close_date.asc`, {headers: hdrs}),
+      fetch(`${ADP_URL}/rest/v1/tbl_tasks?account_id=eq.${accountId}&select=*&order=due_date.asc`, {headers: hdrs}),
+      fetch(`${ADP_URL}/rest/v1/tbl_activities?account_id=eq.${accountId}&select=*&order=activity_date.desc&limit=50`, {headers: hdrs}),
+    ]);
+
+    const [opps, tasks, acts] = await Promise.all([oppsRes.json(), tasksRes.json(), actsRes.json()]);
+
+    // Load vendors (cached after first fetch)
+    if (!_adpVendors) {
+      try {
+        const vr = await fetch(`${ADP_GAS}?action=get_vendors&t=${Date.now()}`);
+        if (vr.ok) {
+          const vd = await vr.json();
+          if (vd?.rows?.length > 1) {
+            const headers = vd.rows[0].map(h => String(h).toLowerCase().trim());
+            const iV = headers.findIndex(h=>h==='vendor'||h==='vendor name'||h==='name');
+            const iS = headers.findIndex(h=>h==='status');
+            const iF = headers.findIndex(h=>h==='funding');
+            const iC = headers.findIndex(h=>h==='coverage');
+            _adpVendors = vd.rows.slice(1).filter(r=>r[iV>-1?iV:0]).map(r=>({
+              name: iV>-1?String(r[iV]||''):'',
+              status: iS>-1?String(r[iS]||''):'',
+              funding: adpNormFunding(iF>-1?r[iF]:''),
+              coverage: iC>-1?String(r[iC]||''):''
+            }));
+          }
+        }
+      } catch(e) { _adpVendors = []; }
+    }
+
+    // Get account state for vendor matching
+    const anchor = Array.isArray(opps) && opps.length ? opps[0] : {};
+    const acctState = (anchor.state || '').trim().toUpperCase();
+
+    adpRender(anchor, opps, tasks, acts, acctState);
+  } catch(e) {
+    document.getElementById('adpBody').innerHTML = `<div class="adp-loading" style="color:var(--red)">Failed to load: ${e.message}</div>`;
+  }
+}
+
+function adpNormFunding(val) {
+  const s = String(val).trim();
+  if (s==='0'||s==='0-day'||s.toLowerCase()==='eft') return 'EFT';
+  if (s==='4'||s==='4-day'||s.toLowerCase().includes('non')) return 'NON-EFT';
+  return s;
+}
+
+function adpClose() {
+  document.getElementById('adpOverlay').classList.remove('open');
+  document.getElementById('adpPanel').classList.remove('open');
+  _adpOpen = false;
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && _adpOpen) adpClose(); });
+
+// ── render ────────────────────────────────────────
+function adpRender(anchor, opps, tasks, acts, acctState) {
+  if (!Array.isArray(opps)) opps = [];
+  if (!Array.isArray(tasks)) tasks = [];
+  if (!Array.isArray(acts)) acts = [];
+
+  const openTasks = tasks.filter(t => t.status !== 'Completed');
+  const openOpps  = opps.filter(o => !['Closed Won','Lost'].includes(o.stage));
+  const closedOpps = opps.filter(o => ['Closed Won','Lost'].includes(o.stage));
+
+  // Update header meta
+  const metaParts = [];
+  if (anchor.fts_id) metaParts.push(`<span class="adp-fts">FTS ${anchor.fts_id}</span>`);
+  if (acctState)     metaParts.push(`<span class="adp-state-badge">📍 ${anchor.city?anchor.city+', ':''}${anchor.state||''} ${anchor.zip||''}`.trim()+'</span>');
+  document.getElementById('adpMeta').innerHTML = metaParts.join('');
+
+  let html = '';
+
+  // ── 1. ACCOUNT DETAILS ──────────────────────────
+  const dv = parseFloat(anchor.days_since_activity);
+  const daysHtml = !isNaN(dv)
+    ? `<span class="${adpDaysClass(dv)}">${dv}d since activity</span>`
+    : '—';
+  const accHtml = `
+    <div class="adp-grid">
+      <div class="adp-field"><div class="adp-label">FTS ID</div><div class="adp-value mono">${anchor.fts_id||'—'}</div></div>
+      <div class="adp-field"><div class="adp-label">Parent Account</div><div class="adp-value muted">${anchor.parent_account||'—'}</div></div>
+      <div class="adp-field"><div class="adp-label">Location</div><div class="adp-value muted">${[anchor.city,anchor.state,anchor.zip].filter(Boolean).join(', ')||'—'}</div></div>
+      <div class="adp-field"><div class="adp-label"># Locations</div><div class="adp-value mono">${anchor.num_locations||'—'}</div></div>
+      <div class="adp-field"><div class="adp-label">Current Solution</div><div class="adp-value muted">${anchor.accounting_package||'—'}</div></div>
+      <div class="adp-field"><div class="adp-label">Industry</div><div class="adp-value muted">${anchor.industry||'—'}</div></div>
+      <div class="adp-field"><div class="adp-label">Days Since Activity</div><div class="adp-value">${daysHtml}</div></div>
+      <div class="adp-field"><div class="adp-label">BO</div><div class="adp-value muted">${anchor.bo||anchor.closed_reason||'—'}</div></div>
+    </div>`;
+  html += adpSection('account', 'Account Details', null, accHtml, false);
+
+  // ── 2. OPPORTUNITIES ────────────────────────────
+  const oppHtml = opps.length === 0
+    ? '<div class="adp-empty">No opportunities found for this account.</div>'
+    : (() => {
+        const actsByAcc = {};
+        acts.forEach(a => { if (!actsByAcc[a.account_id]) actsByAcc[a.account_id] = []; actsByAcc[a.account_id].push(a); });
+        const renderOpp = (o) => {
+          // Most recent activity for this account
+          const oppActs = acts.slice(0,1); // latest activity = first since sorted desc
+          const lastAct = oppActs[0];
+          // Open tasks for this account
+          const oppTasks = openTasks.slice(0,3);
+
+          const actHtml = lastAct ? `
+            <div class="adp-sub-section">
+              <div class="adp-sub-title">Last Activity</div>
+              <div class="adp-activity-item">
+                <div class="adp-item-subject">${lastAct.subject||'—'}</div>
+                <div class="adp-item-meta">
+                  <span>${adpFmt(lastAct.activity_date,'date')}</span>
+                  ${lastAct.type?`<span>${lastAct.type}</span>`:''}
+                  ${lastAct.assigned_to?`<span>${lastAct.assigned_to}</span>`:''}
+                  ${lastAct.contact_name?`<span>${lastAct.contact_name}</span>`:''}
+                </div>
+                ${lastAct.comments?`<div class="adp-item-comments">${lastAct.comments.slice(0,200)}${lastAct.comments.length>200?'…':''}</div>`:''}
+              </div>
+            </div>` : '';
+
+          const taskHtml = oppTasks.length ? `
+            <div class="adp-sub-section">
+              <div class="adp-sub-title">Open Tasks</div>
+              ${oppTasks.map(t=>`
+                <div class="adp-task-item">
+                  <div class="adp-item-subject">${t.subject||'—'}</div>
+                  <div class="adp-item-meta">
+                    <span>${adpFmt(t.due_date,'date')}</span>
+                    ${t.type?`<span>${t.type}</span>`:''}
+                    ${t.assigned_to?`<span>${t.assigned_to}</span>`:''}
+                    ${t.priority?`<span style="${t.priority==='High'?'color:var(--red)':''}">${t.priority}</span>`:''}
+                  </div>
+                  ${t.comments?`<div class="adp-item-comments">${t.comments.slice(0,150)}${t.comments.length>150?'…':''}</div>`:''}
+                </div>`).join('')}
+            </div>` : '';
+
+          return `
+            <div class="adp-opp-card ${adpOppCardClass(o.stage)}">
+              <div class="adp-opp-name">${o.opportunity_name||o.account_name||'—'}</div>
+              <div class="adp-opp-grid">
+                <div class="adp-opp-field"><div class="adp-opp-label">Stage</div><div class="adp-opp-value"><span class="adp-stage-badge" style="${adpStageStyle(o.stage)}">${o.stage||'—'}</span></div></div>
+                <div class="adp-opp-field"><div class="adp-opp-label">Owner</div><div class="adp-opp-value">${o.opportunity_owner||'—'}</div></div>
+                <div class="adp-opp-field"><div class="adp-opp-label"># Locs</div><div class="adp-opp-value mono">${o.num_locations||'—'}</div></div>
+                <div class="adp-opp-field"><div class="adp-opp-label">Close Date</div><div class="adp-opp-value mono">${adpFmt(o.close_date,'date')}</div></div>
+                <div class="adp-opp-field"><div class="adp-opp-label">Created</div><div class="adp-opp-value mono">${adpFmt(o.created_date,'date')}</div></div>
+                <div class="adp-opp-field"><div class="adp-opp-label">Lead Source</div><div class="adp-opp-value">${o.lead_source||'—'}</div></div>
+                <div class="adp-opp-field"><div class="adp-opp-label">Product</div><div class="adp-opp-value">${o.product_name||'—'}</div></div>
+                <div class="adp-opp-field"><div class="adp-opp-label">ASM Rate</div><div class="adp-opp-value mono">${adpFmt(o.asm_flat_rate,'currency')}</div></div>
+                <div class="adp-opp-field"><div class="adp-opp-label">Total Flat Rate</div><div class="adp-opp-value mono">${adpFmt(o.total_flat_rate,'currency')}</div></div>
+              </div>
+              ${o.contact_name||o.contact_title||o.contact_phone||o.contact_email ? `
+                <div class="adp-sub-section">
+                  <div class="adp-sub-title">Primary Contact</div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--text2)">
+                    ${o.contact_name?`<span style="color:var(--text);font-weight:500">${o.contact_name}</span>`:''}
+                    ${o.contact_title?`<span>${o.contact_title}</span>`:''}
+                    ${o.contact_phone?`<span class="mono">${o.contact_phone}</span>`:''}
+                    ${o.contact_email?`<span>${o.contact_email}</span>`:''}
+                  </div>
+                </div>` : ''}
+              ${actHtml}${taskHtml}
+            </div>`;
+        };
+
+        let out = openOpps.length ? openOpps.map(renderOpp).join('') : '';
+        if (closedOpps.length) {
+          out += `<div class="adp-closed-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.ct-arrow').textContent=this.nextElementSibling.style.display==='none'?'▸':'▾'">
+            <span class="ct-arrow">▸</span> Show ${closedOpps.length} closed opp${closedOpps.length>1?'s':''}
+          </div>
+          <div style="display:none">${closedOpps.map(renderOpp).join('')}</div>`;
+        }
+        return out;
+      })();
+  html += adpSection('opps', 'Opportunities', opps.length, oppHtml, false);
+
+  // ── 3. TASKS ─────────────────────────────────────
+  const taskHtml = openTasks.length === 0
+    ? '<div class="adp-empty">No open tasks for this account.</div>'
+    : openTasks.sort((a,b)=>(a.due_date||'').localeCompare(b.due_date||'')).map(t => {
+        const today = new Date().toISOString().slice(0,10);
+        const dc = t.due_date ? (t.due_date < today ? 'color:var(--red)' : t.due_date === today ? 'color:var(--gold)' : '') : '';
+        return `<div class="adp-task-card ${t.priority==='High'?'high':''}">
+          <div class="adp-task-subject">${t.subject||'—'}</div>
+          <div class="adp-task-meta">
+            <span style="${dc}">${adpFmt(t.due_date,'date')}</span>
+            ${t.type?`<span>${t.type}</span>`:''}
+            ${t.priority?`<span style="${t.priority==='High'?'color:var(--red);font-weight:600':''}">${t.priority}</span>`:''}
+            ${t.assigned_to?`<span>${t.assigned_to}</span>`:''}
+          </div>
+          ${t.comments?`<div class="adp-item-comments" style="margin-top:5px;font-size:11px;color:var(--text2);font-style:italic;line-height:1.5">${t.comments.slice(0,200)}${t.comments.length>200?'…':''}</div>`:''}
+        </div>`;
+      }).join('');
+  html += adpSection('tasks', 'Tasks', openTasks.length, taskHtml, true);
+
+  // ── 4. VENDORS ───────────────────────────────────
+  html += adpSection('vendors', 'Available Vendors', null, `<div id="adpVendorContent"></div>`, false);
+
+  document.getElementById('adpBody').innerHTML = html;
+
+  // Render vendors (deferred so DOM is ready)
+  setTimeout(() => adpRenderVendors(acctState), 0);
+}
+
+// ── vendor section ────────────────────────────────
+function adpRenderVendors(state) {
+  const el = document.getElementById('adpVendorContent');
+  if (!el) return;
+
+  if (!_adpVendors) {
+    el.innerHTML = '<div class="adp-empty">Vendor data unavailable.</div>';
+    return;
+  }
+  if (!state) {
+    el.innerHTML = '<div class="adp-empty">No state on record for this account — cannot match vendors.</div>';
+    return;
+  }
+
+  // Filter vendors: match state OR national
+  const matched = _adpVendors.filter(v => {
+    const cov = (v.coverage || '').toUpperCase();
+    return /\bNATIONAL\b/.test(cov) || new RegExp('\\b' + state + '\\b').test(cov);
+  });
+
+  // Apply status filter
+  const visible = _adpVendorStatus.size > 0
+    ? matched.filter(v => _adpVendorStatus.has(v.status))
+    : matched;
+
+  const counts = { Live: 0, Pending: 0, 'On Hold': 0 };
+  matched.forEach(v => { if (counts[v.status] !== undefined) counts[v.status]++; });
+
+  const pillActive = (s) => _adpVendorStatus.has(s);
+  const pillCls = (s) => {
+    if (!pillActive(s)) return 'adp-vendor-pill';
+    if (s==='Live') return 'adp-vendor-pill av-live';
+    if (s==='Pending') return 'adp-vendor-pill av-pending';
+    return 'adp-vendor-pill av-hold';
+  };
+
+  const rowsHtml = visible.length === 0
+    ? '<div class="adp-empty">No matching vendors for the selected filters.</div>'
+    : visible.map(v => {
+        const isNat = /\bNATIONAL\b/i.test(v.coverage);
+        return `<div class="adp-vendor-row${isNat?' national':''}">
+          <span class="adp-vendor-name">${v.name}${isNat?' <span style="font-size:10px;color:var(--gold)">★ National</span>':''}</span>
+          <div class="adp-vendor-badges">
+            <span class="adp-vendor-funding">${v.funding||'—'}</span>
+            <span class="adp-vendor-status" style="${adpVendorStatusStyle(v.status)}">${v.status||'—'}</span>
+          </div>
+        </div>`;
+      }).join('');
+
+  el.innerHTML = `
+    <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">
+      Matching vendors for <strong style="color:var(--text)">${state}</strong> — ${matched.length} found
+    </div>
+    <div class="adp-vendor-filters">
+      <button class="${pillCls('Live')}" onclick="adpToggleVendorStatus('Live','${state}')">Live (${counts.Live})</button>
+      <button class="${pillCls('Pending')}" onclick="adpToggleVendorStatus('Pending','${state}')">Pending (${counts.Pending})</button>
+      <button class="${pillCls('On Hold')}" onclick="adpToggleVendorStatus('On Hold','${state}')">On Hold (${counts['On Hold']})</button>
+    </div>
+    ${rowsHtml}`;
+}
+
+function adpToggleVendorStatus(s, state) {
+  if (_adpVendorStatus.has(s)) _adpVendorStatus.delete(s);
+  else _adpVendorStatus.add(s);
+  adpRenderVendors(state);
+}
+
 </script>
 </body>
 </html>
