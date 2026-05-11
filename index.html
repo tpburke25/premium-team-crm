@@ -343,6 +343,7 @@ body.light .loc-high { color: #14532d; }
 .adp-account-name{font-size:18px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:3px;}
 .adp-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px;}
 .adp-fts{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;}
+.adp-state-badge{font-size:11px;color:var(--text3);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;}
 .adp-sf-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--accent);text-decoration:none;background:color-mix(in srgb,var(--accent) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:5px;padding:2px 8px;transition:opacity 0.15s;}
 .adp-sf-link:hover{opacity:0.75;}
 .adp-header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
@@ -353,7 +354,7 @@ body.light .loc-high { color: #14532d; }
 .adp-spinner{width:26px;height:26px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:adp-spin 0.7s linear infinite;margin:0 auto 12px;}
 @keyframes adp-spin{to{transform:rotate(360deg);}}
 .adp-section{border-bottom:1px solid var(--border);}
-.adp-section-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 28px 14px 25px;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.1s;border-left:3px solid transparent;}
+.adp-section-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.1s;}
 .adp-section-toggle:hover{background:var(--surface2);}
 .adp-section-label{display:flex;align-items:center;gap:8px;}
 .adp-section-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);}
@@ -362,17 +363,8 @@ body.light .loc-high { color: #14532d; }
 .adp-section.collapsed .adp-section-arrow{transform:rotate(-90deg);}
 .adp-section-body{padding:0 28px 20px;}
 .adp-section.collapsed .adp-section-body{display:none;}
-.adp-section[data-sec="account"] .adp-section-toggle{border-left-color:#6c8ebf;}
-.adp-section[data-sec="account"] .adp-section-title{color:#6c8ebf;}
-.adp-section[data-sec="opps"] .adp-section-toggle{border-left-color:var(--accent);}
-.adp-section[data-sec="opps"] .adp-section-title{color:var(--accent);}
-.adp-section[data-sec="tasks"] .adp-section-toggle{border-left-color:var(--gold);}
-.adp-section[data-sec="tasks"] .adp-section-title{color:var(--gold);}
-.adp-section[data-sec="activity"] .adp-section-toggle{border-left-color:#a78bfa;}
-.adp-section[data-sec="activity"] .adp-section-title{color:#a78bfa;}
-.adp-section[data-sec="vendors"] .adp-section-toggle{border-left-color:var(--green);}
-.adp-section[data-sec="vendors"] .adp-section-title{color:var(--green);}
 .adp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;}
+.adp-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px;}
 .adp-field{background:var(--surface2);border-radius:8px;padding:9px 12px;border:1px solid var(--border);}
 .adp-field.full{grid-column:1/-1;}
 .adp-label{font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text3);margin-bottom:3px;font-weight:500;}
@@ -393,13 +385,8 @@ body.light .loc-high { color: #14532d; }
 .adp-opp-value{font-size:12px;color:var(--text);font-weight:500;}
 .adp-opp-value.mono{font-family:'DM Mono',monospace;}
 .adp-stage-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;}
-.adp-sub-section{margin-top:8px;border-top:1px solid var(--border);padding-top:8px;}
-.adp-sub-toggle{width:100%;display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text3);font-weight:600;font-family:'DM Sans',sans-serif;padding:0;margin-bottom:0;}
-.adp-sub-toggle:hover{color:var(--text2);}
-.adp-sub-toggle .adp-sub-arrow{font-size:9px;transition:transform 0.2s;}
-.adp-sub-collapsed .adp-sub-arrow{transform:rotate(-90deg);}
-.adp-sub-body{margin-top:6px;}
-.adp-sub-collapsed .adp-sub-body{display:none;}
+.adp-sub-section{margin-top:10px;border-top:1px solid var(--border);padding-top:10px;}
+.adp-sub-title{font-size:9px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);margin-bottom:6px;font-weight:600;}
 .adp-activity-item{display:flex;flex-direction:column;gap:2px;padding:7px 10px;background:var(--surface3);border-radius:7px;margin-bottom:5px;border-left:2px solid var(--accent);}
 .adp-task-item{display:flex;flex-direction:column;gap:2px;padding:7px 10px;background:var(--surface3);border-radius:7px;margin-bottom:5px;border-left:2px solid var(--gold);}
 .adp-item-subject{font-size:12px;font-weight:500;color:var(--text);}
@@ -409,12 +396,9 @@ body.light .loc-high { color: #14532d; }
 .adp-task-card.high{border-left-color:var(--red);}
 .adp-task-subject{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;}
 .adp-task-meta{font-size:11px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap;}
-.adp-act-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;border-left:3px solid var(--accent);}
-.adp-act-subject{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;}
-.adp-act-meta{font-size:11px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap;}
-.adp-act-comments{font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5;font-style:italic;}
 .adp-vendor-filters{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
 .adp-vendor-pill{padding:4px 11px;border-radius:16px;border:1px solid var(--border2);font-size:11px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;background:transparent;color:var(--text3);}
+.adp-vendor-pill:hover{background:var(--surface2);color:var(--text);}
 .adp-vendor-pill.av-live{background:color-mix(in srgb,var(--green) 18%,transparent);border-color:var(--green);color:var(--green);}
 .adp-vendor-pill.av-pending{background:color-mix(in srgb,var(--gold) 18%,transparent);border-color:var(--gold);color:var(--gold);}
 .adp-vendor-pill.av-hold{background:color-mix(in srgb,var(--red) 18%,transparent);border-color:var(--red);color:var(--red);}
@@ -427,6 +411,18 @@ body.light .loc-high { color: #14532d; }
 .adp-empty{font-size:12px;color:var(--text3);padding:10px 0;font-style:italic;}
 .adp-closed-toggle{margin-top:10px;display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text3);user-select:none;}
 .adp-closed-toggle:hover{color:var(--text2);}
+
+
+/* ── Panel section header colors ── */
+.adp-section[data-sec="account"]  .adp-section-toggle { border-left: 3px solid #6c8ebf; }
+.adp-section[data-sec="account"]  .adp-section-title  { color: #6c8ebf; }
+.adp-section[data-sec="opps"]     .adp-section-toggle { border-left: 3px solid var(--accent); }
+.adp-section[data-sec="opps"]     .adp-section-title  { color: var(--accent); }
+.adp-section[data-sec="tasks"]    .adp-section-toggle { border-left: 3px solid var(--gold); }
+.adp-section[data-sec="tasks"]    .adp-section-title  { color: var(--gold); }
+.adp-section[data-sec="vendors"]  .adp-section-toggle { border-left: 3px solid var(--green); }
+.adp-section[data-sec="vendors"]  .adp-section-title  { color: var(--green); }
+.adp-section-toggle { padding-left: 25px !important; }
 
 </style>
 </head>
@@ -584,7 +580,7 @@ if (localStorage.getItem('crm_theme') === 'light') {
         <th onclick="sortList('opportunity_owner')">Owner <span class="sort-arrow" id="sort-opportunity_owner"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('opportunity_owner','check')">▾</span><div class="cf-dd" id="cf-opportunity_owner"><div class="cf-title">Owner</div><input class="cf-search" id="cfs-opportunity_owner" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('opportunity_owner')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('opportunity_owner')">Select / Deselect all</span><div class="cf-list" id="cfl-opportunity_owner"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('opportunity_owner')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('opportunity_owner')">Clear</button></div></div></th>
         <th onclick="sortList('account_name')">Account <span class="sort-arrow" id="sort-account_name"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('account_name','check')">▾</span><div class="cf-dd" id="cf-account_name"><div class="cf-title">Account</div><input class="cf-search" id="cfs-account_name" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('account_name')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('account_name')">Select / Deselect all</span><div class="cf-list" id="cfl-account_name"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('account_name')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('account_name')">Clear</button></div></div></th>
         <th onclick="sortList('num_locations')"># Locs <span class="sort-arrow" id="sort-num_locations"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('num_locations','num')">▾</span><div class="cf-dd" id="cf-num_locations"><div class="cf-title"># Locs</div><select class="cf-num-op" id="cfop-num_locations" onclick="event.stopPropagation()"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-num_locations" type="number" min="0" placeholder="e.g. 5" onclick="event.stopPropagation()"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('num_locations')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('num_locations')">Clear</button></div></div></th>
-        <th onclick="sortList('stage')">Stage <span class="sort-arrow" id="sort-stage"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('stage','check')">▾</span><div class="cf-dd" id="cf-stage"><div class="cf-title">Stage</div><input class="cf-search" id="cfs-stage" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('stage')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('stage')">Select / Deselect all</span><div class="cf-list" id="cfl-stage"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('stage')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('stage')">Clear</button></div></div></th>
+        <th onclick="sortList('stage')">Stage <span class="sort-arrow" id="sort-stage"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('stage','check')">▾</span><div class="cf-dd" id="cf-stage"><div class="cf-title">Stage</div><div style="display:flex;gap:5px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border2)"><button onclick="event.stopPropagation();applyStageQuick('open')" style="flex:1;padding:5px 0;border-radius:6px;border:1px solid color-mix(in srgb,var(--green) 40%,transparent);background:color-mix(in srgb,var(--green) 12%,transparent);color:var(--green);font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .15s" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">✓ Open</button><button onclick="event.stopPropagation();applyStageQuick('closed')" style="flex:1;padding:5px 0;border-radius:6px;border:1px solid var(--border2);background:var(--surface3);color:var(--text3);font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .15s" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">✕ Closed</button></div><input class="cf-search" id="cfs-stage" placeholder="Search stages..." onclick="event.stopPropagation()" oninput="renderCFList('stage')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('stage')">Select / Deselect all</span><div class="cf-list" id="cfl-stage"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('stage')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('stage')">Clear</button></div></div></th>
         <th onclick="sortList('close_date')">Close Date <span class="sort-arrow" id="sort-close_date"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('close_date','date')">▾</span><div class="cf-dd" id="cf-close_date"><div class="cf-title">Close Date</div><select class="cf-num-op" id="cfpreset-close_date" onclick="event.stopPropagation()" onchange="handleDatePreset('close_date')"><option value="">All dates</option><optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option><option value="this_quarter">This Quarter</option><option value="this_year">This Year</option></optgroup><optgroup label="Future"><option value="next_month">Next Month</option><option value="next_30">Next 30 Days</option><option value="next_60">Next 60 Days</option><option value="next_90">Next 90 Days</option><option value="future_all">All Future</option></optgroup><option value="custom">Custom range...</option></select><div id="cfcustom-close_date" style="display:none"><input class="cf-date-input" id="cffrom-close_date" type="date" onclick="event.stopPropagation()"><input class="cf-date-input" id="cfto-close_date" type="date" onclick="event.stopPropagation()"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('close_date')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('close_date')">Clear</button></div></div></th>
         <th onclick="sortList('lead_source')">Lead Source <span class="sort-arrow" id="sort-lead_source"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('lead_source','check')">▾</span><div class="cf-dd" id="cf-lead_source"><div class="cf-title">Lead Source</div><input class="cf-search" id="cfs-lead_source" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('lead_source')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('lead_source')">Select / Deselect all</span><div class="cf-list" id="cfl-lead_source"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('lead_source')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('lead_source')">Clear</button></div></div></th>
         <th onclick="sortList('last_activity')">Last Activity <span class="sort-arrow" id="sort-last_activity"></span></th>
@@ -736,6 +732,7 @@ function applyFilters() {
       if (!sel || sel.size === 0) continue;
       const val = col === 'opportunity_owner' ? d.opportunity_owner :
                   col === 'account_name'      ? d.account_name :
+                  col === 'parent_account'    ? d.parent_account :
                   col === 'stage'             ? d.stage :
                   col === 'lead_source'       ? d.lead_source : null;
       if (!sel.has(val)) return false;
@@ -745,9 +742,10 @@ function applyFilters() {
       const f = numFilters[col];
       if (!f) continue;
       if (f.preset !== undefined) {
-        // Date filter on close_date
-        if (!d.close_date) return false;
-        if (!passesDateCF(d.close_date, f)) return false;
+        // Date filter (close_date or created_date)
+        const dateVal = col === 'created_date' ? d.created_date : d.close_date;
+        if (!dateVal) return false;
+        if (!passesDateCF(dateVal, f)) return false;
       } else if (f.op) {
         const v = parseFloat(col === 'num_locations' ? d.num_locations : d.days_since_activity);
         if (isNaN(v)) return false;
@@ -991,8 +989,12 @@ function renderList() {
           return `<td class="mono" style="${lc==='loc-high'?'color:#16a34a;font-weight:500':lc==='loc-mid'?'color:#4ade80':''}">${d.num_locations||'—'}</td>`;
         case 'stage':
           return `<td><span class="stage-badge ${sc}">${d.stage||'—'}</span></td>`;
+        case 'parent_account':
+          return `<td style="color:var(--text2)">${d.parent_account||'—'}</td>`;
         case 'close_date':
           return `<td class="mono" style="${isPastDue?'color:var(--red);font-weight:500':isToday?'color:var(--gold);font-weight:500':''}">${fmt(d.close_date,'date')}</td>`;
+        case 'created_date':
+          return `<td class="mono">${fmt(d.created_date,'date')}</td>`;
         case 'lead_source':
           return `<td>${d.lead_source||'—'}</td>`;
         case 'last_activity':
@@ -1050,16 +1052,18 @@ document.addEventListener('click', e => {
 });
 
 // ── COLUMN DEFINITIONS ────────────────────────────
-const LOCKED_COLS = ['opportunity_owner', 'account_name', 'stage', 'close_date'];
+const LOCKED_COLS = []; // all columns unlocked
 const ALL_COLS = [
-  { id: 'opportunity_owner', label: 'Owner',         type: 'check' },
-  { id: 'account_name',      label: 'Account',       type: 'check' },
-  { id: 'num_locations',     label: '# Locs',        type: 'num'   },
-  { id: 'stage',             label: 'Stage',         type: 'check' },
-  { id: 'close_date',        label: 'Close Date',    type: 'date'  },
-  { id: 'lead_source',       label: 'Lead Source',   type: 'check' },
-  { id: 'last_activity',     label: 'Last Activity', type: 'none'  },
-  { id: 'next_task',         label: 'Next Task',     type: 'none'  },
+  { id: 'opportunity_owner', label: 'Owner',           type: 'check' },
+  { id: 'account_name',      label: 'Account',         type: 'check' },
+  { id: 'parent_account',    label: 'Parent Account',  type: 'check' },
+  { id: 'num_locations',     label: '# Locs',          type: 'num'   },
+  { id: 'stage',             label: 'Stage',           type: 'check' },
+  { id: 'close_date',        label: 'Close Date',      type: 'date'  },
+  { id: 'created_date',      label: 'Created Date',    type: 'date'  },
+  { id: 'lead_source',       label: 'Lead Source',     type: 'check' },
+  { id: 'last_activity',     label: 'Last Activity',   type: 'none'  },
+  { id: 'next_task',         label: 'Next Task',       type: 'none'  },
   { id: 'days_since_activity', label: 'Days Since Act.', type: 'num' },
 ];
 
@@ -1768,6 +1772,16 @@ async function loadData() {
     }
     allDeals = all;
     await loadActivities();
+    // Default to Open opps on first load (skip if a view/filter is already active)
+    const hasExistingFilter = Object.values(checkFilters).some(s => s && s.size > 0) || Object.keys(numFilters).length > 0;
+    if (!hasExistingFilter) {
+      const closedStages = ['Closed Won', 'Lost'];
+      const openStages = [...new Set(allDeals.map(d => d.stage).filter(Boolean))].filter(s => !closedStages.includes(s));
+      if (!checkFilters['stage']) checkFilters['stage'] = new Set();
+      openStages.forEach(s => checkFilters['stage'].add(s));
+      const stageTh = document.getElementById('cf-stage')?.closest('th');
+      if (stageTh) stageTh.classList.add('th-filtered');
+    }
     applyColVisibility();
     renderListHeaders();
     applyFilters();
@@ -1792,6 +1806,7 @@ function openCF(col, type) {
       const fieldMap = {
         'opportunity_owner': d => d.opportunity_owner,
         'account_name':      d => d.account_name,
+        'parent_account':    d => d.parent_account,
         'stage':             d => d.stage,
         'lead_source':       d => d.lead_source,
       };
@@ -1827,6 +1842,23 @@ function toggleAllCF(col){
   renderCFList(col);
 }
 
+
+function applyStageQuick(type) {
+  const closedStages = ['Closed Won', 'Lost'];
+  if (!checkFilters['stage']) checkFilters['stage'] = new Set();
+  checkFilters['stage'].clear();
+  if (type === 'open') {
+    const openStages = [...new Set(allDeals.map(d => d.stage).filter(Boolean))].filter(s => !closedStages.includes(s));
+    openStages.forEach(s => checkFilters['stage'].add(s));
+  } else {
+    closedStages.forEach(s => checkFilters['stage'].add(s));
+  }
+  document.getElementById('cf-stage')?.classList.remove('open');
+  const th = document.getElementById('cf-stage')?.closest('th');
+  if (th) th.classList.add('th-filtered');
+  applyFilters();
+  updateFilterPills();
+}
 function applyCF(col) {
   const dd = document.getElementById('cf-' + col);
   if (dd) dd.classList.remove('open');
@@ -1979,10 +2011,6 @@ function adpSection(id, title, count, html, collapsed=false) {
       </button>
       <div class="adp-section-body">${html}</div>
     </div>`;
-}
-function adpToggleSub(el) {
-  const wrap = el.closest('.adp-sub-wrap');
-  if (wrap) wrap.classList.toggle('adp-sub-collapsed');
 }
 function adpToggleSection(id) {
   document.getElementById('adps-'+id)?.classList.toggle('collapsed');
@@ -2178,7 +2206,7 @@ function adpRender(anchor, opps, tasks, acts, acctState) {
         }
         return out;
       })();
-  html += adpSection('opps', 'Opportunities', opps.length, oppHtml, true);
+  html += adpSection('opps', 'Opportunities', opps.length, oppHtml, false);
 
   // ── 3. TASKS ─────────────────────────────────────
   const taskHtml = openTasks.length === 0
@@ -2199,47 +2227,8 @@ function adpRender(anchor, opps, tasks, acts, acctState) {
       }).join('');
   html += adpSection('tasks', 'Tasks', openTasks.length, taskHtml, true);
 
-
-  // ── 4. ACTIVITY (collapsed) ───────────────────────
-  // Open tasks first (by due date), then completed activities (newest first)
-  const activityHtml = (() => {
-    if (!openTasks.length && !acts.length) return '<div class="adp-empty">No activity found.</div>';
-    const today = new Date().toISOString().slice(0,10);
-    const taskItems = [...openTasks].sort((a,b)=>(a.due_date||'').localeCompare(b.due_date||'')).map(t => {
-      const dc = t.due_date ? (t.due_date < today ? 'color:var(--red)' : t.due_date === today ? 'color:var(--gold)' : '') : '';
-      return `<div class="adp-task-card ${t.priority==='High'?'high':''}">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-          <span style="font-size:9px;background:color-mix(in srgb,var(--gold) 20%,transparent);color:var(--gold);padding:1px 6px;border-radius:4px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">Task</span>
-          <div class="adp-task-subject" style="margin:0">${t.subject||'—'}</div>
-        </div>
-        <div class="adp-task-meta">
-          <span style="${dc}">${adpFmt(t.due_date,'date')}</span>
-          ${t.type?`<span>${t.type}</span>`:''}
-          ${t.priority?`<span style="${t.priority==='High'?'color:var(--red);font-weight:600':''}">${t.priority}</span>`:''}
-          ${t.assigned_to?`<span>${t.assigned_to}</span>`:''}
-        </div>
-        ${t.comments?`<div class="adp-act-comments">${t.comments.slice(0,200)}${t.comments.length>200?'…':''}</div>`:''}
-      </div>`;
-    });
-    const actItems = acts.map(a => `<div class="adp-act-card">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-        <span style="font-size:9px;background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent);padding:1px 6px;border-radius:4px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">Activity</span>
-        <div class="adp-act-subject" style="margin:0">${a.subject||'—'}</div>
-      </div>
-      <div class="adp-act-meta">
-        <span>${adpFmt(a.activity_date,'date')}</span>
-        ${a.type?`<span>${a.type}</span>`:''}
-        ${a.assigned_to?`<span>${a.assigned_to}</span>`:''}
-        ${a.contact_name?`<span>${a.contact_name}</span>`:''}
-      </div>
-      ${a.comments?`<div class="adp-act-comments">${a.comments.slice(0,200)}${a.comments.length>200?'…':''}</div>`:''}
-    </div>`);
-    return taskItems.join('') + actItems.join('');
-  })();
-  html += adpSection('activity', 'Activity', openTasks.length + acts.length, activityHtml, true);
-
-  // ── 5. VENDORS (collapsed) ────────────────────────
-  html += adpSection('vendors', 'Available Vendors', null, `<div id="adpVendorContent"></div>`, true);
+  // ── 4. VENDORS ───────────────────────────────────
+  html += adpSection('vendors', 'Available Vendors', null, `<div id="adpVendorContent"></div>`, false);
 
   document.getElementById('adpBody').innerHTML = html;
 
