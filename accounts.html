@@ -216,6 +216,18 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .adp-closed-toggle{margin-top:10px;display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text3);user-select:none;}
 .adp-closed-toggle:hover{color:var(--text2);}
 
+
+/* ── Panel section header colors ── */
+.adp-section[data-sec="account"]  .adp-section-toggle { border-left: 3px solid #6c8ebf; }
+.adp-section[data-sec="account"]  .adp-section-title  { color: #6c8ebf; }
+.adp-section[data-sec="opps"]     .adp-section-toggle { border-left: 3px solid var(--accent); }
+.adp-section[data-sec="opps"]     .adp-section-title  { color: var(--accent); }
+.adp-section[data-sec="tasks"]    .adp-section-toggle { border-left: 3px solid var(--gold); }
+.adp-section[data-sec="tasks"]    .adp-section-title  { color: var(--gold); }
+.adp-section[data-sec="vendors"]  .adp-section-toggle { border-left: 3px solid var(--green); }
+.adp-section[data-sec="vendors"]  .adp-section-title  { color: var(--green); }
+.adp-section-toggle { padding-left: 25px !important; }
+
 </style>
 </head>
 <body>
@@ -648,7 +660,7 @@ function adpVendorStatusStyle(s) {
 function adpSection(id, title, count, html, collapsed=false) {
   const countBadge = count !== null ? `<span class="adp-section-count">${count}</span>` : '';
   return `
-    <div class="adp-section${collapsed?' collapsed':''}" id="adps-${id}">
+    <div class="adp-section${collapsed?' collapsed':''}" id="adps-${id}" data-sec="${id}">
       <button class="adp-section-toggle" onclick="adpToggleSection('${id}')">
         <div class="adp-section-label">
           <span class="adp-section-title">${title}</span>${countBadge}
@@ -767,7 +779,7 @@ function adpRender(anchor, opps, tasks, acts, acctState) {
       <div class="adp-field"><div class="adp-label">Current Solution</div><div class="adp-value muted">${anchor.accounting_package||'—'}</div></div>
       <div class="adp-field"><div class="adp-label">Industry</div><div class="adp-value muted">${anchor.industry||'—'}</div></div>
       <div class="adp-field"><div class="adp-label">Days Since Activity</div><div class="adp-value">${daysHtml}</div></div>
-      <div class="adp-field"><div class="adp-label">BO</div><div class="adp-value muted">${anchor.bo||anchor.closed_reason||'—'}</div></div>
+      <div class="adp-field"><div class="adp-label">Accounting Pkg</div><div class="adp-value muted">${anchor.accounting_package||'—'}</div></div>
     </div>`;
   html += adpSection('account', 'Account Details', null, accHtml, false);
 
