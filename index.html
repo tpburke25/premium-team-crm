@@ -1056,7 +1056,13 @@ function closePanel() { adpClose(); }
 // ── VIEWS DROPDOWN TOGGLE ─────────────────────────
 function toggleViewsDropdown() {
   const wrap = document.getElementById('viewsWrap');
-  if (wrap) wrap.classList.toggle('open');
+  if (wrap) {
+    wrap.classList.toggle('open');
+    if (wrap.classList.contains('open')) {
+      renderColManager();
+      renderViewsList();
+    }
+  }
 }
 document.addEventListener('click', e => {
   const wrap = document.getElementById('viewsWrap');
@@ -1367,10 +1373,7 @@ function toggleColVisible(id, visible) {
 }
 
 function applyColVisibility() {
-  ALL_COLS.forEach(col => {
-    const th = document.getElementById('sort-' + col.id)?.closest('th');
-    if (th) th.style.display = colVisible[col.id] ? '' : 'none';
-  });
+  renderListHeaders();
 }
 
 function colDragStart(e, id) { dragSrcId = id; e.dataTransfer.effectAllowed = 'move'; }
