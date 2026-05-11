@@ -424,6 +424,20 @@ body.light .loc-high { color: #14532d; }
 .adp-section[data-sec="vendors"]  .adp-section-title  { color: var(--green); }
 .adp-section-toggle { padding-left: 25px !important; }
 
+.adp-section[data-sec="activity"] .adp-section-toggle { border-left: 3px solid #a78bfa; }
+.adp-section[data-sec="activity"] .adp-section-title  { color: #a78bfa; }
+.adp-sub-section{margin-top:8px;border-top:1px solid var(--border);padding-top:8px;}
+.adp-sub-toggle{width:100%;display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text3);font-weight:600;font-family:'DM Sans',sans-serif;padding:0;}
+.adp-sub-toggle:hover{color:var(--text2);}
+.adp-sub-toggle .adp-sub-arrow{font-size:9px;transition:transform 0.2s;}
+.adp-sub-collapsed .adp-sub-arrow{transform:rotate(-90deg);}
+.adp-sub-body{margin-top:6px;}
+.adp-sub-collapsed .adp-sub-body{display:none;}
+.adp-act-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;border-left:3px solid var(--accent);}
+.adp-act-subject{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;}
+.adp-act-meta{font-size:11px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap;}
+.adp-act-comments{font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5;font-style:italic;}
+
 </style>
 </head>
 <body>
@@ -2020,6 +2034,10 @@ function adpSection(id, title, count, html, collapsed=false) {
 function adpToggleSection(id) {
   document.getElementById('adps-'+id)?.classList.toggle('collapsed');
 }
+function adpToggleSub(el) {
+  const wrap = el.closest('.adp-sub-wrap');
+  if (wrap) wrap.classList.toggle('adp-sub-collapsed');
+}
 
 // ── open / close ─────────────────────────────────
 async function adpOpen(accountId, accountName, accountIdSF) {
@@ -2156,7 +2174,7 @@ function adpRender(anchor, opps, tasks, acts, acctState) {
                 </div>
                 ${lastAct.comments?`<div class="adp-item-comments">${lastAct.comments.slice(0,200)}${lastAct.comments.length>200?'…':''}</div>`:''}
               </div>
-            </div>` : '';
+            </div></div></div>` : '';
 
           const taskHtml = oppTasks.length ? `
             <div class="adp-sub-section">
@@ -2211,7 +2229,7 @@ function adpRender(anchor, opps, tasks, acts, acctState) {
         }
         return out;
       })();
-  html += adpSection('opps', 'Opportunities', opps.length, oppHtml, false);
+  html += adpSection('opps', 'Opportunities', opps.length, oppHtml, true);
 
   // ── 3. TASKS ─────────────────────────────────────
   const taskHtml = openTasks.length === 0
@@ -2232,8 +2250,46 @@ function adpRender(anchor, opps, tasks, acts, acctState) {
       }).join('');
   html += adpSection('tasks', 'Tasks', openTasks.length, taskHtml, true);
 
-  // ── 4. VENDORS ───────────────────────────────────
-  html += adpSection('vendors', 'Available Vendors', null, `<div id="adpVendorContent"></div>`, false);
+
+  // ── 4. ACTIVITY (collapsed) ───────────────────────
+  const activityHtml = (() => {
+    if (!openTasks.length && !acts.length) return '<div class="adp-empty">No activity found.</div>';
+    const today = new Date().toISOString().slice(0,10);
+    const taskItems = [...openTasks].sort((a,b)=>(a.due_date||'').localeCompare(b.due_date||'')).map(t => {
+      const dc = t.due_date ? (t.due_date < today ? 'color:var(--red)' : t.due_date === today ? 'color:var(--gold)' : '') : '';
+      return `<div class="adp-task-card ${t.priority==='High'?'high':''}">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+          <span style="font-size:9px;background:color-mix(in srgb,var(--gold) 20%,transparent);color:var(--gold);padding:1px 6px;border-radius:4px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">Task</span>
+          <div class="adp-task-subject" style="margin:0">${t.subject||'—'}</div>
+        </div>
+        <div class="adp-task-meta">
+          <span style="${dc}">${adpFmt(t.due_date,'date')}</span>
+          ${t.type?`<span>${t.type}</span>`:''}
+          ${t.priority?`<span style="${t.priority==='High'?'color:var(--red);font-weight:600':''}">${t.priority}</span>`:''}
+          ${t.assigned_to?`<span>${t.assigned_to}</span>`:''}
+        </div>
+        ${t.comments?`<div class="adp-act-comments">${t.comments.slice(0,200)}${t.comments.length>200?'…':''}</div>`:''}
+      </div>`;
+    });
+    const actItems = acts.map(a => `<div class="adp-act-card">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+        <span style="font-size:9px;background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent);padding:1px 6px;border-radius:4px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">Activity</span>
+        <div class="adp-act-subject" style="margin:0">${a.subject||'—'}</div>
+      </div>
+      <div class="adp-act-meta">
+        <span>${adpFmt(a.activity_date,'date')}</span>
+        ${a.type?`<span>${a.type}</span>`:''}
+        ${a.assigned_to?`<span>${a.assigned_to}</span>`:''}
+        ${a.contact_name?`<span>${a.contact_name}</span>`:''}
+      </div>
+      ${a.comments?`<div class="adp-act-comments">${a.comments.slice(0,200)}${a.comments.length>200?'…':''}</div>`:''}
+    </div>`);
+    return taskItems.join('') + actItems.join('');
+  })();
+  html += adpSection('activity', 'Activity', openTasks.length + acts.length, activityHtml, true);
+
+  // ── 5. VENDORS (collapsed) ────────────────────────
+  html += adpSection('vendors', 'Available Vendors', null, `<div id="adpVendorContent"></div>`, true);
 
   document.getElementById('adpBody').innerHTML = html;
 
