@@ -574,7 +574,7 @@ if (localStorage.getItem('crm_theme') === 'light') {
   </div>
 </div>
 <!-- Active filter pills -->
-<div id="filterPillsBar" style="display:none;padding:8px 28px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:6px;flex-wrap:wrap"></div>
+<div id="filterPillsBar" style="display:none;padding:8px 28px;border-bottom:1px solid var(--border);background:var(--surface);align-items:center;gap:6px;flex-wrap:wrap"></div>
 
 <!-- Board view removed — code preserved for future restoration
 <div id="kanbanView" class="hidden">
@@ -674,6 +674,14 @@ function clearFilters() {
   activeViewName = null;
   const vbl = document.getElementById('viewsBtnLabel'); if (vbl) vbl.textContent = '⊞ Views';
   const si = document.getElementById('searchInput'); if (si) si.value = '';
+  // Re-apply default Open filter and suppress pills (same as on load)
+  if (typeof isClosedStage === 'function' && allDeals.length) {
+    const allStages = [...new Set(allDeals.map(d => d.stage).filter(Boolean))];
+    const openStages = allStages.filter(s => !isClosedStage(s));
+    if (!checkFilters['stage']) checkFilters['stage'] = new Set();
+    openStages.forEach(s => checkFilters['stage'].add(s));
+    window._defaultOpenFilterActive = true;
+  }
   applyFilters();
   updateFilterPills();
 }
