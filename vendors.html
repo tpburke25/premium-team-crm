@@ -318,7 +318,8 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
   <table class="list-table" id="vendorTable" style="display:none;table-layout:fixed;width:100%;">
     <thead><tr>
       <th style="width:36px;text-align:center;"><input type="checkbox" id="selectAllChk" onchange="toggleSelectAll(this.checked)" style="cursor:pointer;width:13px;height:13px;accent-color:var(--accent);"></th>
-      <th style="width:20%" onclick="sortBy('name')">Vendor Name <span class="sort-arrow" id="s-name"></span>
+      <th style="width:8%" onclick="sortBy('fts')">FTS ID <span class="sort-arrow" id="s-fts"></span></th>
+      <th style="width:14%" onclick="sortBy('name')">Vendor Name <span class="sort-arrow" id="s-name"></span>
         <span class="cf-btn" onclick="event.stopPropagation();openCF('name')">▾</span>
         <div class="cf-dd" id="cf-name"><div class="cf-title">Vendor Name</div><input class="cf-search" id="cfs-name" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('name')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('name')">Select/Deselect all</span><div class="cf-list" id="cfl-name"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('name')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('name')">Clear</button></div></div>
       </th>
@@ -330,8 +331,8 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
         <span class="cf-btn" onclick="event.stopPropagation();openCF('funding')">▾</span>
         <div class="cf-dd" id="cf-funding"><div class="cf-title">Funding</div><input class="cf-search" id="cfs-funding" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('funding')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('funding')">Select/Deselect all</span><div class="cf-list" id="cfl-funding"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('funding')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('funding')">Clear</button></div></div>
       </th>
-      <th style="width:35%">Coverage States</th>
-      <th style="width:27%" onclick="sortBy('notes')">Notes <span class="sort-arrow" id="s-notes"></span></th>
+      <th style="width:31%">Coverage States</th>
+      <th style="width:24%" onclick="sortBy('notes')">Notes <span class="sort-arrow" id="s-notes"></span></th>
     </tr></thead>
     <tbody id="vendorBody"></tbody>
   </table>
@@ -628,6 +629,7 @@ function renderTable() {
   document.getElementById('vendorBody').innerHTML = sorted.map(v => `
     <tr data-vendor="${v.name.replace(/"/g,'&quot;')}">
       <td style="text-align:center;vertical-align:middle;"><input type="checkbox" class="row-chk" onchange="toggleVendorSelection(this)" style="cursor:pointer;width:13px;height:13px;accent-color:var(--accent);" ${selectedVendors.has(v.name)?'checked':''}></td>
+      <td class="mono" style="font-size:11px;color:var(--text3)">${v.fts||'—'}</td>
       <td class="primary">${v.name||'—'}</td>
       <td><span class="status-badge" style="${statusStyle(v.status)}">${v.status||'—'}</span></td>
       <td class="mono">${v.funding||'—'}</td>

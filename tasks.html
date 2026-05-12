@@ -281,6 +281,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .adp-closed-toggle{margin-top:10px;display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text3);user-select:none;}
 .adp-closed-toggle:hover{color:var(--text2);}
 
+
+/* ── Panel vendor checkboxes + copy bar ── */
+.adp-vendor-row{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;}
+.adp-vendor-chk{width:13px;height:13px;cursor:pointer;accent-color:var(--accent);flex-shrink:0;}
+.adp-vendor-row.national{border-left:3px solid var(--gold);}
+.adp-copy-bar{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+.adp-copy-btn{padding:5px 11px;border-radius:7px;border:none;font-size:11px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity 0.15s;}
+.adp-copy-btn-fts{background:var(--green);color:#fff;}
+.adp-copy-btn-names{background:var(--surface3);color:var(--text2);border:1px solid var(--border2);}
+.adp-copy-btn-fts:hover,.adp-copy-btn-names:hover{opacity:0.8;}
+
 </style>
 </head>
 <body>
@@ -1143,32 +1154,19 @@ function adpRenderVendors(state) {
   const el = document.getElementById('adpVendorContent');
   if (!el) return;
 
-  if (!_adpVendors) {
-    el.innerHTML = '<div class="adp-empty">Vendor data unavailable.</div>';
-    return;
-  }
-  if (!state) {
-    el.innerHTML = '<div class="adp-empty">No state on record for this account — cannot match vendors.</div>';
-    return;
-  }
+  if (!_adpVendors) { el.innerHTML = '<div class="adp-empty">Vendor data unavailable.</div>'; return; }
+  if (!state) { el.innerHTML = '<div class="adp-empty">No state on record — cannot match vendors.</div>'; return; }
 
-  // Filter vendors: match state OR national
   const matched = _adpVendors.filter(v => {
     const cov = (v.coverage || '').toUpperCase();
     return /\bNATIONAL\b/.test(cov) || new RegExp('\\b' + state + '\\b').test(cov);
   });
-
-  // Apply status filter
-  const visible = _adpVendorStatus.size > 0
-    ? matched.filter(v => _adpVendorStatus.has(v.status))
-    : matched;
-
+  const visible = _adpVendorStatus.size > 0 ? matched.filter(v => _adpVendorStatus.has(v.status)) : matched;
   const counts = { Live: 0, Pending: 0, 'On Hold': 0 };
   matched.forEach(v => { if (counts[v.status] !== undefined) counts[v.status]++; });
 
-  const pillActive = (s) => _adpVendorStatus.has(s);
-  const pillCls = (s) => {
-    if (!pillActive(s)) return 'adp-vendor-pill';
+  const pillCls = s => {
+    if (!_adpVendorStatus.has(s)) return 'adp-vendor-pill';
     if (s==='Live') return 'adp-vendor-pill av-live';
     if (s==='Pending') return 'adp-vendor-pill av-pending';
     return 'adp-vendor-pill av-hold';
@@ -1176,10 +1174,16 @@ function adpRenderVendors(state) {
 
   const rowsHtml = visible.length === 0
     ? '<div class="adp-empty">No matching vendors for the selected filters.</div>'
-    : visible.map(v => {
+    : `<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:11px;color:var(--text3)">
+        <input type="checkbox" id="adpVendorSelectAll" class="adp-vendor-chk" onchange="adpToggleAllVendors(this.checked,'${state}')">
+        <label for="adpVendorSelectAll" style="cursor:pointer">Select all</label>
+      </div>` +
+      visible.map(v => {
         const isNat = /\bNATIONAL\b/i.test(v.coverage);
+        const chkId = 'adpvc-' + (v.fts || v.name).replace(/[^a-z0-9]/gi,'_');
         return `<div class="adp-vendor-row${isNat?' national':''}">
-          <span class="adp-vendor-name">${v.name}${isNat?' <span style="font-size:10px;color:var(--gold)">★ National</span>':''}</span>
+          <input type="checkbox" id="${chkId}" class="adp-vendor-chk adp-vc-row" data-name="${v.name.replace(/"/g,'&quot;')}" data-fts="${v.fts||''}" onchange="adpUpdateVendorCopyBar('${state}')">
+          <span class="adp-vendor-name" style="flex:1">${v.name}${isNat?' <span style="font-size:10px;color:var(--gold)">★ National</span>':''}</span>
           <div class="adp-vendor-badges">
             <span class="adp-vendor-funding">${v.funding||'—'}</span>
             <span class="adp-vendor-status" style="${adpVendorStatusStyle(v.status)}">${v.status||'—'}</span>
@@ -1196,15 +1200,71 @@ function adpRenderVendors(state) {
       <button class="${pillCls('Pending')}" onclick="adpToggleVendorStatus('Pending','${state}')">Pending (${counts.Pending})</button>
       <button class="${pillCls('On Hold')}" onclick="adpToggleVendorStatus('On Hold','${state}')">On Hold (${counts['On Hold']})</button>
     </div>
+    <div class="adp-copy-bar" id="adpVendorCopyBar" style="display:none">
+      <button class="adp-copy-btn adp-copy-btn-fts" id="adpCopyFts" onclick="adpCopyVendors('fts','${state}')">📋 Copy (FTS + Funding)</button>
+      <button class="adp-copy-btn adp-copy-btn-names" id="adpCopyNames" onclick="adpCopyVendors('names','${state}')">📄 Copy (Names Only)</button>
+    </div>
     ${rowsHtml}`;
 }
 
 function adpToggleVendorStatus(s, state) {
-  if (_adpVendorStatus.has(s)) _adpVendorStatus.delete(s);
-  else _adpVendorStatus.add(s);
+  if (_adpVendorStatus.has(s)) _adpVendorStatus.delete(s); else _adpVendorStatus.add(s);
   adpRenderVendors(state);
 }
 
+function adpToggleAllVendors(checked, state) {
+  document.querySelectorAll('.adp-vc-row').forEach(chk => { chk.checked = checked; });
+  adpUpdateVendorCopyBar(state);
+}
+
+function adpUpdateVendorCopyBar(state) {
+  const checked = document.querySelectorAll('.adp-vc-row:checked');
+  const bar = document.getElementById('adpVendorCopyBar');
+  const ftsBtn = document.getElementById('adpCopyFts');
+  const namesBtn = document.getElementById('adpCopyNames');
+  const selectAll = document.getElementById('adpVendorSelectAll');
+  const all = document.querySelectorAll('.adp-vc-row');
+  if (bar) bar.style.display = checked.length > 0 ? 'flex' : 'none';
+  if (ftsBtn) ftsBtn.textContent = `📋 Copy ${checked.length} (FTS + Funding)`;
+  if (namesBtn) namesBtn.textContent = `📄 Copy ${checked.length} (Names Only)`;
+  if (selectAll) {
+    selectAll.checked = all.length > 0 && checked.length === all.length;
+    selectAll.indeterminate = checked.length > 0 && checked.length < all.length;
+  }
+}
+
+function adpCopyVendors(type, state) {
+  const checked = [...document.querySelectorAll('.adp-vc-row:checked')];
+  if (!checked.length) return;
+  const lines = checked.map(chk => {
+    const name = chk.dataset.name;
+    const fts  = chk.dataset.fts;
+    const vendor = _adpVendors.find(v => v.name === name);
+    if (type === 'fts') return `FTS ${fts} ${name} - ${vendor?.funding||''}`.trim();
+    return `FTS ${fts} ${name}`.trim();
+  });
+  const text = lines.join('\n');
+  const btnId = type === 'fts' ? 'adpCopyFts' : 'adpCopyNames';
+  const btn = document.getElementById(btnId);
+  const confirm = () => {
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = `✓ Copied ${lines.length}`;
+      setTimeout(() => { btn.textContent = orig; }, 2000);
+    }
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(confirm).catch(() => adpFallbackCopy(text, confirm));
+  } else { adpFallbackCopy(text, confirm); }
+}
+
+function adpFallbackCopy(text, callback) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); callback(); } catch(e) { alert('Copy failed:\n\n' + text); }
+  document.body.removeChild(ta);
+}
 </script>
 </body>
 </html>
