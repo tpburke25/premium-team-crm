@@ -309,6 +309,7 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
         <th onclick="sortBy('state')">State <span class="sort-arrow" id="s-state"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('state','check')">▾</span><div class="cf-dd" id="cf-state"><div class="cf-title">State</div><input class="cf-search" id="cfs-state" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('state')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('state')">Select/Deselect all</span><div class="cf-list" id="cfl-state"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('state')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('state')">Clear</button></div></div></th>
         <th onclick="sortBy('open_opps')">Open Opps <span class="sort-arrow" id="s-open_opps"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('open_opps','num')">▾</span><div class="cf-dd" id="cf-open_opps"><div class="cf-title">Open Opps</div><select class="cf-num-op" id="cfop-open_opps"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-open_opps" type="number" min="0" placeholder="e.g. 1"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('open_opps')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('open_opps')">Clear</button></div></div></th>
         <th onclick="sortBy('open_tasks')">Open Tasks <span class="sort-arrow" id="s-open_tasks"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('open_tasks','num')">▾</span><div class="cf-dd" id="cf-open_tasks"><div class="cf-title">Open Tasks</div><select class="cf-num-op" id="cfop-open_tasks"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-open_tasks" type="number" min="0" placeholder="e.g. 1"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('open_tasks')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('open_tasks')">Clear</button></div></div></th>
+        <th onclick="sortBy('asm_flat_rate')">ASM Rate <span class="sort-arrow" id="s-asm_flat_rate"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('asm_flat_rate','num')">▾</span><div class="cf-dd" id="cf-asm_flat_rate"><div class="cf-title">ASM Rate</div><select class="cf-num-op" id="cfop-asm_flat_rate"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-asm_flat_rate" type="number" min="0" placeholder="e.g. 500"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('asm_flat_rate')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('asm_flat_rate')">Clear</button></div></div></th>
       </tr></thead>
       <tbody id="acctBody"></tbody>
     </table>
@@ -425,7 +426,7 @@ function buildAccountList() {
   const map={};
   allOpps.forEach(o=>{
     if(!o.account_id) return;
-    if(!map[o.account_id]) map[o.account_id]={account_id:o.account_id,account_name:o.account_name,fts_id:o.fts_id,industry:o.industry,accounting_package:o.accounting_package,days_since_activity:o.days_since_activity,city:o.city,state:o.state,parent_account:o.parent_account,open_opps:0,open_tasks:0,total_opps:0};
+    if(!map[o.account_id]) map[o.account_id]={account_id:o.account_id,account_name:o.account_name,fts_id:o.fts_id,industry:o.industry,accounting_package:o.accounting_package,days_since_activity:o.days_since_activity,city:o.city,state:o.state,parent_account:o.parent_account,open_opps:0,open_tasks:0,total_opps:0,asm_flat_rate:null};
     const a=map[o.account_id]; a.total_opps++;
     if(!['Lost','Closed Won'].includes(o.stage)) a.open_opps++;
     if(!a.fts_id&&o.fts_id) a.fts_id=o.fts_id;
@@ -434,6 +435,7 @@ function buildAccountList() {
     if(!a.city&&o.city) a.city=o.city;
     if(!a.state&&o.state) a.state=o.state;
     if(o.days_since_activity!==null) a.days_since_activity=o.days_since_activity;
+    if(o.asm_flat_rate!==null&&o.asm_flat_rate!==undefined&&!['Lost','Closed Won'].includes(o.stage)){if(a.asm_flat_rate===null||o.asm_flat_rate>a.asm_flat_rate) a.asm_flat_rate=o.asm_flat_rate;}
   });
   allTasks.forEach(t=>{
     if(!t.account_id) return;
@@ -531,7 +533,7 @@ function clearAllFilters(){
     if(checkFilters[col]) checkFilters[col].clear();
     const th=document.getElementById('cf-'+col)?.closest('th'); if(th) th.classList.remove('th-filtered');
   });
-  ['days_since_activity','open_opps','open_tasks'].forEach(col=>{
+  ['days_since_activity','open_opps','open_tasks','asm_flat_rate'].forEach(col=>{
     delete numFilters[col];
     const op=document.getElementById('cfop-'+col),vl=document.getElementById('cfval-'+col);
     if(op) op.value=''; if(vl) vl.value='';
@@ -548,6 +550,7 @@ function applyFilters(){
     if(!passesNum('days_since_activity',a.days_since_activity)) return false;
     if(!passesNum('open_opps',a.open_opps)) return false;
     if(!passesNum('open_tasks',a.open_tasks)) return false;
+    if(!passesNum('asm_flat_rate',a.asm_flat_rate)) return false;
     return true;
   });
   const hasAny=search||Object.values(checkFilters).some(s=>s.size>0)||Object.keys(numFilters).length>0;
@@ -595,6 +598,7 @@ function renderList(){
       <td>${a.city||'—'}</td><td>${a.state||'—'}</td>
       <td class="mono" style="${a.open_opps>0?'color:var(--accent)':''}">${a.open_opps}</td>
       <td class="mono" style="${a.open_tasks>0?'color:var(--gold)':''}">${a.open_tasks}</td>
+      <td class="mono">${a.asm_flat_rate!==null&&a.asm_flat_rate!==undefined?'$'+parseFloat(a.asm_flat_rate).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</td>
     </tr>`;
   }).join('');
   document.querySelectorAll('[id^="s-"]').forEach(el=>el.textContent='');
