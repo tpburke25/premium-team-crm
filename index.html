@@ -1727,7 +1727,7 @@ async function doLogin() {
     document.getElementById('loginOverlay').style.display = 'none';
 
     // Load data — admin sees all, rep sees own deals
-    await loadData();
+    await Promise.all([loadData(), loadViews()]);
 
   } catch(e) {
     errEl.textContent = e.message;
