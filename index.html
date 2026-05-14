@@ -268,9 +268,12 @@ body.light .loc-high { color: #14532d; }
 .view-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; transition: background 0.1s; }
 .view-item:hover { background: var(--surface3); color: var(--text); }
 .view-item.active-view { color: var(--accent); font-weight: 500; }
-.view-item-del { font-size: 11px; color: var(--text3); padding: 2px 6px; border-radius: 4px; opacity: 0; transition: opacity 0.15s; border: none; background: none; cursor: pointer; }
-.view-item:hover .view-item-del { opacity: 1; }
+.view-item-actions { display: flex; align-items: center; gap: 2px; opacity: 0; transition: opacity 0.15s; flex-shrink: 0; }
+.view-item:hover .view-item-actions { opacity: 1; }
+.view-item-del, .view-item-rename, .view-item-update { font-size: 11px; color: var(--text3); padding: 2px 5px; border-radius: 4px; border: none; background: none; cursor: pointer; }
 .view-item-del:hover { color: var(--red); }
+.view-item-rename:hover { color: var(--gold); }
+.view-item-update:hover { color: var(--green); }
 .col-manager-item { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 4px; font-size: 12px; color: var(--text2); cursor: grab; user-select: none; }
 .col-manager-item:hover { background: var(--surface3); }
 .col-manager-item.locked { opacity: 0.5; cursor: not-allowed; }
@@ -1311,19 +1314,37 @@ function updateFilterPills() {
 function clearPill(i) { if(window._pillClears && window._pillClears[i]) window._pillClears[i](); }
 
 // ── VIEWS / PRESETS ───────────────────────────────
-function loadViews() {
-  const key = 'crm_views_opps_' + (currentUser?.email || 'default');
-  try { savedViews = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) { savedViews = []; }
+async function loadViews() {
+  if (!currentUser?.email) { savedViews = []; renderViewsList(); renderColManager(); return; }
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/tbl_views?user_email=eq.${encodeURIComponent(currentUser.email)}&page=eq.opps&select=name,view_data&order=updated_at.asc`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}` }
+    });
+    const rows = await res.json();
+    savedViews = Array.isArray(rows) ? rows.map(r => ({ name: r.name, ...r.view_data })) : [];
+  } catch(e) { savedViews = []; }
   renderViewsList();
   renderColManager();
 }
 
-function saveViews() {
-  const key = 'crm_views_opps_' + (currentUser?.email || 'default');
-  localStorage.setItem(key, JSON.stringify(savedViews));
+async function saveViews(view) {
+  if (!currentUser?.email) return;
+  const { name, ...view_data } = view;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/tbl_views`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${currentUser.token}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({ user_email: currentUser.email, page: 'opps', name, view_data, updated_at: new Date().toISOString() })
+    });
+  } catch(e) { console.error('Failed to save view:', e); }
 }
 
-function saveCurrentView() {
+async function saveCurrentView() {
   const name = prompt('Name this view:');
   if (!name) return;
   const view = {
@@ -1336,7 +1357,7 @@ function saveCurrentView() {
   const existing = savedViews.findIndex(v => v.name === name);
   if (existing >= 0) savedViews[existing] = view; else savedViews.push(view);
   activeViewName = name;
-  saveViews();
+  await saveViews(view);
   renderViewsList();
   document.getElementById('viewsBtnLabel').textContent = `⊞ ${name}`;
 }
@@ -1345,7 +1366,6 @@ function applyView(name) {
   const view = savedViews.find(v => v.name === name);
   if (!view) return;
   activeViewName = name;
-  // Restore checkFilters and numFilters
   Object.keys(checkFilters).forEach(k => delete checkFilters[k]);
   Object.keys(numFilters).forEach(k => delete numFilters[k]);
   Object.entries(view.checkFilters || {}).forEach(([id, vals]) => {
@@ -1365,11 +1385,56 @@ function applyView(name) {
   updateFilterPills();
 }
 
-function deleteView(name, e) {
+async function deleteView(name, e) {
   e.stopPropagation();
   savedViews = savedViews.filter(v => v.name !== name);
   if (activeViewName === name) { activeViewName = null; document.getElementById('viewsBtnLabel').textContent = '⊞ Views'; }
-  saveViews();
+  renderViewsList();
+  if (!currentUser?.email) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/tbl_views?user_email=eq.${encodeURIComponent(currentUser.email)}&page=eq.opps&name=eq.${encodeURIComponent(name)}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}` }
+    });
+  } catch(e) { console.error('Failed to delete view:', e); }
+}
+
+async function renameView(oldName, e) {
+  e.stopPropagation();
+  const newName = prompt('Rename view:', oldName);
+  if (!newName || newName === oldName) return;
+  const view = savedViews.find(v => v.name === oldName);
+  if (!view) return;
+  // Delete old, save new
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/tbl_views?user_email=eq.${encodeURIComponent(currentUser.email)}&page=eq.opps&name=eq.${encodeURIComponent(oldName)}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}` }
+    });
+  } catch(e) { console.error('Failed to delete old view for rename:', e); }
+  view.name = newName;
+  if (activeViewName === oldName) {
+    activeViewName = newName;
+    document.getElementById('viewsBtnLabel').textContent = `⊞ ${newName}`;
+  }
+  await saveViews(view);
+  renderViewsList();
+}
+
+async function updateView(name, e) {
+  e.stopPropagation();
+  const view = {
+    name,
+    checkFilters: JSON.parse(JSON.stringify(checkFilters, (k,v) => v instanceof Set ? [...v] : v)),
+    numFilters: JSON.parse(JSON.stringify(numFilters)),
+    listSortCol, listSortDir, colOrder: [...colOrder],
+    colVisible: {...colVisible}
+  };
+  const existing = savedViews.findIndex(v => v.name === name);
+  if (existing >= 0) savedViews[existing] = view;
+  activeViewName = name;
+  document.getElementById('viewsBtnLabel').textContent = `⊞ ${name}`;
+  await saveViews(view);
   renderViewsList();
 }
 
@@ -1380,7 +1445,11 @@ function renderViewsList() {
   el.innerHTML = savedViews.map(v => `
     <div class="view-item ${activeViewName===v.name?'active-view':''}" onclick="applyView('${v.name.replace(/'/g,"\'")}')">
       <span>${v.name}</span>
-      <button class="view-item-del" onclick="deleteView('${v.name.replace(/'/g,"\'")}',event)">✕</button>
+      <div class="view-item-actions">
+        <button class="view-item-update" title="Update with current filters" onclick="updateView('${v.name.replace(/'/g,"\'")}',event)">↺</button>
+        <button class="view-item-rename" title="Rename" onclick="renameView('${v.name.replace(/'/g,"\'")}',event)">✎</button>
+        <button class="view-item-del" title="Delete" onclick="deleteView('${v.name.replace(/'/g,"\'")}',event)">✕</button>
+      </div>
     </div>`).join('');
 }
 
