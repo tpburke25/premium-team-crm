@@ -1049,6 +1049,8 @@ function renderList() {
           return `<td class="mono">${fmtNextTask(d.account_id)}</td>`;
         case 'days_since_activity':
           return `<td class="mono" style="${dc==='danger'?'color:var(--red)':dc==='warn'?'color:var(--orange)':dc==='good'?'color:var(--green)':''}">${d.days_since_activity!=null?d.days_since_activity+'d':'—'}</td>`;
+        case 'asm_flat_rate':
+          return `<td class="mono">${d.asm_flat_rate!=null?'$'+parseFloat(d.asm_flat_rate).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</td>`;
         default: return '<td>—</td>';
       }
     }).join('');
@@ -1117,6 +1119,7 @@ const ALL_COLS = [
   { id: 'last_activity',     label: 'Last Activity',   type: 'none'  },
   { id: 'next_task',         label: 'Next Task',       type: 'none'  },
   { id: 'days_since_activity', label: 'Days Since Act.', type: 'num' },
+  { id: 'asm_flat_rate',       label: 'ASM Rate',        type: 'num'   },
 ];
 
 let colOrder   = ALL_COLS.map(c => c.id);
