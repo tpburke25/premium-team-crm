@@ -197,11 +197,7 @@ def sync_opportunities(token, instance):
             Total_of_Setup_and_ASM__c,
             Loc__c,
             Product_Interests__c,
-            Opp_Primary_Contact__c,
-            Opp_Primary_Contact__r.Name,
-            Opp_Primary_Contact__r.Title,
-            Opp_Primary_Contact__r.Phone,
-            Opp_Primary_Contact__r.Email
+
         FROM Opportunity
         WHERE IsDeleted = false
         AND Owner.LastName IN ('Burke', 'Adcock', 'Pottle', 'Cuellar', 'Behymer')
@@ -247,10 +243,6 @@ def sync_opportunities(token, instance):
             'setup_amount':         clean_num(r.get('Setup_Amount__c')),
             'total_setup_amount':   clean_num(r.get('Total_Setup_Amount__c')),
             'total_setup_and_flat': clean_num(r.get('Total_of_Setup_and_ASM__c')),
-            'contact_name':         (r.get('Opp_Primary_Contact__r') or {}).get('Name'),
-            'contact_title':        (r.get('Opp_Primary_Contact__r') or {}).get('Title'),
-            'contact_phone':        (r.get('Opp_Primary_Contact__r') or {}).get('Phone'),
-            'contact_email':        (r.get('Opp_Primary_Contact__r') or {}).get('Email'),
             'synced_at':            now_iso(),
         })
 
