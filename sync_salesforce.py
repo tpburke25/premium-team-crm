@@ -196,7 +196,7 @@ def sync_opportunities(token, instance):
             Total_Setup_Amount__c,
             Total_of_Setup_and_ASM__c,
             Loc__c,
-            Product_Interests__c,
+            Product_Interests__c
 
         FROM Opportunity
         WHERE IsDeleted = false
