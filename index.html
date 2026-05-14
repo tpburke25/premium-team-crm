@@ -1653,6 +1653,10 @@ function doLogout() {
   currentUser = null;
   allDeals = [];
   filteredDeals = [];
+  savedViews = [];
+  activeViewName = null;
+  renderViewsList();
+  document.getElementById('viewsBtnLabel').textContent = '⊞ Views';
   localStorage.removeItem('crm_session');
   const sfBtn = document.getElementById('sfSyncMenuItem');
   if (sfBtn) sfBtn.style.display = 'none';
