@@ -90,11 +90,11 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
 
 /* STATUS BADGES */
 .status-badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; white-space: nowrap; }
-.status-active    { background: color-mix(in srgb, var(--green) 15%, transparent); color: var(--green); border: 1px solid color-mix(in srgb, var(--green) 30%, transparent); }
-.status-pending   { background: color-mix(in srgb, var(--gold) 15%, transparent); color: var(--gold); border: 1px solid color-mix(in srgb, var(--gold) 30%, transparent); }
-.status-inactive  { background: color-mix(in srgb, var(--text3) 15%, transparent); color: var(--text3); border: 1px solid color-mix(in srgb, var(--text3) 30%, transparent); }
-.status-rejected  { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); border: 1px solid color-mix(in srgb, var(--red) 30%, transparent); }
-.status-other     { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+.status-processing      { background: color-mix(in srgb, var(--green) 15%, transparent); color: var(--green); border: 1px solid color-mix(in srgb, var(--green) 30%, transparent); }
+.status-active-non-proc { background: color-mix(in srgb, #4a9eff 15%, transparent); color: #4a9eff; border: 1px solid color-mix(in srgb, #4a9eff 30%, transparent); }
+.status-wait-dist       { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); border: 1px solid color-mix(in srgb, var(--red) 30%, transparent); }
+.status-wait-retailer   { background: color-mix(in srgb, var(--gold) 15%, transparent); color: var(--gold); border: 1px solid color-mix(in srgb, var(--gold) 30%, transparent); }
+.status-other           { background: color-mix(in srgb, var(--text3) 15%, transparent); color: var(--text3); border: 1px solid color-mix(in srgb, var(--text3) 30%, transparent); }
 
 /* COLUMN FILTERS */
 .cf-wrap { position: relative; display: inline; }
@@ -230,6 +230,8 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
           <span class="cf-btn" onclick="event.stopPropagation();openCF('status','check')">▾</span>
           <div class="cf-dd" id="cf-status"><div class="cf-title">Status</div><input class="cf-search" id="cfs-status" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('status')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('status')">Select/Deselect all</span><div class="cf-list" id="cfl-status"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('status')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('status')">Clear</button></div></div>
         </th>
+        <th onclick="sortBy('active_date')">Active Date <span class="sort-arrow" id="s-active_date"></span></th>
+        <th onclick="sortBy('last_process_date')">Last Process Date <span class="sort-arrow" id="s-last_process_date"></span></th>
       </tr>
     </thead>
     <tbody id="vrBody"></tbody>
@@ -395,7 +397,7 @@ async function loadData() {
       let vPage = 0;
       while (true) {
         const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/tbl_vendor_relationships?select=retailer_fts_id,vendor_name,status&retailer_fts_id=in.${inClause}&limit=${size}&offset=${vPage * size}`,
+          `${SUPABASE_URL}/rest/v1/tbl_vendor_relationships?select=retailer_fts_id,vendor_name,status,active_date,last_process_date&retailer_fts_id=in.${inClause}&limit=${size}&offset=${vPage * size}`,
           { headers }
         );
         if (!res.ok) break;
@@ -418,7 +420,9 @@ async function loadData() {
         num_locations: opp.num_locations || null,
         opportunity_owner: opp.opportunity_owner || '—',
         vendor_name: vr.vendor_name || '—',
-        status: vr.status || '—'
+        status: vr.status || '—',
+        active_date: vr.active_date || null,
+        last_process_date: vr.last_process_date || null
       };
     });
 
@@ -579,6 +583,11 @@ function sortRows() {
       av = parseFloat(av) || 0; bv = parseFloat(bv) || 0;
       return (av - bv) * sortDir;
     }
+    if (sortCol === 'active_date' || sortCol === 'last_process_date') {
+      av = av ? new Date(av).getTime() : 0;
+      bv = bv ? new Date(bv).getTime() : 0;
+      return (av - bv) * sortDir;
+    }
     return ((av || '') + '').localeCompare((bv || '') + '') * sortDir;
   });
 }
@@ -594,13 +603,24 @@ function updateStats() {
 // ── STATUS BADGE ───────────────────────────────────
 function statusBadge(status) {
   if (!status || status === '—') return '<span style="color:var(--text3)">—</span>';
-  const s = status.toLowerCase();
+  const s = status.toLowerCase().trim();
   let cls = 'status-other';
-  if (s.includes('active') || s.includes('approved') || s.includes('live')) cls = 'status-active';
-  else if (s.includes('pending') || s.includes('submitted') || s.includes('review')) cls = 'status-pending';
-  else if (s.includes('inactive') || s.includes('closed') || s.includes('expired')) cls = 'status-inactive';
-  else if (s.includes('reject') || s.includes('denied') || s.includes('declined')) cls = 'status-rejected';
+  if (s === 'processing')                                         cls = 'status-processing';
+  else if (s === 'active non processing' || s === 'active non-processing') cls = 'status-active-non-proc';
+  else if (s === 'waiting on distributor')                        cls = 'status-wait-dist';
+  else if (s === 'waiting on retailer')                           cls = 'status-wait-retailer';
   return `<span class="status-badge ${cls}">${status}</span>`;
+}
+
+// ── DATE FORMAT ────────────────────────────────────
+function fmtDate(val) {
+  if (!val) return '—';
+  const d = new Date(val);
+  if (isNaN(d)) return val;
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(d.getUTCDate()).padStart(2, '0');
+  const yy = String(d.getUTCFullYear()).slice(2);
+  return `${mm}/${dd}/${yy}`;
 }
 
 // ── RENDER ─────────────────────────────────────────
@@ -624,6 +644,8 @@ function renderTable() {
       <td>${r.opportunity_owner || '—'}</td>
       <td>${r.vendor_name || '—'}</td>
       <td>${statusBadge(r.status)}</td>
+      <td class="mono">${fmtDate(r.active_date)}</td>
+      <td class="mono">${fmtDate(r.last_process_date)}</td>
     </tr>`).join('');
 }
 
