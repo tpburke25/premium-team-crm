@@ -74,6 +74,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .clear-btn { padding: 7px 12px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; font-size: 12px; color: var(--text2); font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
 .clear-btn:hover { color: var(--red); border-color: var(--red); }
 .stats-bar { font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; }
+.group-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; font-size: 13px; color: var(--text2); font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; transition: border 0.15s; }
+.group-select:focus { border-color: var(--accent); }
+.group-header td { background: var(--surface2); color: var(--text3); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; padding: 6px 12px; border-bottom: 1px solid var(--border2); }
 
 /* TABLE */
 .table-wrap { overflow-x: auto; padding: 0 28px 40px; }
@@ -191,9 +194,19 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
       <span class="search-icon">⌕</span>
       <input class="search-input" id="searchInput" placeholder="Search account, vendor, FTS ID..." oninput="applyFilters()">
     </div>
+    <select class="group-select" id="groupSelect" onchange="applyFilters()">
+      <option value="">No grouping</option>
+      <option value="parent_account">Group by Parent Account</option>
+      <option value="account_name">Group by Account</option>
+      <option value="vendor_name">Group by Vendor</option>
+      <option value="status">Group by Status</option>
+    </select>
     <button class="clear-btn" id="clearBtn" onclick="clearAllFilters()" style="display:none">✕ Clear filters</button>
   </div>
-  <div class="stats-bar" id="statsBar"></div>
+  <div style="text-align:right">
+    <div class="stats-bar" id="statsBar"></div>
+    <div class="stats-bar" id="statusStatsBar" style="margin-top:4px"></div>
+  </div>
 </div>
 
 <!-- TABLE -->
@@ -202,25 +215,25 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
   <table id="vrTable" style="display:none">
     <thead>
       <tr>
+        <th onclick="sortBy('opportunity_owner')">Opp Owner <span class="sort-arrow" id="s-opportunity_owner"></span>
+          <span class="cf-btn" onclick="event.stopPropagation();openCF('opportunity_owner','check')">▾</span>
+          <div class="cf-dd" id="cf-opportunity_owner"><div class="cf-title">Opp Owner</div><input class="cf-search" id="cfs-opportunity_owner" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('opportunity_owner')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('opportunity_owner')">Select/Deselect all</span><div class="cf-list" id="cfl-opportunity_owner"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('opportunity_owner')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('opportunity_owner')">Clear</button></div></div>
+        </th>
         <th onclick="sortBy('fts_id')">FTS ID <span class="sort-arrow" id="s-fts_id"></span>
           <span class="cf-btn" onclick="event.stopPropagation();openCF('fts_id','check')">▾</span>
           <div class="cf-dd" id="cf-fts_id"><div class="cf-title">FTS ID</div><input class="cf-search" id="cfs-fts_id" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('fts_id')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('fts_id')">Select/Deselect all</span><div class="cf-list" id="cfl-fts_id"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('fts_id')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('fts_id')">Clear</button></div></div>
-        </th>
-        <th onclick="sortBy('account_name')">Account <span class="sort-arrow" id="s-account_name"></span>
-          <span class="cf-btn" onclick="event.stopPropagation();openCF('account_name','check')">▾</span>
-          <div class="cf-dd" id="cf-account_name"><div class="cf-title">Account</div><input class="cf-search" id="cfs-account_name" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('account_name')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('account_name')">Select/Deselect all</span><div class="cf-list" id="cfl-account_name"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('account_name')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('account_name')">Clear</button></div></div>
         </th>
         <th onclick="sortBy('parent_account')">Parent Account <span class="sort-arrow" id="s-parent_account"></span>
           <span class="cf-btn" onclick="event.stopPropagation();openCF('parent_account','check')">▾</span>
           <div class="cf-dd" id="cf-parent_account"><div class="cf-title">Parent Account</div><input class="cf-search" id="cfs-parent_account" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('parent_account')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('parent_account')">Select/Deselect all</span><div class="cf-list" id="cfl-parent_account"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('parent_account')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('parent_account')">Clear</button></div></div>
         </th>
+        <th onclick="sortBy('account_name')">Account <span class="sort-arrow" id="s-account_name"></span>
+          <span class="cf-btn" onclick="event.stopPropagation();openCF('account_name','check')">▾</span>
+          <div class="cf-dd" id="cf-account_name"><div class="cf-title">Account</div><input class="cf-search" id="cfs-account_name" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('account_name')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('account_name')">Select/Deselect all</span><div class="cf-list" id="cfl-account_name"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('account_name')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('account_name')">Clear</button></div></div>
+        </th>
         <th onclick="sortBy('num_locations')">Locs <span class="sort-arrow" id="s-num_locations"></span>
           <span class="cf-btn" onclick="event.stopPropagation();openCF('num_locations','num')">▾</span>
           <div class="cf-dd" id="cf-num_locations"><div class="cf-title">Locations</div><select class="cf-num-op" id="cfop-num_locations"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-num_locations" type="number" min="0" placeholder="e.g. 10"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('num_locations')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('num_locations')">Clear</button></div></div>
-        </th>
-        <th onclick="sortBy('opportunity_owner')">Opp Owner <span class="sort-arrow" id="s-opportunity_owner"></span>
-          <span class="cf-btn" onclick="event.stopPropagation();openCF('opportunity_owner','check')">▾</span>
-          <div class="cf-dd" id="cf-opportunity_owner"><div class="cf-title">Opp Owner</div><input class="cf-search" id="cfs-opportunity_owner" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('opportunity_owner')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('opportunity_owner')">Select/Deselect all</span><div class="cf-list" id="cfl-opportunity_owner"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('opportunity_owner')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('opportunity_owner')">Clear</button></div></div>
         </th>
         <th onclick="sortBy('vendor_name')">Vendor <span class="sort-arrow" id="s-vendor_name"></span>
           <span class="cf-btn" onclick="event.stopPropagation();openCF('vendor_name','check')">▾</span>
@@ -245,7 +258,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 let currentUser = null;
 let allRows = [], filteredRows = [];
-let sortCol = 'account_name', sortDir = 1;
+let sortCol = 'close_date', sortDir = -1;
 const checkFilters = {}, numFilters = {}, cfValues = {};
 
 // ── THEME ──────────────────────────────────────────
@@ -353,7 +366,7 @@ async function loadData() {
     let opps = [], page = 0, size = 1000;
     while (true) {
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/tbl_opportunities?select=fts_id,account_name,parent_account,num_locations,opportunity_owner&stage=eq.Closed Won&limit=${size}&offset=${page * size}${ownerParam}`,
+        `${SUPABASE_URL}/rest/v1/tbl_opportunities?select=fts_id,account_name,parent_account,num_locations,opportunity_owner,close_date&stage=eq.Closed Won&limit=${size}&offset=${page * size}${ownerParam}`,
         { headers }
       );
       if (!res.ok) throw new Error('Failed to load opportunities');
@@ -378,12 +391,17 @@ async function loadData() {
     // Use first match per fts_id for account info (accounts are consistent)
     const oppMap = {};
     opps.forEach(o => {
-      if (o.fts_id && !oppMap[o.fts_id]) {
+      if (!o.fts_id) return;
+      const existing = oppMap[o.fts_id];
+      const oDate = o.close_date ? new Date(o.close_date).getTime() : 0;
+      const eDate = existing?.close_date ? new Date(existing.close_date).getTime() : 0;
+      if (!existing || oDate > eDate) {
         oppMap[o.fts_id] = {
           account_name: o.account_name,
           parent_account: o.parent_account,
           num_locations: o.num_locations,
-          opportunity_owner: o.opportunity_owner
+          opportunity_owner: o.opportunity_owner,
+          close_date: o.close_date || null
         };
       }
     });
@@ -419,6 +437,7 @@ async function loadData() {
         parent_account: opp.parent_account || '—',
         num_locations: opp.num_locations || null,
         opportunity_owner: opp.opportunity_owner || '—',
+        close_date: opp.close_date || null,
         vendor_name: vr.vendor_name || '—',
         status: vr.status || '—',
         active_date: vr.active_date || null,
@@ -583,7 +602,7 @@ function sortRows() {
       av = parseFloat(av) || 0; bv = parseFloat(bv) || 0;
       return (av - bv) * sortDir;
     }
-    if (sortCol === 'active_date' || sortCol === 'last_process_date') {
+    if (['active_date', 'last_process_date', 'close_date'].includes(sortCol)) {
       av = av ? new Date(av).getTime() : 0;
       bv = bv ? new Date(bv).getTime() : 0;
       return (av - bv) * sortDir;
@@ -598,6 +617,27 @@ function updateStats() {
   const uniqueAccounts = new Set(filteredRows.map(r => r.fts_id)).size;
   document.getElementById('statsBar').textContent =
     `${shown.toLocaleString()} relationship${shown !== 1 ? 's' : ''} · ${uniqueAccounts.toLocaleString()} account${uniqueAccounts !== 1 ? 's' : ''}${shown < total ? ` (of ${total.toLocaleString()} total)` : ''}`;
+
+  // Status breakdown
+  const statusDefs = [
+    { key: 'processing',            label: 'Processing',            color: 'var(--green)' },
+    { key: 'active non processing', label: 'Active Non Processing', color: '#4a9eff'       },
+    { key: 'waiting on distributor',label: 'Waiting on Dist.',      color: 'var(--red)'   },
+    { key: 'waiting on retailer',   label: 'Waiting on Retailer',   color: 'var(--gold)'  },
+  ];
+  const counts = {};
+  filteredRows.forEach(r => {
+    const s = (r.status || '').toLowerCase().trim().replace(/-/g, ' ');
+    counts[s] = (counts[s] || 0) + 1;
+  });
+  const knownKeys = new Set(statusDefs.map(d => d.key));
+  const parts = statusDefs
+    .filter(d => counts[d.key] > 0)
+    .map(d => `<span style="color:${d.color};margin-left:10px">● ${d.label}: ${counts[d.key]}</span>`);
+  Object.entries(counts).forEach(([k, v]) => {
+    if (!knownKeys.has(k) && k && k !== '—') parts.push(`<span style="color:var(--text3);margin-left:10px">● ${k}: ${v}</span>`);
+  });
+  document.getElementById('statusStatsBar').innerHTML = parts.length ? parts.join('') : '';
 }
 
 // ── STATUS BADGE ───────────────────────────────────
@@ -635,18 +675,45 @@ function renderTable() {
   document.getElementById('emptyMsg').style.display = 'none';
   document.getElementById('vrTable').style.display = 'table';
 
-  tbody.innerHTML = filteredRows.map(r => `
-    <tr>
-      <td class="mono">${r.fts_id || '—'}</td>
-      <td class="primary">${r.account_name || '—'}</td>
-      <td>${r.parent_account || '—'}</td>
-      <td class="mono">${r.num_locations != null ? r.num_locations.toLocaleString() : '—'}</td>
-      <td>${r.opportunity_owner || '—'}</td>
-      <td>${r.vendor_name || '—'}</td>
-      <td>${statusBadge(r.status)}</td>
-      <td class="mono">${fmtDate(r.active_date)}</td>
-      <td class="mono">${fmtDate(r.last_process_date)}</td>
-    </tr>`).join('');
+  const groupCol = document.getElementById('groupSelect').value;
+  const NCOLS = 9;
+
+  if (!groupCol) {
+    tbody.innerHTML = filteredRows.map(r => rowHTML(r)).join('');
+    return;
+  }
+
+  // Group rows
+  const groups = {};
+  const groupOrder = [];
+  filteredRows.forEach(r => {
+    const key = r[groupCol] || '—';
+    if (!groups[key]) { groups[key] = []; groupOrder.push(key); }
+    groups[key].push(r);
+  });
+
+  let html = '';
+  groupOrder.forEach(key => {
+    html += `<tr class="group-header"><td colspan="${NCOLS}" style="padding-left:12px">
+      ${key} <span style="font-weight:400;color:var(--text3)">(${groups[key].length})</span>
+    </td></tr>`;
+    html += groups[key].map(r => rowHTML(r)).join('');
+  });
+  tbody.innerHTML = html;
+}
+
+function rowHTML(r) {
+  return `<tr>
+    <td>${r.opportunity_owner || '—'}</td>
+    <td class="mono">${r.fts_id || '—'}</td>
+    <td>${r.parent_account || '—'}</td>
+    <td class="primary">${r.account_name || '—'}</td>
+    <td class="mono">${r.num_locations != null ? r.num_locations.toLocaleString() : '—'}</td>
+    <td>${r.vendor_name || '—'}</td>
+    <td>${statusBadge(r.status)}</td>
+    <td class="mono">${fmtDate(r.active_date)}</td>
+    <td class="mono">${fmtDate(r.last_process_date)}</td>
+  </tr>`;
 }
 
 // ── INIT ───────────────────────────────────────────
