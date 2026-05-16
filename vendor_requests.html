@@ -219,6 +219,7 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
           <span class="cf-btn" onclick="event.stopPropagation();openCF('opportunity_owner','check')">▾</span>
           <div class="cf-dd" id="cf-opportunity_owner"><div class="cf-title">Opp Owner</div><input class="cf-search" id="cfs-opportunity_owner" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('opportunity_owner')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('opportunity_owner')">Select/Deselect all</span><div class="cf-list" id="cfl-opportunity_owner"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('opportunity_owner')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('opportunity_owner')">Clear</button></div></div>
         </th>
+        <th onclick="sortBy('close_date')">Close Date <span class="sort-arrow" id="s-close_date"></span></th>
         <th onclick="sortBy('fts_id')">FTS ID <span class="sort-arrow" id="s-fts_id"></span>
           <span class="cf-btn" onclick="event.stopPropagation();openCF('fts_id','check')">▾</span>
           <div class="cf-dd" id="cf-fts_id"><div class="cf-title">FTS ID</div><input class="cf-search" id="cfs-fts_id" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('fts_id')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('fts_id')">Select/Deselect all</span><div class="cf-list" id="cfl-fts_id"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('fts_id')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('fts_id')">Clear</button></div></div>
@@ -245,6 +246,7 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
         </th>
         <th onclick="sortBy('active_date')">Active Date <span class="sort-arrow" id="s-active_date"></span></th>
         <th onclick="sortBy('last_process_date')">Last Process Date <span class="sort-arrow" id="s-last_process_date"></span></th>
+        <th onclick="sortBy('days_to_active')" title="Days from close date to active date (or today if no active date)">Days to Active <span class="sort-arrow" id="s-days_to_active"></span></th>
       </tr>
     </thead>
     <tbody id="vrBody"></tbody>
@@ -595,6 +597,14 @@ function sortBy(col) {
   renderTable();
 }
 
+function daysToActive(r) {
+  if (!r.close_date) return null;
+  const start = new Date(r.close_date);
+  const end = r.active_date ? new Date(r.active_date) : new Date();
+  if (isNaN(start) || isNaN(end)) return null;
+  return Math.round((end - start) / (1000 * 60 * 60 * 24));
+}
+
 function sortRows() {
   filteredRows.sort((a, b) => {
     let av = a[sortCol], bv = b[sortCol];
@@ -605,6 +615,11 @@ function sortRows() {
     if (['active_date', 'last_process_date', 'close_date'].includes(sortCol)) {
       av = av ? new Date(av).getTime() : 0;
       bv = bv ? new Date(bv).getTime() : 0;
+      return (av - bv) * sortDir;
+    }
+    if (sortCol === 'days_to_active') {
+      av = daysToActive(a) ?? Infinity;
+      bv = daysToActive(b) ?? Infinity;
       return (av - bv) * sortDir;
     }
     return ((av || '') + '').localeCompare((bv || '') + '') * sortDir;
@@ -676,7 +691,7 @@ function renderTable() {
   document.getElementById('vrTable').style.display = 'table';
 
   const groupCol = document.getElementById('groupSelect').value;
-  const NCOLS = 9;
+  const NCOLS = 11;
 
   if (!groupCol) {
     tbody.innerHTML = filteredRows.map(r => rowHTML(r)).join('');
@@ -703,8 +718,12 @@ function renderTable() {
 }
 
 function rowHTML(r) {
+  const days = daysToActive(r);
+  const daysLabel = days === null ? '—' : days.toLocaleString();
+  const daysColor = days === null ? '' : days <= 14 ? 'color:var(--text)' : days <= 30 ? 'color:var(--gold)' : 'color:var(--red)';
   return `<tr>
     <td>${r.opportunity_owner || '—'}</td>
+    <td class="mono">${fmtDate(r.close_date)}</td>
     <td class="mono">${r.fts_id || '—'}</td>
     <td>${r.parent_account || '—'}</td>
     <td class="primary">${r.account_name || '—'}</td>
@@ -713,6 +732,7 @@ function rowHTML(r) {
     <td>${statusBadge(r.status)}</td>
     <td class="mono">${fmtDate(r.active_date)}</td>
     <td class="mono">${fmtDate(r.last_process_date)}</td>
+    <td class="mono" style="${daysColor}">${daysLabel}</td>
   </tr>`;
 }
 
