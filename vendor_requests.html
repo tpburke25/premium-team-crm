@@ -219,7 +219,10 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
           <span class="cf-btn" onclick="event.stopPropagation();openCF('opportunity_owner','check')">▾</span>
           <div class="cf-dd" id="cf-opportunity_owner"><div class="cf-title">Opp Owner</div><input class="cf-search" id="cfs-opportunity_owner" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('opportunity_owner')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('opportunity_owner')">Select/Deselect all</span><div class="cf-list" id="cfl-opportunity_owner"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('opportunity_owner')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('opportunity_owner')">Clear</button></div></div>
         </th>
-        <th onclick="sortBy('close_date')">Close Date <span class="sort-arrow" id="s-close_date"></span></th>
+        <th onclick="sortBy('close_date')">Close Date <span class="sort-arrow" id="s-close_date"></span>
+          <span class="cf-btn" onclick="event.stopPropagation();openCF('close_date','date')">▾</span>
+          <div class="cf-dd" id="cf-close_date"><div class="cf-title">Close Date</div><select class="cf-num-op" id="cfop-close_date"><option value="">Any</option><option value="after">After</option><option value="before">Before</option><option value="on">On</option></select><input class="cf-num-val" id="cfval-close_date" type="date" onclick="event.stopPropagation()"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('close_date')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearDateCF('close_date')">Clear</button></div></div>
+        </th>
         <th onclick="sortBy('fts_id')">FTS ID <span class="sort-arrow" id="s-fts_id"></span>
           <span class="cf-btn" onclick="event.stopPropagation();openCF('fts_id','check')">▾</span>
           <div class="cf-dd" id="cf-fts_id"><div class="cf-title">FTS ID</div><input class="cf-search" id="cfs-fts_id" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('fts_id')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('fts_id')">Select/Deselect all</span><div class="cf-list" id="cfl-fts_id"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('fts_id')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('fts_id')">Clear</button></div></div>
@@ -244,9 +247,18 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
           <span class="cf-btn" onclick="event.stopPropagation();openCF('status','check')">▾</span>
           <div class="cf-dd" id="cf-status"><div class="cf-title">Status</div><input class="cf-search" id="cfs-status" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('status')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('status')">Select/Deselect all</span><div class="cf-list" id="cfl-status"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('status')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('status')">Clear</button></div></div>
         </th>
-        <th onclick="sortBy('active_date')">Active Date <span class="sort-arrow" id="s-active_date"></span></th>
-        <th onclick="sortBy('last_process_date')">Last Process Date <span class="sort-arrow" id="s-last_process_date"></span></th>
-        <th onclick="sortBy('days_to_active')" title="Days from close date to active date (or today if no active date)">Days to Active <span class="sort-arrow" id="s-days_to_active"></span></th>
+        <th onclick="sortBy('active_date')">Active Date <span class="sort-arrow" id="s-active_date"></span>
+          <span class="cf-btn" onclick="event.stopPropagation();openCF('active_date','date')">▾</span>
+          <div class="cf-dd" id="cf-active_date"><div class="cf-title">Active Date</div><select class="cf-num-op" id="cfop-active_date"><option value="">Any</option><option value="after">After</option><option value="before">Before</option><option value="on">On</option><option value="blank">Is blank</option></select><input class="cf-num-val" id="cfval-active_date" type="date" onclick="event.stopPropagation()"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('active_date')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearDateCF('active_date')">Clear</button></div></div>
+        </th>
+        <th onclick="sortBy('last_process_date')">Last Process Date <span class="sort-arrow" id="s-last_process_date"></span>
+          <span class="cf-btn" onclick="event.stopPropagation();openCF('last_process_date','date')">▾</span>
+          <div class="cf-dd" id="cf-last_process_date"><div class="cf-title">Last Process Date</div><select class="cf-num-op" id="cfop-last_process_date"><option value="">Any</option><option value="after">After</option><option value="before">Before</option><option value="on">On</option><option value="blank">Is blank</option></select><input class="cf-num-val" id="cfval-last_process_date" type="date" onclick="event.stopPropagation()"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('last_process_date')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearDateCF('last_process_date')">Clear</button></div></div>
+        </th>
+        <th onclick="sortBy('days_to_active')" title="Days from close date to active date (or today if no active date)">Days to Active <span class="sort-arrow" id="s-days_to_active"></span>
+          <span class="cf-btn" onclick="event.stopPropagation();openCF('days_to_active','num')">▾</span>
+          <div class="cf-dd" id="cf-days_to_active"><div class="cf-title">Days to Active</div><select class="cf-num-op" id="cfop-days_to_active"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-days_to_active" type="number" min="0" placeholder="e.g. 30"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('days_to_active')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('days_to_active')">Clear</button></div></div>
+        </th>
       </tr>
     </thead>
     <tbody id="vrBody"></tbody>
@@ -261,7 +273,45 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 let currentUser = null;
 let allRows = [], filteredRows = [];
 let sortCol = 'close_date', sortDir = -1;
-const checkFilters = {}, numFilters = {}, cfValues = {};
+const checkFilters = {}, numFilters = {}, dateFilters = {}, cfValues = {};
+
+// ── DATE FILTER FUNCTIONS ──────────────────────────
+function applyDateCF(col) {
+  const op = document.getElementById('cfop-' + col).value;
+  const val = document.getElementById('cfval-' + col).value;
+  if (op === 'blank') {
+    dateFilters[col] = { op: 'blank', val: null };
+  } else if (op && val) {
+    dateFilters[col] = { op, val };
+  }
+  const th = document.getElementById('cf-' + col)?.closest('th');
+  if (th) th.classList.toggle('th-filtered', !!dateFilters[col]);
+  document.querySelectorAll('.cf-dd.open').forEach(d => d.classList.remove('open'));
+  applyFilters();
+}
+
+function clearDateCF(col) {
+  delete dateFilters[col];
+  document.getElementById('cfop-' + col).value = '';
+  document.getElementById('cfval-' + col).value = '';
+  const th = document.getElementById('cf-' + col)?.closest('th');
+  if (th) th.classList.remove('th-filtered');
+  document.querySelectorAll('.cf-dd.open').forEach(d => d.classList.remove('open'));
+  applyFilters();
+}
+
+function passesDate(col, rawVal) {
+  const f = dateFilters[col];
+  if (!f) return true;
+  if (f.op === 'blank') return !rawVal;
+  if (!rawVal) return false;
+  const rowDate = new Date(rawVal).setHours(0,0,0,0);
+  const filterDate = new Date(f.val).setHours(0,0,0,0);
+  if (f.op === 'after')  return rowDate > filterDate;
+  if (f.op === 'before') return rowDate < filterDate;
+  if (f.op === 'on')     return rowDate === filterDate;
+  return true;
+}
 
 // ── THEME ──────────────────────────────────────────
 function toggleTheme() {
@@ -554,8 +604,15 @@ function clearAllFilters() {
     const th = document.getElementById('cf-' + col)?.closest('th');
     if (th) th.classList.remove('th-filtered');
   });
-  ['num_locations'].forEach(col => {
+  ['num_locations', 'days_to_active'].forEach(col => {
     delete numFilters[col];
+    const op = document.getElementById('cfop-' + col), vl = document.getElementById('cfval-' + col);
+    if (op) op.value = ''; if (vl) vl.value = '';
+    const th = document.getElementById('cf-' + col)?.closest('th');
+    if (th) th.classList.remove('th-filtered');
+  });
+  ['close_date', 'active_date', 'last_process_date'].forEach(col => {
+    delete dateFilters[col];
     const op = document.getElementById('cfop-' + col), vl = document.getElementById('cfval-' + col);
     if (op) op.value = ''; if (vl) vl.value = '';
     const th = document.getElementById('cf-' + col)?.closest('th');
@@ -577,10 +634,17 @@ function applyFilters() {
       if (checkFilters[col]?.size > 0 && !checkFilters[col].has(r[col])) return false;
     }
     if (!passesNum('num_locations', r.num_locations)) return false;
+    if (!passesNum('days_to_active', daysToActive(r))) return false;
+    if (!passesDate('close_date', r.close_date)) return false;
+    if (!passesDate('active_date', r.active_date)) return false;
+    if (!passesDate('last_process_date', r.last_process_date)) return false;
     return true;
   });
 
-  const hasAny = search || Object.values(checkFilters).some(s => s.size > 0) || Object.keys(numFilters).length > 0;
+  const hasAny = search
+    || Object.values(checkFilters).some(s => s.size > 0)
+    || Object.keys(numFilters).length > 0
+    || Object.keys(dateFilters).length > 0;
   document.getElementById('clearBtn').style.display = hasAny ? 'inline-block' : 'none';
 
   sortRows();
