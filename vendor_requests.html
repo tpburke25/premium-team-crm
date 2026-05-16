@@ -117,6 +117,8 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
 .cf-sel-all:hover { color: var(--accent); }
 .cf-num-op { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 5px; }
 .cf-num-val { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Mono', monospace; outline: none; margin-bottom: 8px; }
+.cf-date-input { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 5px; }
+.cf-num-op option, .cf-num-op optgroup { background: var(--surface2); color: var(--text); }
 .cf-btns { display: flex; gap: 6px; }
 .cf-apply { padding: 5px 12px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
 .cf-clear-btn { padding: 5px 12px; background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
@@ -221,7 +223,19 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
         </th>
         <th onclick="sortBy('close_date')">Close Date <span class="sort-arrow" id="s-close_date"></span>
           <span class="cf-btn" onclick="event.stopPropagation();openCF('close_date','date')">▾</span>
-          <div class="cf-dd" id="cf-close_date"><div class="cf-title">Close Date</div><select class="cf-num-op" id="cfop-close_date"><option value="">Any</option><option value="after">After</option><option value="before">Before</option><option value="on">On</option></select><input class="cf-num-val" id="cfval-close_date" type="date" onclick="event.stopPropagation()"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('close_date')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearDateCF('close_date')">Clear</button></div></div>
+          <div class="cf-dd" id="cf-close_date">
+            <div class="cf-title">Close Date</div>
+            <select class="cf-num-op" id="cfpreset-close_date" onclick="event.stopPropagation()" onchange="handleDatePreset('close_date')">
+              <option value="">All dates</option>
+              <optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option><option value="this_quarter">This Quarter</option><option value="this_year">This Year</option></optgroup>
+              <option value="custom">Custom range...</option>
+            </select>
+            <div id="cfcustom-close_date" style="display:none">
+              <input class="cf-date-input" id="cffrom-close_date" type="date" onclick="event.stopPropagation()">
+              <input class="cf-date-input" id="cfto-close_date" type="date" onclick="event.stopPropagation()">
+            </div>
+            <div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('close_date')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearDateCF('close_date')">Clear</button></div>
+          </div>
         </th>
         <th onclick="sortBy('fts_id')">FTS ID <span class="sort-arrow" id="s-fts_id"></span>
           <span class="cf-btn" onclick="event.stopPropagation();openCF('fts_id','check')">▾</span>
@@ -249,11 +263,37 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
         </th>
         <th onclick="sortBy('active_date')">Active Date <span class="sort-arrow" id="s-active_date"></span>
           <span class="cf-btn" onclick="event.stopPropagation();openCF('active_date','date')">▾</span>
-          <div class="cf-dd" id="cf-active_date"><div class="cf-title">Active Date</div><select class="cf-num-op" id="cfop-active_date"><option value="">Any</option><option value="after">After</option><option value="before">Before</option><option value="on">On</option><option value="blank">Is blank</option></select><input class="cf-num-val" id="cfval-active_date" type="date" onclick="event.stopPropagation()"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('active_date')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearDateCF('active_date')">Clear</button></div></div>
+          <div class="cf-dd" id="cf-active_date">
+            <div class="cf-title">Active Date</div>
+            <select class="cf-num-op" id="cfpreset-active_date" onclick="event.stopPropagation()" onchange="handleDatePreset('active_date')">
+              <option value="">All dates</option>
+              <optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option><option value="this_quarter">This Quarter</option><option value="this_year">This Year</option></optgroup>
+              <option value="blank">Is blank</option>
+              <option value="custom">Custom range...</option>
+            </select>
+            <div id="cfcustom-active_date" style="display:none">
+              <input class="cf-date-input" id="cffrom-active_date" type="date" onclick="event.stopPropagation()">
+              <input class="cf-date-input" id="cfto-active_date" type="date" onclick="event.stopPropagation()">
+            </div>
+            <div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('active_date')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearDateCF('active_date')">Clear</button></div>
+          </div>
         </th>
         <th onclick="sortBy('last_process_date')">Last Process Date <span class="sort-arrow" id="s-last_process_date"></span>
           <span class="cf-btn" onclick="event.stopPropagation();openCF('last_process_date','date')">▾</span>
-          <div class="cf-dd" id="cf-last_process_date"><div class="cf-title">Last Process Date</div><select class="cf-num-op" id="cfop-last_process_date"><option value="">Any</option><option value="after">After</option><option value="before">Before</option><option value="on">On</option><option value="blank">Is blank</option></select><input class="cf-num-val" id="cfval-last_process_date" type="date" onclick="event.stopPropagation()"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('last_process_date')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearDateCF('last_process_date')">Clear</button></div></div>
+          <div class="cf-dd" id="cf-last_process_date">
+            <div class="cf-title">Last Process Date</div>
+            <select class="cf-num-op" id="cfpreset-last_process_date" onclick="event.stopPropagation()" onchange="handleDatePreset('last_process_date')">
+              <option value="">All dates</option>
+              <optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option><option value="this_quarter">This Quarter</option><option value="this_year">This Year</option></optgroup>
+              <option value="blank">Is blank</option>
+              <option value="custom">Custom range...</option>
+            </select>
+            <div id="cfcustom-last_process_date" style="display:none">
+              <input class="cf-date-input" id="cffrom-last_process_date" type="date" onclick="event.stopPropagation()">
+              <input class="cf-date-input" id="cfto-last_process_date" type="date" onclick="event.stopPropagation()">
+            </div>
+            <div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('last_process_date')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearDateCF('last_process_date')">Clear</button></div>
+          </div>
         </th>
         <th onclick="sortBy('days_to_active')" title="Days from close date to active date (or today if no active date)">Days to Active <span class="sort-arrow" id="s-days_to_active"></span>
           <span class="cf-btn" onclick="event.stopPropagation();openCF('days_to_active','num')">▾</span>
@@ -276,14 +316,19 @@ let sortCol = 'close_date', sortDir = -1;
 const checkFilters = {}, numFilters = {}, dateFilters = {}, cfValues = {};
 
 // ── DATE FILTER FUNCTIONS ──────────────────────────
+function handleDatePreset(col) {
+  const preset = document.getElementById('cfpreset-' + col)?.value;
+  const div = document.getElementById('cfcustom-' + col);
+  if (div) div.style.display = preset === 'custom' ? 'block' : 'none';
+}
+
 function applyDateCF(col) {
-  const op = document.getElementById('cfop-' + col).value;
-  const val = document.getElementById('cfval-' + col).value;
-  if (op === 'blank') {
-    dateFilters[col] = { op: 'blank', val: null };
-  } else if (op && val) {
-    dateFilters[col] = { op, val };
-  }
+  const preset = document.getElementById('cfpreset-' + col)?.value;
+  const from   = document.getElementById('cffrom-' + col)?.value;
+  const to     = document.getElementById('cfto-' + col)?.value;
+  if (!preset) { delete dateFilters[col]; }
+  else if (preset === 'custom') { if (from || to) dateFilters[col] = { preset: 'custom', from, to }; }
+  else { dateFilters[col] = { preset }; }
   const th = document.getElementById('cf-' + col)?.closest('th');
   if (th) th.classList.toggle('th-filtered', !!dateFilters[col]);
   document.querySelectorAll('.cf-dd.open').forEach(d => d.classList.remove('open'));
@@ -292,8 +337,14 @@ function applyDateCF(col) {
 
 function clearDateCF(col) {
   delete dateFilters[col];
-  document.getElementById('cfop-' + col).value = '';
-  document.getElementById('cfval-' + col).value = '';
+  const preset = document.getElementById('cfpreset-' + col);
+  const from   = document.getElementById('cffrom-' + col);
+  const to     = document.getElementById('cfto-' + col);
+  const custom = document.getElementById('cfcustom-' + col);
+  if (preset) preset.value = '';
+  if (from) from.value = '';
+  if (to) to.value = '';
+  if (custom) custom.style.display = 'none';
   const th = document.getElementById('cf-' + col)?.closest('th');
   if (th) th.classList.remove('th-filtered');
   document.querySelectorAll('.cf-dd.open').forEach(d => d.classList.remove('open'));
@@ -303,14 +354,25 @@ function clearDateCF(col) {
 function passesDate(col, rawVal) {
   const f = dateFilters[col];
   if (!f) return true;
-  if (f.op === 'blank') return !rawVal;
+  if (f.preset === 'blank') return !rawVal;
   if (!rawVal) return false;
-  const rowDate = new Date(rawVal).setHours(0,0,0,0);
-  const filterDate = new Date(f.val).setHours(0,0,0,0);
-  if (f.op === 'after')  return rowDate > filterDate;
-  if (f.op === 'before') return rowDate < filterDate;
-  if (f.op === 'on')     return rowDate === filterDate;
-  return true;
+  const dateStr = rawVal.slice(0, 10); // normalize to YYYY-MM-DD
+  if (f.preset === 'custom') {
+    if (f.from && dateStr < f.from) return false;
+    if (f.to   && dateStr > f.to)   return false;
+    return true;
+  }
+  const now = new Date(); now.setHours(0,0,0,0);
+  const d = new Date(dateStr);
+  const start = new Date(now), end = new Date(now);
+  const p = f.preset;
+  if (p === 'this_month')    { start.setDate(1); end.setMonth(end.getMonth()+1,0); }
+  else if (p === 'last_30')  { start.setDate(start.getDate()-30); }
+  else if (p === 'last_60')  { start.setDate(start.getDate()-60); }
+  else if (p === 'last_90')  { start.setDate(start.getDate()-90); }
+  else if (p === 'this_quarter') { const q=Math.floor(now.getMonth()/3); start.setMonth(q*3,1); end.setMonth(q*3+3,0); }
+  else if (p === 'this_year')    { start.setMonth(0,1); end.setMonth(11,31); }
+  return d >= start && d <= end;
 }
 
 // ── THEME ──────────────────────────────────────────
@@ -611,13 +673,7 @@ function clearAllFilters() {
     const th = document.getElementById('cf-' + col)?.closest('th');
     if (th) th.classList.remove('th-filtered');
   });
-  ['close_date', 'active_date', 'last_process_date'].forEach(col => {
-    delete dateFilters[col];
-    const op = document.getElementById('cfop-' + col), vl = document.getElementById('cfval-' + col);
-    if (op) op.value = ''; if (vl) vl.value = '';
-    const th = document.getElementById('cf-' + col)?.closest('th');
-    if (th) th.classList.remove('th-filtered');
-  });
+  ['close_date', 'active_date', 'last_process_date'].forEach(col => clearDateCF(col));
   applyFilters();
 }
 
