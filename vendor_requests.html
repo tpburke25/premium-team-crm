@@ -499,18 +499,19 @@ async function loadData() {
     }
 
     // Step 2: Get unique FTS IDs from those opps
-    const ftsIds = [...new Set(opps.map(o => o.fts_id).filter(Boolean))];
+    const ftsIds = [...new Set(opps.map(o => o.fts_id).filter(Boolean).map(id => id.trim()))];
 
     // Step 3: Build a lookup map from opp data (fts_id -> opp info)
     // Use first match per fts_id for account info (accounts are consistent)
     const oppMap = {};
     opps.forEach(o => {
       if (!o.fts_id) return;
-      const existing = oppMap[o.fts_id];
+      const key = o.fts_id.trim();
+      const existing = oppMap[key];
       const oDate = o.close_date ? new Date(o.close_date).getTime() : 0;
       const eDate = existing?.close_date ? new Date(existing.close_date).getTime() : 0;
       if (!existing || oDate > eDate) {
-        oppMap[o.fts_id] = {
+        oppMap[key] = {
           account_name: o.account_name,
           parent_account: o.parent_account,
           num_locations: o.num_locations,
@@ -543,7 +544,7 @@ async function loadData() {
 
     // Step 5: Join — build final flat rows
     allRows = vendorRows.map(vr => {
-      const ftsKey = String(vr.retailer_fts_id);
+      const ftsKey = String(vr.retailer_fts_id).trim();
       const opp = oppMap[ftsKey] || {};
       return {
         fts_id: ftsKey,
@@ -553,7 +554,7 @@ async function loadData() {
         opportunity_owner: opp.opportunity_owner || '—',
         close_date: opp.close_date || null,
         vendor_name: vr.vendor_name || '—',
-        status: vr.status || '—',
+        status: (vr.status || '').trim() || '—',
         active_date: vr.active_date || null,
         last_process_date: vr.last_process_date || null
       };
@@ -687,7 +688,11 @@ function applyFilters() {
       if (!hay.includes(search)) return false;
     }
     for (const col of ['fts_id', 'account_name', 'parent_account', 'opportunity_owner', 'vendor_name', 'status']) {
-      if (checkFilters[col]?.size > 0 && !checkFilters[col].has(r[col])) return false;
+      if (checkFilters[col]?.size > 0) {
+        const val = (r[col] || '').trim();
+        const filterVals = [...checkFilters[col]].map(v => v.toLowerCase());
+        if (!filterVals.includes(val.toLowerCase())) return false;
+      }
     }
     if (!passesNum('num_locations', r.num_locations)) return false;
     if (!passesNum('days_to_active', daysToActive(r))) return false;
