@@ -201,6 +201,7 @@ def sync_vendor_opps(token, instance):
         WHERE IsDeleted = false
           AND StageName = 'Closed Won'
           AND Owner.LastName IN ('Burke', 'Adcock', 'Pottle', 'Cuellar', 'Behymer')
+          AND Account.RecordType.Name = 'Retailer'
         ORDER BY CloseDate DESC
         LIMIT 10
     """
