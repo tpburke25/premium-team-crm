@@ -499,14 +499,15 @@ async function loadData() {
     }
 
     // Step 2: Get unique FTS IDs from those opps
-    const ftsIds = [...new Set(opps.map(o => o.fts_id).filter(Boolean).map(id => id.trim()))];
+    const ftsIds = [...new Set(opps.map(o => o.fts_id).filter(Boolean).map(id => id.trim()).filter(id => !isNaN(parseInt(id, 10))))];
 
     // Step 3: Build a lookup map from opp data (fts_id -> opp info)
     // Use first match per fts_id for account info (accounts are consistent)
     const oppMap = {};
     opps.forEach(o => {
       if (!o.fts_id) return;
-      const key = o.fts_id.trim();
+      const key = String(parseInt(o.fts_id.trim(), 10));
+      if (isNaN(parseInt(key, 10))) return;
       const existing = oppMap[key];
       const oDate = o.close_date ? new Date(o.close_date).getTime() : 0;
       const eDate = existing?.close_date ? new Date(existing.close_date).getTime() : 0;
@@ -525,7 +526,10 @@ async function loadData() {
     let vendorRows = [];
     const batchSize = 100;
     for (let i = 0; i < ftsIds.length; i += batchSize) {
-      const batch = ftsIds.slice(i, i + batchSize);
+      const batch = ftsIds.slice(i, i + batchSize)
+        .map(id => parseInt(id, 10))
+        .filter(id => !isNaN(id));
+      if (!batch.length) continue;
       const inClause = `(${batch.join(',')})`;
       let vPage = 0;
       while (true) {
@@ -544,7 +548,7 @@ async function loadData() {
 
     // Step 5: Join — build final flat rows
     allRows = vendorRows.map(vr => {
-      const ftsKey = String(vr.retailer_fts_id).trim();
+      const ftsKey = String(parseInt(String(vr.retailer_fts_id).trim(), 10));
       const opp = oppMap[ftsKey] || {};
       return {
         fts_id: ftsKey,
