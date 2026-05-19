@@ -205,9 +205,14 @@ def sync_vendor_opps(token, instance):
           AND Id IN (
               SELECT OpportunityId
               FROM OpportunityLineItem
-              WHERE Product2.Name LIKE '%APA%'
-                AND Product2.Name LIKE '%Premium%'
-                AND (NOT Product2.Name LIKE '%AccountsFlow%')
+              WHERE (
+                  Product2.Name = 'APA Full Invoice Data'
+                  OR Product2.Name = 'APA Full Invoice Data & Payments'
+                  OR Product2.Name = 'APA Invoice Summary Data'
+                  OR Product2.Name = 'PaymentSource - Premium'
+                  OR Product2.Name = 'PaymentSource - Premium Plus'
+                  OR Product2.Name = 'PaymentSource APA Bundle'
+              )
                 AND UnitPrice > 0
           )
         ORDER BY CloseDate DESC
