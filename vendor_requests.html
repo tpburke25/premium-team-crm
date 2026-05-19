@@ -81,7 +81,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 /* TABLE */
 .table-wrap { overflow-x: auto; padding: 0 28px 40px; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 16px; }
-thead th { background: var(--surface); border-bottom: 1px solid var(--border2); padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; position: sticky; top: 61px; z-index: 10; cursor: pointer; user-select: none; }
+thead th { background: var(--surface); border-bottom: 1px solid var(--border2); padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; position: sticky; top: 0; z-index: 10; cursor: pointer; user-select: none; }
 thead th:hover { color: var(--text2); }
 thead th.th-filtered { color: var(--accent); }
 tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
@@ -500,7 +500,6 @@ async function loadData() {
 
     // Step 2: Get unique FTS IDs from those opps
     const ftsIds = [...new Set(opps.map(o => o.fts_id).filter(Boolean).map(id => id.trim()).filter(id => !isNaN(parseInt(id, 10))))];
-    console.log('[DEBUG] ftsIds includes 86216?', ftsIds.includes('86216'), '| raw sample:', ftsIds.slice(0,5));
 
     // Step 3: Build a lookup map from opp data (fts_id -> opp info)
     // Use first match per fts_id for account info (accounts are consistent)
@@ -522,8 +521,6 @@ async function loadData() {
         };
       }
     });
-    console.log('[DEBUG] oppMap has 86216?', '86216' in oppMap, '| value:', oppMap['86216']);
-
     // Step 4: Fetch vendor relationships in batches (max 100 FTS IDs per request to be safe)
     let vendorRows = [];
     const batchSize = 100;
@@ -533,22 +530,21 @@ async function loadData() {
         .filter(id => !isNaN(id));
       if (!batch.length) continue;
       const inClause = `(${batch.join(',')})`;
-      const has86216InBatch = batch.includes(86216);
       let vPage = 0;
       while (true) {
-        const url = `${SUPABASE_URL}/rest/v1/tbl_vendor_relationships?select=retailer_fts_id,vendor_name,status,active_date,last_process_date&retailer_fts_id=in.${inClause}&limit=${size}&offset=${vPage * size}`;
-        if (has86216InBatch) console.log('[DEBUG] Fetching batch with 86216:', url);
-        const res = await fetch(url, { headers });
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/tbl_vendor_relationships?select=retailer_fts_id,vendor_name,status,active_date,last_process_date&retailer_fts_id=in.${inClause}&limit=${size}&offset=${vPage * size}`,
+          { headers }
+        );
         if (!res.ok) break;
         const data = await res.json();
         if (!Array.isArray(data)) break;
-        if (has86216InBatch) console.log('[DEBUG] Batch results count:', data.length, '| 86216 rows:', data.filter(r => r.retailer_fts_id == 86216));
         vendorRows = vendorRows.concat(data);
         if (data.length < size) break;
         vPage++;
       }
     }
-    console.log('[DEBUG] Total vendorRows:', vendorRows.length, '| 86216 in vendorRows:', vendorRows.filter(r => r.retailer_fts_id == 86216));
+    
 
     // Step 5: Join — build final flat rows
     allRows = vendorRows.map(vr => {
