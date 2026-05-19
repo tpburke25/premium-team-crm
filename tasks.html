@@ -925,15 +925,17 @@ async function adpOpen(accountId, accountName, accountIdSF) {
           const vd = await vr.json();
           if (vd?.rows?.length > 1) {
             const headers = vd.rows[0].map(h => String(h).toLowerCase().trim());
-            const iV = headers.findIndex(h=>h==='vendor'||h==='vendor name'||h==='name');
-            const iS = headers.findIndex(h=>h==='status');
-            const iF = headers.findIndex(h=>h==='funding');
-            const iC = headers.findIndex(h=>h==='coverage');
+            const iV   = headers.findIndex(h=>h==='vendor'||h==='vendor name'||h==='name');
+            const iS   = headers.findIndex(h=>h==='status');
+            const iF   = headers.findIndex(h=>h==='funding');
+            const iC   = headers.findIndex(h=>h==='coverage');
+            const iFts = headers.findIndex(h=>h==='fts'||h==='fts id'||h==='fts_id');
             _adpVendors = vd.rows.slice(1).filter(r=>r[iV>-1?iV:0]).map(r=>({
               name: iV>-1?String(r[iV]||''):'',
               status: iS>-1?String(r[iS]||''):'',
               funding: adpNormFunding(iF>-1?r[iF]:''),
-              coverage: iC>-1?String(r[iC]||''):''
+              coverage: iC>-1?String(r[iC]||''):'',
+              fts: iFts>-1?String(r[iFts]||''):''
             }));
           }
         }
