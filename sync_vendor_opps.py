@@ -200,8 +200,14 @@ def sync_vendor_opps(token, instance):
         FROM Opportunity
         WHERE IsDeleted = false
           AND StageName = 'Closed Won'
-          AND Owner.LastName IN ('Burke', 'Adcock', 'Pottle', 'Cuellar', 'Behymer')
           AND Account.RecordType.Name = 'Retailer'
+          AND Owner.UserRole.Name IN (
+              'SMB Sales Rep',
+              'APA Sales Rep',
+              'VP Sales',
+              'DAM',
+              'APA Sales Manager'
+          )
           AND Id IN (
               SELECT OpportunityId
               FROM OpportunityLineItem
@@ -215,8 +221,8 @@ def sync_vendor_opps(token, instance):
               )
                 AND UnitPrice > 0
           )
+          AND OwnerId != null
         ORDER BY CloseDate DESC
-        LIMIT 10
     """
 
     records = sf_query(token, instance, soql)
