@@ -213,7 +213,7 @@ def sync_vendor_opps(token, instance):
               FROM OpportunityLineItem
               WHERE Product2.Name LIKE '%APA%'
                 AND Product2.Name LIKE '%Premium%'
-                AND Product2.Name NOT LIKE '%AccountsFlow%'
+                AND (NOT Product2.Name LIKE '%AccountsFlow%')
                 AND UnitPrice > 0
           )
           AND OwnerId != null
