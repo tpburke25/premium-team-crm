@@ -202,6 +202,14 @@ def sync_vendor_opps(token, instance):
           AND StageName = 'Closed Won'
           AND Owner.LastName IN ('Burke', 'Adcock', 'Pottle', 'Cuellar', 'Behymer')
           AND Account.RecordType.Name = 'Retailer'
+          AND Id IN (
+              SELECT OpportunityId
+              FROM OpportunityLineItem
+              WHERE Product2.Name LIKE '%APA%'
+                AND Product2.Name LIKE '%Premium%'
+                AND (NOT Product2.Name LIKE '%AccountsFlow%')
+                AND UnitPrice > 0
+          )
         ORDER BY CloseDate DESC
         LIMIT 10
     """
