@@ -202,6 +202,13 @@ def sync_vendor_opps(token, instance):
           AND StageName = 'Closed Won'
           AND Account.RecordType.Name = 'Retailer'
           AND Account.FTS_ID__c != null
+          AND Owner.UserRole.Name IN (
+              'SMB Sales Rep',
+              'APA Sales Rep',
+              'VP Sales',
+              'DAM',
+              'APA Sales Manager'
+          )
           AND Id IN (
               SELECT OpportunityId
               FROM OpportunityLineItem
