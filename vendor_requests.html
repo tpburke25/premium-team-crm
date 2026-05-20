@@ -363,7 +363,7 @@ function passesDate(col, rawVal) {
     return true;
   }
   const now = new Date(); now.setHours(0,0,0,0);
-  const d = new Date(dateStr);
+  const [_dy,_dm,_dd] = dateStr.slice(0,10).split('-').map(Number); const d = new Date(_dy,_dm-1,_dd);
   const start = new Date(now), end = new Date(now);
   const p = f.preset;
   if (p === 'this_month')    { start.setDate(1); end.setMonth(end.getMonth()+1,0); }

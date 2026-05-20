@@ -225,7 +225,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .adp-vendor-pill.av-pending{background:color-mix(in srgb,var(--gold) 18%,transparent);border-color:var(--gold);color:var(--gold);}
 .adp-vendor-pill.av-hold{background:color-mix(in srgb,var(--red) 18%,transparent);border-color:var(--red);color:var(--red);}
 .adp-vendor-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;}
-.adp-vendor-row.national{border-left:3px solid var(--gold);}
+
 .adp-vendor-name{font-size:13px;font-weight:500;color:var(--text);}
 .adp-vendor-badges{display:flex;align-items:center;gap:6px;}
 .adp-vendor-status{font-size:10px;font-weight:600;padding:2px 7px;border-radius:6px;}
@@ -238,7 +238,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 /* ── Panel vendor checkboxes + copy bar ── */
 .adp-vendor-row{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;}
 .adp-vendor-chk{width:13px;height:13px;cursor:pointer;accent-color:var(--accent);flex-shrink:0;}
-.adp-vendor-row.national{border-left:3px solid var(--gold);}
+
 .adp-copy-bar{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
 .adp-copy-btn{padding:5px 11px;border-radius:7px;border:none;font-size:11px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity 0.15s;}
 .adp-copy-btn-fts{background:var(--green);color:#fff;}
@@ -993,9 +993,9 @@ function adpRenderVendors(state) {
       visible.map(v => {
         const isNat = /\bNATIONAL\b/i.test(v.coverage);
         const chkId = 'adpvc-' + (v.fts || v.name).replace(/[^a-z0-9]/gi,'_');
-        return `<div class="adp-vendor-row${isNat?' national':''}">
+        return `<div class="adp-vendor-row">
           <input type="checkbox" id="${chkId}" class="adp-vendor-chk adp-vc-row" data-name="${v.name.replace(/"/g,'&quot;')}" data-fts="${v.fts||''}" onchange="adpUpdateVendorCopyBar('${state}')">
-          <span class="adp-vendor-name" style="flex:1">${v.name}${isNat?' <span style="font-size:10px;color:var(--gold)">★ National</span>':''}</span>
+          <span class="adp-vendor-name" style="flex:1">${v.name}</span>
           <div class="adp-vendor-badges">
             <span class="adp-vendor-funding">${v.funding||'—'}</span>
             <span class="adp-vendor-status" style="${adpVendorStatusStyle(v.status)}">${v.status||'—'}</span>

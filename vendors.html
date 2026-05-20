@@ -214,7 +214,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .adp-vendor-pill.av-pending{background:color-mix(in srgb,var(--gold) 18%,transparent);border-color:var(--gold);color:var(--gold);}
 .adp-vendor-pill.av-hold{background:color-mix(in srgb,var(--red) 18%,transparent);border-color:var(--red);color:var(--red);}
 .adp-vendor-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;}
-.adp-vendor-row.national{border-left:3px solid var(--gold);}
+
 .adp-vendor-name{font-size:13px;font-weight:500;color:var(--text);}
 .adp-vendor-badges{display:flex;align-items:center;gap:6px;}
 .adp-vendor-status{font-size:10px;font-weight:600;padding:2px 7px;border-radius:6px;}
@@ -1078,8 +1078,8 @@ function adpRenderVendors(state) {
     ? '<div class="adp-empty">No matching vendors for the selected filters.</div>'
     : visible.map(v => {
         const isNat = /\bNATIONAL\b/i.test(v.coverage);
-        return `<div class="adp-vendor-row${isNat?' national':''}">
-          <span class="adp-vendor-name">${v.name}${isNat?' <span style="font-size:10px;color:var(--gold)">★ National</span>':''}</span>
+        return `<div class="adp-vendor-row">
+          <span class="adp-vendor-name">${v.name}</span>
           <div class="adp-vendor-badges">
             <span class="adp-vendor-funding">${v.funding||'—'}</span>
             <span class="adp-vendor-status" style="${adpVendorStatusStyle(v.status)}">${v.status||'—'}</span>
