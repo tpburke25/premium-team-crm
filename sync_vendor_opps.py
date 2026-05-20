@@ -201,6 +201,14 @@ def sync_vendor_opps(token, instance):
         WHERE IsDeleted = false
           AND StageName = 'Closed Won'
           AND Account.RecordType.Name = 'Retailer'
+          AND Owner.UserRole.Name IN (
+              'SMB Sales Rep',
+              'APA Sales Rep',
+              'VP Sales',
+              'DAM',
+              'APA Sales Manager'
+          )
+          AND Account.FTS_ID__c != null
           AND Id IN (
               SELECT OpportunityId
               FROM OpportunityLineItem
@@ -211,6 +219,7 @@ def sync_vendor_opps(token, instance):
                   OR Product2.Name = 'PaymentSource - Premium'
                   OR Product2.Name = 'PaymentSource - Premium Plus'
                   OR Product2.Name = 'PaymentSource APA Bundle'
+                  OR Product2.Name = 'Standard Data Feed'
               )
                 AND UnitPrice > 0
           )
