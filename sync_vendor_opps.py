@@ -188,8 +188,7 @@ def sync_vendor_opps(token, instance):
         FROM OpportunityLineItem
         WHERE IsDeleted = false
           AND (
-              Product2.Name LIKE '%Data%'
-              OR Product2.Name LIKE '%Premium%'
+              Product2.Name LIKE '%Premium%'
               OR Product2.Name LIKE '%APA%'
           )
           AND (NOT Product2.Name LIKE '%AccountsFlow%')
