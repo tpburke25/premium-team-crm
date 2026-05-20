@@ -214,7 +214,7 @@ def sync_vendor_opps(token, instance):
                   OR Product2.Name = 'PaymentSource APA Bundle'
                   OR Product2.Name = 'Standard Data Feed'
               )
-                AND Original_Sales_Price__c > 0
+                AND UnitPrice > 0
           )
           AND OwnerId != null
         ORDER BY CloseDate DESC
