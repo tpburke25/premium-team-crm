@@ -214,11 +214,20 @@ def sync_vendor_opps(token, instance):
                   OR Product2.Name = 'PaymentSource APA Bundle'
                   OR Product2.Name = 'Standard Data Feed'
               )
-                AND UnitPrice > 0
           )
           AND OwnerId != null
         ORDER BY CloseDate DESC
     """
+
+    # DEBUG: print OpportunityLineItem fields to find Actual Price API name
+    headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
+    desc_res = requests.get(f"{instance}/services/data/v57.0/sobjects/OpportunityLineItem/describe", headers=headers)
+    if desc_res.ok:
+        fields = desc_res.json().get('fields', [])
+        print("  OpportunityLineItem fields containing 'price' or 'actual':")
+        for f in fields:
+            if any(x in f['name'].lower() or x in f['label'].lower() for x in ['price', 'actual']):
+                print(f"    {f['name']} ({f['label']})")
 
     records = sf_query(token, instance, soql)
     print(f"  Pulled {len(records)} records from Salesforce")
