@@ -181,46 +181,66 @@ def sync_vendor_opps(token, instance):
     # Subquery on OpportunityLineItem filters to opps that have at least one
     # APA Premium product line (price > $0, not AccountsFlow).
     # Owner role filter covers all 5 roles that sell this solution.
-    soql = """
-        SELECT
-            Id,
-            AccountId,
-            Name,
-            StageName,
-            CloseDate,
-            CreatedDate,
-            Owner.Name,
-            Owner.UserRole.Name,
-            Account.Name,
-            Account.ParentId,
-            Account.Parent.Name,
-            Account.FTS_ID__c,
-            Account.RecordType.Name,
-            Loc__c
-        FROM Opportunity
+    # Step 1: Query OpportunityLineItem directly with Actual Price filter
+    print("  Fetching qualifying product line items...")
+    oli_soql = """
+        SELECT OpportunityId
+        FROM OpportunityLineItem
         WHERE IsDeleted = false
-          AND StageName = 'Closed Won'
-          AND Account.RecordType.Name = 'Retailer'
-          AND Account.FTS_ID__c != null
-          AND Id IN (
-              SELECT OpportunityId
-              FROM OpportunityLineItem
-              WHERE (
-                  Product2.Name = 'APA Full Invoice Data'
-                  OR Product2.Name = 'APA Full Invoice Data & Payments'
-                  OR Product2.Name = 'APA Invoice Summary Data'
-                  OR Product2.Name = 'PaymentSource - Premium'
-                  OR Product2.Name = 'PaymentSource - Premium Plus'
-                  OR Product2.Name = 'PaymentSource APA Bundle'
-                  OR Product2.Name = 'Standard Data Feed'
-              )
-                AND UnitPrice > 0
+          AND (
+              Product2.Name = 'APA Full Invoice Data'
+              OR Product2.Name = 'APA Full Invoice Data & Payments'
+              OR Product2.Name = 'APA Invoice Summary Data'
+              OR Product2.Name = 'PaymentSource - Premium'
+              OR Product2.Name = 'PaymentSource - Premium Plus'
+              OR Product2.Name = 'PaymentSource APA Bundle'
+              OR Product2.Name = 'Standard Data Feed'
           )
-          AND OwnerId != null
-        ORDER BY CloseDate DESC
+          AND Original_Sales_Price__c > 0
     """
+    oli_records = sf_query(token, instance, oli_soql)
+    qualifying_opp_ids = list(set(r['OpportunityId'] for r in oli_records))
+    print(f"  Found {len(qualifying_opp_ids)} qualifying opportunity IDs from line items")
 
-    records = sf_query(token, instance, soql)
+    if not qualifying_opp_ids:
+        print("  No qualifying opportunities found.")
+        return 0, 0
+
+    # Step 2: Query Opportunities in batches of 200 IDs
+    all_opp_records = []
+    batch_size = 200
+    for i in range(0, len(qualifying_opp_ids), batch_size):
+        batch = qualifying_opp_ids[i:i + batch_size]
+        id_list = "', '".join(batch)
+        opp_soql = f"""
+            SELECT
+                Id,
+                AccountId,
+                Name,
+                StageName,
+                CloseDate,
+                CreatedDate,
+                Owner.Name,
+                Owner.UserRole.Name,
+                Account.Name,
+                Account.ParentId,
+                Account.Parent.Name,
+                Account.FTS_ID__c,
+                Account.RecordType.Name,
+                Loc__c
+            FROM Opportunity
+            WHERE IsDeleted = false
+              AND StageName = 'Closed Won'
+              AND Account.RecordType.Name = 'Retailer'
+              AND Account.FTS_ID__c != null
+              AND OwnerId != null
+              AND Id IN ('{id_list}')
+        """
+        batch_records = sf_query(token, instance, opp_soql)
+        all_opp_records.extend(batch_records)
+        print(f"  ...fetched {len(all_opp_records)} opportunities so far")
+
+    records = all_opp_records
     print(f"  Pulled {len(records)} records from Salesforce")
 
     # Deduplicate by opportunity ID (should already be unique, but just in case)
