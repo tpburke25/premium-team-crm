@@ -188,14 +188,12 @@ def sync_vendor_opps(token, instance):
         FROM OpportunityLineItem
         WHERE IsDeleted = false
           AND (
-              Product2.Name = 'APA Full Invoice Data'
-              OR Product2.Name = 'APA Full Invoice Data & Payments'
-              OR Product2.Name = 'APA Invoice Summary Data'
-              OR Product2.Name = 'PaymentSource - Premium'
-              OR Product2.Name = 'PaymentSource - Premium Plus'
-              OR Product2.Name = 'PaymentSource APA Bundle'
-              OR Product2.Name = 'Standard Data Feed'
+              Product2.Name LIKE '%Data%'
+              OR Product2.Name LIKE '%Premium%'
+              OR Product2.Name LIKE '%APA%'
           )
+          AND (NOT Product2.Name LIKE '%AccountsFlow%')
+          AND (NOT Product2.Name LIKE '%Setup%')
           AND Original_Sales_Price__c > 0
     """
     oli_records = sf_query(token, instance, oli_soql)
@@ -233,7 +231,6 @@ def sync_vendor_opps(token, instance):
               AND StageName = 'Closed Won'
               AND Account.RecordType.Name = 'Retailer'
               AND Account.FTS_ID__c != null
-              AND OwnerId != null
               AND Id IN ('{id_list}')
         """
         batch_records = sf_query(token, instance, opp_soql)
