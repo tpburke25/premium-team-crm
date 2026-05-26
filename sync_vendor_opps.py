@@ -186,14 +186,8 @@ def sync_vendor_opps(token, instance):
     oli_soql = """
         SELECT OpportunityId
         FROM OpportunityLineItem
-        WHERE IsDeleted = false
-          AND (
-              Product2.Name LIKE '%Premium%'
-              OR Product2.Name LIKE '%APA%'
-          )
-          AND (NOT Product2.Name LIKE '%AccountsFlow%')
-          AND (NOT Product2.Name LIKE '%Setup%')
-          AND Original_Sales_Price__c > 0
+        WHERE Product2.Name LIKE '%Premium%'
+           OR Product2.Name LIKE '%APA%'
     """
     oli_records = sf_query(token, instance, oli_soql)
     qualifying_opp_ids = list(set(r['OpportunityId'] for r in oli_records))
@@ -226,8 +220,7 @@ def sync_vendor_opps(token, instance):
                 Account.RecordType.Name,
                 Loc__c
             FROM Opportunity
-            WHERE IsDeleted = false
-              AND StageName = 'Closed Won'
+            WHERE StageName = 'Closed Won'
               AND Account.RecordType.Name = 'Retailer'
               AND Account.FTS_ID__c != null
               AND Id IN ('{id_list}')
