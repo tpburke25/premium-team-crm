@@ -133,6 +133,26 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
 .cf-apply:hover { background: var(--accent-bright); }
 .cf-clear-btn { padding: 5px 12px; background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
 
+/* VIEWS */
+.views-wrap { position: relative; display: inline-flex; align-items: center; gap: 6px; }
+.views-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; font-size: 13px; color: var(--text2); font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; transition: border 0.15s; min-width: 140px; }
+.views-select:focus { border-color: var(--accent-bright); }
+.save-view-btn { padding: 7px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; font-size: 12px; color: var(--text2); font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.save-view-btn:hover { border-color: var(--accent-bright); color: var(--text); }
+.delete-view-btn { padding: 7px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; font-size: 12px; color: var(--text3); font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
+.delete-view-btn:hover { border-color: var(--red); color: var(--red); }
+
+/* SAVE VIEW MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 900; display: flex; align-items: center; justify-content: center; }
+.modal-box { background: var(--surface); border: 1px solid var(--border2); border-radius: 14px; padding: 24px; width: 100%; max-width: 380px; }
+.modal-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+.modal-input { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 12px; font-size: 14px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; transition: border 0.15s; margin-bottom: 14px; }
+.modal-input:focus { border-color: var(--accent-bright); }
+.modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+.modal-confirm { padding: 8px 16px; background: var(--accent); color: #fff; border: none; border-radius: 7px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.modal-confirm:hover { background: var(--accent-bright); }
+.modal-cancel { padding: 8px 16px; background: var(--surface2); color: var(--text2); border: 1px solid var(--border2); border-radius: 7px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+
 /* LOADING / EMPTY */
 .loading-msg { text-align: center; padding: 60px 20px; color: var(--text3); font-size: 14px; }
 .spinner { width: 28px; height: 28px; border: 2px solid var(--border2); border-top-color: var(--accent-bright); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px; }
@@ -233,6 +253,13 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
       <option value="status">Group by Status</option>
       <option value="opportunity_owner">Group by Owner</option>
     </select>
+    <div class="views-wrap">
+      <select class="views-select" id="viewsSelect" onchange="loadView()">
+        <option value="">— Views —</option>
+      </select>
+      <button class="save-view-btn" onclick="openSaveViewModal()">+ Save View</button>
+      <button class="delete-view-btn" id="deleteViewBtn" onclick="deleteCurrentView()" style="display:none" title="Delete this view">✕</button>
+    </div>
     <button class="clear-btn" id="clearBtn" onclick="clearAllFilters()" style="display:none">✕ Clear filters</button>
   </div>
   <div style="text-align:right">
@@ -334,6 +361,20 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
     <tbody id="vrBody"></tbody>
   </table>
   <div id="emptyMsg" class="empty-msg" style="display:none">No vendor requests found matching your filters.</div>
+</div>
+
+<!-- SAVE VIEW MODAL -->
+<div class="modal-overlay" id="saveViewModal" style="display:none" onclick="if(event.target===this)closeSaveViewModal()">
+  <div class="modal-box">
+    <div class="modal-title">Save Current View</div>
+    <input class="modal-input" id="viewNameInput" type="text" placeholder="View name (e.g. Burke – Closed/Won)" maxlength="80"
+      onkeydown="if(event.key==='Enter')confirmSaveView()">
+    <div style="font-size:12px;color:var(--text3);margin-bottom:14px">Saves current filters and grouping. Visible to all portal users.</div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeSaveViewModal()">Cancel</button>
+      <button class="modal-confirm" onclick="confirmSaveView()">Save View</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -448,6 +489,7 @@ function doLogin() {
     localStorage.setItem('portal_auth', '1');
     document.getElementById('loginOverlay').style.display = 'none';
     loadData();
+    loadViewsList();
   } else {
     errEl.textContent = 'Incorrect password.';
     btn.disabled = false;
@@ -460,6 +502,7 @@ function init() {
   if (authed) {
     document.getElementById('loginOverlay').style.display = 'none';
     loadData();
+    loadViewsList();
   } else {
     document.getElementById('loadingMsg').style.display = 'none';
   }
@@ -858,6 +901,179 @@ function rowHTML(r) {
     <td class="mono">${fmtDate(r.last_process_date)}</td>
     <td class="mono" style="${daysColor}">${daysLabel}</td>
   </tr>`;
+}
+
+// ── VIEWS ───────────────────────────────────────────
+const PAGE_KEY = 'vendor-portal';
+let savedViews = [];
+let activeViewId = null;
+
+async function loadViewsList() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/tbl_views?page=eq.${PAGE_KEY}&order=name.asc`,
+      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+    );
+    if (!res.ok) return;
+    savedViews = await res.json();
+    renderViewsDropdown();
+  } catch(e) { console.error('Views load error:', e); }
+}
+
+function renderViewsDropdown() {
+  const sel = document.getElementById('viewsSelect');
+  sel.innerHTML = '<option value="">— Views —</option>';
+  savedViews.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.id;
+    opt.textContent = v.name;
+    sel.appendChild(opt);
+  });
+  if (activeViewId) {
+    sel.value = activeViewId;
+    document.getElementById('deleteViewBtn').style.display = 'inline-block';
+  } else {
+    document.getElementById('deleteViewBtn').style.display = 'none';
+  }
+}
+
+function captureViewState() {
+  const state = {
+    search: document.getElementById('searchInput').value,
+    groupCol: document.getElementById('groupSelect').value,
+    checkFilters: {},
+    numFilters: {},
+    dateFilters: {}
+  };
+  for (const col in checkFilters) {
+    if (checkFilters[col]?.size > 0) state.checkFilters[col] = [...checkFilters[col]];
+  }
+  for (const col in numFilters) state.numFilters[col] = numFilters[col];
+  for (const col in dateFilters) state.dateFilters[col] = dateFilters[col];
+  return state;
+}
+
+function applyViewState(state) {
+  // Clear first
+  clearAllFilters();
+  // Search
+  if (state.search) document.getElementById('searchInput').value = state.search;
+  // Group
+  if (state.groupCol) document.getElementById('groupSelect').value = state.groupCol;
+  // Check filters
+  for (const col in (state.checkFilters || {})) {
+    checkFilters[col] = new Set(state.checkFilters[col]);
+    const th = document.getElementById('cf-' + col)?.closest('th');
+    if (th && checkFilters[col].size > 0) th.classList.add('th-filtered');
+  }
+  // Num filters
+  for (const col in (state.numFilters || {})) {
+    numFilters[col] = state.numFilters[col];
+    const opEl = document.getElementById('cfop-' + col);
+    const valEl = document.getElementById('cfval-' + col);
+    if (opEl) opEl.value = numFilters[col].op;
+    if (valEl) valEl.value = numFilters[col].val;
+    const th = document.getElementById('cf-' + col)?.closest('th');
+    if (th) th.classList.add('th-filtered');
+  }
+  // Date filters
+  for (const col in (state.dateFilters || {})) {
+    dateFilters[col] = state.dateFilters[col];
+    const presetEl = document.getElementById('cfpreset-' + col);
+    if (presetEl) presetEl.value = dateFilters[col].preset;
+    if (dateFilters[col].preset === 'custom') {
+      const customDiv = document.getElementById('cfcustom-' + col);
+      if (customDiv) customDiv.style.display = 'block';
+      const fromEl = document.getElementById('cffrom-' + col);
+      const toEl = document.getElementById('cfto-' + col);
+      if (fromEl) fromEl.value = dateFilters[col].from || '';
+      if (toEl) toEl.value = dateFilters[col].to || '';
+    }
+    const th = document.getElementById('cf-' + col)?.closest('th');
+    if (th) th.classList.add('th-filtered');
+  }
+  applyFilters();
+}
+
+function loadView() {
+  const sel = document.getElementById('viewsSelect');
+  const id = sel.value;
+  if (!id) {
+    activeViewId = null;
+    document.getElementById('deleteViewBtn').style.display = 'none';
+    clearAllFilters();
+    return;
+  }
+  activeViewId = id;
+  document.getElementById('deleteViewBtn').style.display = 'inline-block';
+  const view = savedViews.find(v => String(v.id) === String(id));
+  if (view?.view_data) applyViewState(view.view_data);
+}
+
+function openSaveViewModal() {
+  document.getElementById('viewNameInput').value = '';
+  document.getElementById('saveViewModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('viewNameInput').focus(), 50);
+}
+
+function closeSaveViewModal() {
+  document.getElementById('saveViewModal').style.display = 'none';
+}
+
+async function confirmSaveView() {
+  const name = document.getElementById('viewNameInput').value.trim();
+  if (!name) { document.getElementById('viewNameInput').focus(); return; }
+  const state = captureViewState();
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/tbl_views`,
+      {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({
+          user_email: 'portal@non-alcohol-vendors.com',
+          page: PAGE_KEY,
+          name,
+          view_data: state,
+          updated_at: new Date().toISOString()
+        })
+      }
+    );
+    if (!res.ok) throw new Error(await res.text());
+    const rows = await res.json();
+    closeSaveViewModal();
+    await loadViewsList();
+    // Select the newly saved view
+    if (rows?.[0]?.id) {
+      activeViewId = rows[0].id;
+      document.getElementById('viewsSelect').value = activeViewId;
+      document.getElementById('deleteViewBtn').style.display = 'inline-block';
+    }
+  } catch(e) { console.error('Save view error:', e); alert('Failed to save view. Please try again.'); }
+}
+
+async function deleteCurrentView() {
+  if (!activeViewId) return;
+  const view = savedViews.find(v => String(v.id) === String(activeViewId));
+  if (!confirm(`Delete view "${view?.name || activeViewId}"?`)) return;
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/tbl_views?id=eq.${activeViewId}`,
+      {
+        method: 'DELETE',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      }
+    );
+    if (!res.ok) throw new Error(await res.text());
+    activeViewId = null;
+    await loadViewsList();
+    clearAllFilters();
+  } catch(e) { console.error('Delete view error:', e); alert('Failed to delete view.'); }
 }
 
 // ── START ──────────────────────────────────────────
