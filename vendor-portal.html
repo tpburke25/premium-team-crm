@@ -230,9 +230,9 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
 
 <!-- SUMMARY BANNER -->
 <div class="summary-banner" id="summaryBanner" style="display:none">
-  <div class="banner-card" style="border-color:rgba(74,158,255,0.3)">
-    <div class="banner-card-label">Accounts</div>
-    <div class="banner-card-value" style="color:#4a9eff" id="bn-accounts">—</div>
+  <div class="banner-card" style="background:#565660;border-color:#65656f">
+    <div class="banner-card-label" style="color:#ffffff">Accounts</div>
+    <div class="banner-card-value" style="color:#1a1a1f" id="bn-accounts">—</div>
   </div>
   <div class="banner-card" style="border-color:rgba(255,255,255,0.15)">
     <div class="banner-card-label">Total Relationships</div>
@@ -626,7 +626,7 @@ function passesNum(col, val) {
   if (f.op === 'eq') return v === f.val; return true;
 }
 
-function clearAllFilters() {
+function clearAllFilters(resetView = true) {
   document.getElementById('searchInput').value = '';
   ['fts_id', 'account_name', 'parent_account', 'opportunity_owner', 'vendor_name', 'status'].forEach(col => {
     if (checkFilters[col]) checkFilters[col].clear();
@@ -641,10 +641,11 @@ function clearAllFilters() {
     if (th) th.classList.remove('th-filtered');
   });
   ['close_date', 'active_date', 'last_process_date'].forEach(col => clearDateCF(col));
-  // Reset Views dropdown label
-  activeViewName = null;
-  const lbl = document.getElementById('viewsBtnLabel');
-  if (lbl) lbl.textContent = '⊞ Views';
+  if (resetView) {
+    activeViewName = null;
+    const lbl = document.getElementById('viewsBtnLabel');
+    if (lbl) lbl.textContent = '⊞ Views';
+  }
   applyFilters();
 }
 
@@ -850,7 +851,7 @@ const ALL_COLS = [
   { id: 'last_process_date', label: 'Last Process Date',type: 'date', blankable: true },
   { id: 'days_to_active',    label: 'Days to Active',   type: 'num'   },
 ];
-const LOCKED_COLS = ['opportunity_owner', 'account_name']; // always visible
+const LOCKED_COLS = []; // all columns unlockable
 let colOrder   = ALL_COLS.map(c => c.id);
 let colVisible = Object.fromEntries(ALL_COLS.map(c => [c.id, true]));
 
@@ -984,7 +985,7 @@ function captureViewState() {
 }
 
 function applyViewState(state) {
-  clearAllFilters();
+  clearAllFilters(false);
   if (state.search) document.getElementById('searchInput').value = state.search;
   if (state.groupCol) document.getElementById('groupSelect').value = state.groupCol;
   if (state.sortCol) { sortCol = state.sortCol; sortDir = state.sortDir || 1; }
