@@ -172,6 +172,13 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
 .modal-confirm:hover { background: var(--accent-bright); }
 .modal-cancel { padding: 8px 16px; background: var(--surface2); color: var(--text2); border: 1px solid var(--border2); border-radius: 7px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
 
+/* COLLAPSIBLE ROWS */
+.acct-parent-row { cursor: pointer; border-bottom: 1px solid var(--border); }
+.acct-parent-row:hover { background: var(--surface2); }
+.acct-sub-row { background: color-mix(in srgb, var(--accent) 5%, transparent); border-bottom: 1px solid var(--border); }
+.acct-sub-row td { padding-top: 7px; padding-bottom: 7px; color: var(--text2); font-size: 12px; }
+.acct-sub-row:last-of-type { border-bottom: 2px solid var(--border2); }
+
 /* LOADING / EMPTY */
 .loading-msg { text-align: center; padding: 60px 20px; color: var(--text3); font-size: 14px; }
 .spinner { width: 28px; height: 28px; border: 2px solid var(--border2); border-top-color: var(--accent-bright); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px; }
@@ -718,8 +725,12 @@ function updateStats() {
   const total = allRows.length;
   const shown = filteredRows.length;
   const uniqueAccounts = new Set(filteredRows.map(r => r.fts_id)).size;
-  document.getElementById('statsBar').textContent =
-    `${shown.toLocaleString()} relationship${shown !== 1 ? 's' : ''} · ${uniqueAccounts.toLocaleString()} account${uniqueAccounts !== 1 ? 's' : ''}${shown < total ? ` (of ${total.toLocaleString()} total)` : ''}`;
+  const vendorFilterActive = checkFilters['vendor_name']?.size > 0;
+  const groupCol = document.getElementById('groupSelect').value;
+  const flatMode = groupCol === 'vendor_name' || vendorFilterActive;
+  document.getElementById('statsBar').textContent = flatMode
+    ? `${shown.toLocaleString()} relationship${shown !== 1 ? 's' : ''} · ${uniqueAccounts.toLocaleString()} account${uniqueAccounts !== 1 ? 's' : ''}${shown < total ? ` (of ${total.toLocaleString()} total)` : ''}`
+    : `${uniqueAccounts.toLocaleString()} account${uniqueAccounts !== 1 ? 's' : ''} · ${shown.toLocaleString()} relationship${shown !== 1 ? 's' : ''}${shown < total ? ` (of ${total.toLocaleString()} total)` : ''}`;
 
   const statusDefs = [
     { key: 'processing',             label: 'Processing',            color: 'var(--green)', bannerEl: 'bn-processing' },
@@ -777,6 +788,8 @@ function fmtDate(val) {
 }
 
 // ── RENDER ─────────────────────────────────────────
+const expandedAccounts = new Set(); // tracks which fts_ids are expanded
+
 function renderTable() {
   const tbody = document.getElementById('vrBody');
   if (filteredRows.length === 0) {
@@ -792,27 +805,146 @@ function renderTable() {
   const visibleCols = colOrder.filter(id => colVisible[id]);
   const NCOLS = visibleCols.length;
 
-  if (!groupCol) {
-    tbody.innerHTML = filteredRows.map(r => rowHTML(r, visibleCols)).join('');
+  // Flat mode: grouping by vendor, or vendor filter active → show all rows as-is
+  const vendorFilterActive = checkFilters['vendor_name']?.size > 0;
+  const flatMode = groupCol === 'vendor_name' || vendorFilterActive;
+
+  if (flatMode) {
+    if (!groupCol) {
+      tbody.innerHTML = filteredRows.map(r => rowHTML(r, visibleCols)).join('');
+    } else {
+      const groups = {}, groupOrder = [];
+      filteredRows.forEach(r => {
+        const key = r[groupCol] || '—';
+        if (!groups[key]) { groups[key] = []; groupOrder.push(key); }
+        groups[key].push(r);
+      });
+      let html = '';
+      groupOrder.forEach(key => {
+        html += `<tr class="group-header"><td colspan="${NCOLS}" style="padding-left:12px">${key} <span style="font-weight:400;color:var(--text3)">(${groups[key].length})</span></td></tr>`;
+        html += groups[key].map(r => rowHTML(r, visibleCols)).join('');
+      });
+      tbody.innerHTML = html;
+    }
     return;
   }
 
-  const groups = {};
-  const groupOrder = [];
+  // Collapsible mode: group rows by fts_id, one parent row per account
+  // Build account groups preserving sort order
+  const accountMap = new Map(); // fts_id → { meta, rows[] }
   filteredRows.forEach(r => {
-    const key = r[groupCol] || '—';
-    if (!groups[key]) { groups[key] = []; groupOrder.push(key); }
-    groups[key].push(r);
+    const key = r.fts_id || '—';
+    if (!accountMap.has(key)) {
+      accountMap.set(key, {
+        fts_id: r.fts_id,
+        account_name: r.account_name,
+        parent_account: r.parent_account,
+        opportunity_owner: r.opportunity_owner,
+        close_date: r.close_date,
+        num_locations: r.num_locations,
+        rows: []
+      });
+    }
+    accountMap.get(key).rows.push(r);
   });
 
+  // If grouping by a non-vendor col, group the accounts
   let html = '';
-  groupOrder.forEach(key => {
-    html += `<tr class="group-header"><td colspan="${NCOLS}" style="padding-left:12px">
-      ${key} <span style="font-weight:400;color:var(--text3)">(${groups[key].length})</span>
-    </td></tr>`;
-    html += groups[key].map(r => rowHTML(r, visibleCols)).join('');
-  });
+  if (groupCol) {
+    const groups = new Map(), groupOrder = [];
+    accountMap.forEach((acct) => {
+      const key = acct[groupCol] || '—';
+      if (!groups.has(key)) { groups.set(key, []); groupOrder.push(key); }
+      groups.get(key).push(acct);
+    });
+    groupOrder.forEach(key => {
+      const accts = groups.get(key);
+      const totalRows = accts.reduce((s, a) => s + a.rows.length, 0);
+      html += `<tr class="group-header"><td colspan="${NCOLS}" style="padding-left:12px">${key} <span style="font-weight:400;color:var(--text3)">(${accts.length} account${accts.length!==1?'s':''}, ${totalRows} relationship${totalRows!==1?'s':''})</span></td></tr>`;
+      accts.forEach(acct => { html += accountRowHTML(acct, visibleCols, NCOLS); });
+    });
+  } else {
+    accountMap.forEach(acct => { html += accountRowHTML(acct, visibleCols, NCOLS); });
+  }
   tbody.innerHTML = html;
+}
+
+function accountRowHTML(acct, visibleCols, NCOLS) {
+  const key = acct.fts_id || '—';
+  const isExpanded = expandedAccounts.has(key);
+  const vendorCount = acct.rows.length;
+
+  // Status summary counts
+  const statusCounts = {};
+  acct.rows.forEach(r => {
+    const s = (r.status || '').toLowerCase().trim().replace(/-/g,' ');
+    statusCounts[s] = (statusCounts[s] || 0) + 1;
+  });
+  const statusSummary = [
+    { key: 'processing',            label: 'Processing',   cls: 'status-processing'      },
+    { key: 'active non processing', label: 'Active NP',    cls: 'status-active-non-proc' },
+    { key: 'waiting on distributor',label: 'Wait Dist.',   cls: 'status-wait-dist'       },
+    { key: 'waiting on retailer',   label: 'Wait Retailer',cls: 'status-wait-retailer'   },
+  ].filter(d => statusCounts[d.key] > 0)
+   .map(d => `<span class="status-badge ${d.cls}" style="margin-right:3px">${statusCounts[d.key]} ${d.label}</span>`)
+   .join('');
+
+  // Parent row — shows account-level fields + status summary + expand toggle
+  let parentRow = `<tr class="acct-parent-row" onclick="toggleAccount('${key.replace(/'/g,"\\'")}')">`;
+  visibleCols.forEach(id => {
+    switch(id) {
+      case 'opportunity_owner': parentRow += `<td>${acct.opportunity_owner || '—'}</td>`; break;
+      case 'close_date':        parentRow += `<td class="mono">${fmtDate(acct.close_date)}</td>`; break;
+      case 'fts_id':            parentRow += `<td class="mono">${acct.fts_id || '—'}</td>`; break;
+      case 'parent_account':    parentRow += `<td>${acct.parent_account || '—'}</td>`; break;
+      case 'account_name':      parentRow += `<td class="primary">${acct.account_name || '—'} <span style="font-size:11px;color:var(--text3);font-weight:400">${isExpanded ? '▾' : '▸'} ${vendorCount}</span></td>`; break;
+      case 'num_locations':     parentRow += `<td class="mono">${acct.num_locations != null ? acct.num_locations.toLocaleString() : '—'}</td>`; break;
+      case 'vendor_name':       parentRow += `<td style="font-size:11px;color:var(--text3)">${vendorCount} vendor${vendorCount!==1?'s':''}</td>`; break;
+      case 'status':            parentRow += `<td>${statusSummary || '—'}</td>`; break;
+      case 'active_date':       parentRow += `<td class="mono">—</td>`; break;
+      case 'last_process_date': parentRow += `<td class="mono">—</td>`; break;
+      case 'days_to_active':    parentRow += `<td class="mono">—</td>`; break;
+      default: parentRow += '<td>—</td>';
+    }
+  });
+  parentRow += '</tr>';
+
+  // Sub-rows (only if expanded)
+  let subRows = '';
+  if (isExpanded) {
+    subRows = acct.rows.map(r => {
+      const days = daysToActive(r);
+      const daysLabel = days === null ? '—' : days.toLocaleString();
+      const daysColor = days === null ? '' : days <= 14 ? 'color:var(--text)' : days <= 30 ? 'color:var(--gold)' : 'color:var(--red)';
+      let tr = '<tr class="acct-sub-row">';
+      visibleCols.forEach(id => {
+        switch(id) {
+          case 'opportunity_owner': tr += `<td></td>`; break;
+          case 'close_date':        tr += `<td></td>`; break;
+          case 'fts_id':            tr += `<td></td>`; break;
+          case 'parent_account':    tr += `<td></td>`; break;
+          case 'account_name':      tr += `<td></td>`; break;
+          case 'num_locations':     tr += `<td></td>`; break;
+          case 'vendor_name':       tr += `<td style="padding-left:20px">${r.vendor_name || '—'}</td>`; break;
+          case 'status':            tr += `<td>${statusBadge(r.status)}</td>`; break;
+          case 'active_date':       tr += `<td class="mono">${fmtDate(r.active_date)}</td>`; break;
+          case 'last_process_date': tr += `<td class="mono">${fmtDate(r.last_process_date)}</td>`; break;
+          case 'days_to_active':    tr += `<td class="mono" style="${daysColor}">${daysLabel}</td>`; break;
+          default: tr += '<td>—</td>';
+        }
+      });
+      tr += '</tr>';
+      return tr;
+    }).join('');
+  }
+
+  return parentRow + subRows;
+}
+
+function toggleAccount(ftsId) {
+  if (expandedAccounts.has(ftsId)) expandedAccounts.delete(ftsId);
+  else expandedAccounts.add(ftsId);
+  renderTable();
 }
 
 function rowHTML(r, visibleCols) {
