@@ -133,14 +133,33 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
 .cf-apply:hover { background: var(--accent-bright); }
 .cf-clear-btn { padding: 5px 12px; background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
 
-/* VIEWS */
-.views-wrap { position: relative; display: inline-flex; align-items: center; gap: 6px; }
-.views-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; font-size: 13px; color: var(--text2); font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; transition: border 0.15s; min-width: 140px; }
-.views-select:focus { border-color: var(--accent-bright); }
-.save-view-btn { padding: 7px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; font-size: 12px; color: var(--text2); font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-.save-view-btn:hover { border-color: var(--accent-bright); color: var(--text); }
-.delete-view-btn { padding: 7px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; font-size: 12px; color: var(--text3); font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
-.delete-view-btn:hover { border-color: var(--red); color: var(--red); }
+/* VIEWS / COLUMN MANAGER */
+.ms-wrap { position: relative; }
+.ms-btn { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; font-size: 13px; color: var(--text2); font-family: 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap; user-select: none; min-width: 90px; justify-content: space-between; transition: border 0.15s; }
+.ms-btn:hover, .ms-btn.open { border-color: var(--border2); color: var(--text); }
+.ms-btn.active { border-color: var(--accent); color: var(--accent); }
+.ms-arrow { font-size: 10px; opacity: 0.5; margin-left: 4px; }
+.ms-dropdown { position: absolute; top: calc(100% + 6px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 10px; min-width: 260px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.ms-wrap.open .ms-dropdown { display: block; }
+.ms-divider { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+.views-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); font-weight: 600; margin-bottom: 6px; }
+.views-save-btn { width: 100%; padding: 7px 10px; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--text2); cursor: pointer; text-align: left; transition: all 0.15s; }
+.views-save-btn:hover { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); border-color: var(--accent); }
+.view-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; transition: background 0.1s; }
+.view-item:hover { background: var(--surface3); color: var(--text); }
+.view-item.active-view { color: var(--accent); font-weight: 500; }
+.view-item-actions { display: flex; align-items: center; gap: 2px; opacity: 0; transition: opacity 0.15s; flex-shrink: 0; }
+.view-item:hover .view-item-actions { opacity: 1; }
+.view-item-del, .view-item-rename, .view-item-update { font-size: 11px; color: var(--text3); padding: 2px 5px; border-radius: 4px; border: none; background: none; cursor: pointer; }
+.view-item-del:hover { color: var(--red); }
+.view-item-rename:hover { color: var(--gold); }
+.view-item-update:hover { color: var(--green); }
+.col-manager-item { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 4px; font-size: 12px; color: var(--text2); cursor: grab; user-select: none; }
+.col-manager-item:hover { background: var(--surface3); }
+.col-manager-item.locked { opacity: 0.5; cursor: not-allowed; }
+.col-manager-item input[type=checkbox] { accent-color: var(--accent); cursor: pointer; }
+.col-drag-handle { color: var(--text3); font-size: 12px; cursor: grab; }
+.col-manager-item.drag-over { border-top: 2px solid var(--accent); }
 
 /* SAVE VIEW MODAL */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 900; display: flex; align-items: center; justify-content: center; }
@@ -211,10 +230,13 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
 
 <!-- SUMMARY BANNER -->
 <div class="summary-banner" id="summaryBanner" style="display:none">
-  <div class="banner-card">
+  <div class="banner-card" style="border-color:rgba(74,158,255,0.3)">
+    <div class="banner-card-label">Accounts</div>
+    <div class="banner-card-value" style="color:#4a9eff" id="bn-accounts">—</div>
+  </div>
+  <div class="banner-card" style="border-color:rgba(255,255,255,0.15)">
     <div class="banner-card-label">Total Relationships</div>
     <div class="banner-card-value" id="bn-total">—</div>
-    <div class="banner-card-sub" id="bn-accounts">— accounts</div>
   </div>
   <div class="banner-card green">
     <div class="banner-card-label">Processing</div>
@@ -231,10 +253,6 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
   <div class="banner-card gold">
     <div class="banner-card-label">Waiting on Retailer</div>
     <div class="banner-card-value" id="bn-wor">—</div>
-  </div>
-  <div class="banner-card" style="margin-left:auto">
-    <div class="banner-card-label">Other / Unknown</div>
-    <div class="banner-card-value" id="bn-other">—</div>
   </div>
 </div>
 
@@ -253,12 +271,18 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
       <option value="status">Group by Status</option>
       <option value="opportunity_owner">Group by Owner</option>
     </select>
-    <div class="views-wrap">
-      <select class="views-select" id="viewsSelect" onchange="loadView()">
-        <option value="">— Views —</option>
-      </select>
-      <button class="save-view-btn" onclick="openSaveViewModal()">+ Save View</button>
-      <button class="delete-view-btn" id="deleteViewBtn" onclick="deleteCurrentView()" style="display:none" title="Delete this view">✕</button>
+    <div class="ms-wrap" id="viewsWrap">
+      <div class="ms-btn" id="viewsBtn" onclick="toggleViewsDropdown()">
+        <span id="viewsBtnLabel">⊞ Views</span><span class="ms-arrow">▾</span>
+      </div>
+      <div class="ms-dropdown" id="viewsDropdown">
+        <div class="views-section-title">Saved Views</div>
+        <div id="savedViewsList" style="margin-bottom:8px"></div>
+        <button class="views-save-btn" onclick="saveCurrentView()">+ Save current view</button>
+        <hr class="ms-divider">
+        <div class="views-section-title">Manage Columns</div>
+        <div id="colManagerList" style="margin-bottom:4px"></div>
+      </div>
     </div>
     <button class="clear-btn" id="clearBtn" onclick="clearAllFilters()" style="display:none">✕ Clear filters</button>
   </div>
@@ -272,110 +296,12 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
 <div class="table-wrap">
   <div id="loadingMsg" class="loading-msg"><div class="spinner"></div>Loading vendor requests...</div>
   <table id="vrTable" style="display:none">
-    <thead>
-      <tr>
-        <th onclick="sortBy('opportunity_owner')">Opp Owner <span class="sort-arrow" id="s-opportunity_owner"></span>
-          <span class="cf-btn" onclick="event.stopPropagation();openCF('opportunity_owner','check')">▾</span>
-          <div class="cf-dd" id="cf-opportunity_owner"><div class="cf-title">Opp Owner</div><input class="cf-search" id="cfs-opportunity_owner" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('opportunity_owner')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('opportunity_owner')">Select/Deselect all</span><div class="cf-list" id="cfl-opportunity_owner"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('opportunity_owner')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('opportunity_owner')">Clear</button></div></div>
-        </th>
-        <th onclick="sortBy('close_date')">Close Date <span class="sort-arrow" id="s-close_date"></span>
-          <span class="cf-btn" onclick="event.stopPropagation();openCF('close_date','date')">▾</span>
-          <div class="cf-dd" id="cf-close_date">
-            <div class="cf-title">Close Date</div>
-            <select class="cf-num-op" id="cfpreset-close_date" onclick="event.stopPropagation()" onchange="handleDatePreset('close_date')">
-              <option value="">All dates</option>
-              <optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option><option value="this_quarter">This Quarter</option><option value="this_year">This Year</option></optgroup>
-              <option value="custom">Custom range...</option>
-            </select>
-            <div id="cfcustom-close_date" style="display:none">
-              <input class="cf-date-input" id="cffrom-close_date" type="date" onclick="event.stopPropagation()">
-              <input class="cf-date-input" id="cfto-close_date" type="date" onclick="event.stopPropagation()">
-            </div>
-            <div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('close_date')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearDateCF('close_date')">Clear</button></div>
-          </div>
-        </th>
-        <th onclick="sortBy('fts_id')">FTS ID <span class="sort-arrow" id="s-fts_id"></span>
-          <span class="cf-btn" onclick="event.stopPropagation();openCF('fts_id','check')">▾</span>
-          <div class="cf-dd" id="cf-fts_id"><div class="cf-title">FTS ID</div><input class="cf-search" id="cfs-fts_id" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('fts_id')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('fts_id')">Select/Deselect all</span><div class="cf-list" id="cfl-fts_id"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('fts_id')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('fts_id')">Clear</button></div></div>
-        </th>
-        <th onclick="sortBy('parent_account')">Parent Account <span class="sort-arrow" id="s-parent_account"></span>
-          <span class="cf-btn" onclick="event.stopPropagation();openCF('parent_account','check')">▾</span>
-          <div class="cf-dd" id="cf-parent_account"><div class="cf-title">Parent Account</div><input class="cf-search" id="cfs-parent_account" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('parent_account')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('parent_account')">Select/Deselect all</span><div class="cf-list" id="cfl-parent_account"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('parent_account')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('parent_account')">Clear</button></div></div>
-        </th>
-        <th onclick="sortBy('account_name')">Account <span class="sort-arrow" id="s-account_name"></span>
-          <span class="cf-btn" onclick="event.stopPropagation();openCF('account_name','check')">▾</span>
-          <div class="cf-dd" id="cf-account_name"><div class="cf-title">Account</div><input class="cf-search" id="cfs-account_name" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('account_name')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('account_name')">Select/Deselect all</span><div class="cf-list" id="cfl-account_name"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('account_name')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('account_name')">Clear</button></div></div>
-        </th>
-        <th onclick="sortBy('num_locations')">Locs <span class="sort-arrow" id="s-num_locations"></span>
-          <span class="cf-btn" onclick="event.stopPropagation();openCF('num_locations','num')">▾</span>
-          <div class="cf-dd" id="cf-num_locations"><div class="cf-title">Locations</div><select class="cf-num-op" id="cfop-num_locations"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-num_locations" type="number" min="0" placeholder="e.g. 10"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('num_locations')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('num_locations')">Clear</button></div></div>
-        </th>
-        <th onclick="sortBy('vendor_name')">Vendor <span class="sort-arrow" id="s-vendor_name"></span>
-          <span class="cf-btn" onclick="event.stopPropagation();openCF('vendor_name','check')">▾</span>
-          <div class="cf-dd" id="cf-vendor_name"><div class="cf-title">Vendor</div><input class="cf-search" id="cfs-vendor_name" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('vendor_name')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('vendor_name')">Select/Deselect all</span><div class="cf-list" id="cfl-vendor_name"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('vendor_name')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('vendor_name')">Clear</button></div></div>
-        </th>
-        <th onclick="sortBy('status')">Status <span class="sort-arrow" id="s-status"></span>
-          <span class="cf-btn" onclick="event.stopPropagation();openCF('status','check')">▾</span>
-          <div class="cf-dd" id="cf-status"><div class="cf-title">Status</div><input class="cf-search" id="cfs-status" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('status')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('status')">Select/Deselect all</span><div class="cf-list" id="cfl-status"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('status')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('status')">Clear</button></div></div>
-        </th>
-        <th onclick="sortBy('active_date')">Active Date <span class="sort-arrow" id="s-active_date"></span>
-          <span class="cf-btn" onclick="event.stopPropagation();openCF('active_date','date')">▾</span>
-          <div class="cf-dd" id="cf-active_date">
-            <div class="cf-title">Active Date</div>
-            <select class="cf-num-op" id="cfpreset-active_date" onclick="event.stopPropagation()" onchange="handleDatePreset('active_date')">
-              <option value="">All dates</option>
-              <optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option><option value="this_quarter">This Quarter</option><option value="this_year">This Year</option></optgroup>
-              <option value="blank">Is blank</option>
-              <option value="custom">Custom range...</option>
-            </select>
-            <div id="cfcustom-active_date" style="display:none">
-              <input class="cf-date-input" id="cffrom-active_date" type="date" onclick="event.stopPropagation()">
-              <input class="cf-date-input" id="cfto-active_date" type="date" onclick="event.stopPropagation()">
-            </div>
-            <div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('active_date')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearDateCF('active_date')">Clear</button></div>
-          </div>
-        </th>
-        <th onclick="sortBy('last_process_date')">Last Process Date <span class="sort-arrow" id="s-last_process_date"></span>
-          <span class="cf-btn" onclick="event.stopPropagation();openCF('last_process_date','date')">▾</span>
-          <div class="cf-dd" id="cf-last_process_date">
-            <div class="cf-title">Last Process Date</div>
-            <select class="cf-num-op" id="cfpreset-last_process_date" onclick="event.stopPropagation()" onchange="handleDatePreset('last_process_date')">
-              <option value="">All dates</option>
-              <optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option><option value="this_quarter">This Quarter</option><option value="this_year">This Year</option></optgroup>
-              <option value="blank">Is blank</option>
-              <option value="custom">Custom range...</option>
-            </select>
-            <div id="cfcustom-last_process_date" style="display:none">
-              <input class="cf-date-input" id="cffrom-last_process_date" type="date" onclick="event.stopPropagation()">
-              <input class="cf-date-input" id="cfto-last_process_date" type="date" onclick="event.stopPropagation()">
-            </div>
-            <div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('last_process_date')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearDateCF('last_process_date')">Clear</button></div>
-          </div>
-        </th>
-        <th onclick="sortBy('days_to_active')" title="Days from close date to active date (or today if no active date)">Days to Active <span class="sort-arrow" id="s-days_to_active"></span>
-          <span class="cf-btn" onclick="event.stopPropagation();openCF('days_to_active','num')">▾</span>
-          <div class="cf-dd" id="cf-days_to_active"><div class="cf-title">Days to Active</div><select class="cf-num-op" id="cfop-days_to_active"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-days_to_active" type="number" min="0" placeholder="e.g. 30"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('days_to_active')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('days_to_active')">Clear</button></div></div>
-        </th>
-      </tr>
-    </thead>
+    <thead id="vrHead"></thead>
     <tbody id="vrBody"></tbody>
   </table>
   <div id="emptyMsg" class="empty-msg" style="display:none">No vendor requests found matching your filters.</div>
 </div>
 
-<!-- SAVE VIEW MODAL -->
-<div class="modal-overlay" id="saveViewModal" style="display:none" onclick="if(event.target===this)closeSaveViewModal()">
-  <div class="modal-box">
-    <div class="modal-title">Save Current View</div>
-    <input class="modal-input" id="viewNameInput" type="text" placeholder="View name (e.g. Burke – Closed/Won)" maxlength="80"
-      onkeydown="if(event.key==='Enter')confirmSaveView()">
-    <div style="font-size:12px;color:var(--text3);margin-bottom:14px">Saves current filters and grouping. Visible to all portal users.</div>
-    <div class="modal-btns">
-      <button class="modal-cancel" onclick="closeSaveViewModal()">Cancel</button>
-      <button class="modal-confirm" onclick="confirmSaveView()">Save View</button>
-    </div>
-  </div>
-</div>
 
 <script>
 const SUPABASE_URL = 'https://idbnpxedwpjrflsqweyh.supabase.co';
@@ -488,6 +414,7 @@ function doLogin() {
   if (pw === PORTAL_PASSWORD) {
     localStorage.setItem('portal_auth', '1');
     document.getElementById('loginOverlay').style.display = 'none';
+    renderListHeaders();
     loadData();
     loadViewsList();
   } else {
@@ -501,6 +428,7 @@ function init() {
   const authed = localStorage.getItem('portal_auth') === '1';
   if (authed) {
     document.getElementById('loginOverlay').style.display = 'none';
+    renderListHeaders();
     loadData();
     loadViewsList();
   } else {
@@ -713,6 +641,10 @@ function clearAllFilters() {
     if (th) th.classList.remove('th-filtered');
   });
   ['close_date', 'active_date', 'last_process_date'].forEach(col => clearDateCF(col));
+  // Reset Views dropdown label
+  activeViewName = null;
+  const lbl = document.getElementById('viewsBtnLabel');
+  if (lbl) lbl.textContent = '⊞ Views';
   applyFilters();
 }
 
@@ -802,15 +734,12 @@ function updateStats() {
 
   // Update banner cards
   document.getElementById('bn-total').textContent = shown.toLocaleString();
-  document.getElementById('bn-accounts').textContent = `${uniqueAccounts.toLocaleString()} account${uniqueAccounts !== 1 ? 's' : ''}`;
+  document.getElementById('bn-accounts').textContent = uniqueAccounts.toLocaleString();
   const knownKeys = new Set(statusDefs.map(d => d.key));
-  let otherCount = 0;
-  Object.entries(counts).forEach(([k, v]) => { if (!knownKeys.has(k) && k && k !== '—') otherCount += v; });
   statusDefs.forEach(d => {
     const el = document.getElementById(d.bannerEl);
     if (el) el.textContent = (counts[d.key] || 0).toLocaleString();
   });
-  document.getElementById('bn-other').textContent = otherCount.toLocaleString();
 
   // Status bar below stats
   const knownKeySet = new Set(statusDefs.map(d => d.key));
@@ -859,10 +788,11 @@ function renderTable() {
   document.getElementById('vrTable').style.display = 'table';
 
   const groupCol = document.getElementById('groupSelect').value;
-  const NCOLS = 11;
+  const visibleCols = colOrder.filter(id => colVisible[id]);
+  const NCOLS = visibleCols.length;
 
   if (!groupCol) {
-    tbody.innerHTML = filteredRows.map(r => rowHTML(r)).join('');
+    tbody.innerHTML = filteredRows.map(r => rowHTML(r, visibleCols)).join('');
     return;
   }
 
@@ -879,34 +809,91 @@ function renderTable() {
     html += `<tr class="group-header"><td colspan="${NCOLS}" style="padding-left:12px">
       ${key} <span style="font-weight:400;color:var(--text3)">(${groups[key].length})</span>
     </td></tr>`;
-    html += groups[key].map(r => rowHTML(r)).join('');
+    html += groups[key].map(r => rowHTML(r, visibleCols)).join('');
   });
   tbody.innerHTML = html;
 }
 
-function rowHTML(r) {
+function rowHTML(r, visibleCols) {
   const days = daysToActive(r);
   const daysLabel = days === null ? '—' : days.toLocaleString();
   const daysColor = days === null ? '' : days <= 14 ? 'color:var(--text)' : days <= 30 ? 'color:var(--gold)' : 'color:var(--red)';
-  return `<tr>
-    <td>${r.opportunity_owner || '—'}</td>
-    <td class="mono">${fmtDate(r.close_date)}</td>
-    <td class="mono">${r.fts_id || '—'}</td>
-    <td>${r.parent_account || '—'}</td>
-    <td class="primary">${r.account_name || '—'}</td>
-    <td class="mono">${r.num_locations != null ? r.num_locations.toLocaleString() : '—'}</td>
-    <td>${r.vendor_name || '—'}</td>
-    <td>${statusBadge(r.status)}</td>
-    <td class="mono">${fmtDate(r.active_date)}</td>
-    <td class="mono">${fmtDate(r.last_process_date)}</td>
-    <td class="mono" style="${daysColor}">${daysLabel}</td>
-  </tr>`;
+  return '<tr>' + visibleCols.map(id => {
+    switch(id) {
+      case 'opportunity_owner':  return `<td>${r.opportunity_owner || '—'}</td>`;
+      case 'close_date':         return `<td class="mono">${fmtDate(r.close_date)}</td>`;
+      case 'fts_id':             return `<td class="mono">${r.fts_id || '—'}</td>`;
+      case 'parent_account':     return `<td>${r.parent_account || '—'}</td>`;
+      case 'account_name':       return `<td class="primary">${r.account_name || '—'}</td>`;
+      case 'num_locations':      return `<td class="mono">${r.num_locations != null ? r.num_locations.toLocaleString() : '—'}</td>`;
+      case 'vendor_name':        return `<td>${r.vendor_name || '—'}</td>`;
+      case 'status':             return `<td>${statusBadge(r.status)}</td>`;
+      case 'active_date':        return `<td class="mono">${fmtDate(r.active_date)}</td>`;
+      case 'last_process_date':  return `<td class="mono">${fmtDate(r.last_process_date)}</td>`;
+      case 'days_to_active':     return `<td class="mono" style="${daysColor}">${daysLabel}</td>`;
+      default: return '<td>—</td>';
+    }
+  }).join('') + '</tr>';
 }
 
-// ── VIEWS ───────────────────────────────────────────
+// ── COLUMN DEFINITIONS ─────────────────────────────
+const ALL_COLS = [
+  { id: 'opportunity_owner', label: 'Opp Owner',        type: 'check' },
+  { id: 'close_date',        label: 'Close Date',       type: 'date'  },
+  { id: 'fts_id',            label: 'FTS ID',           type: 'check' },
+  { id: 'parent_account',    label: 'Parent Account',   type: 'check' },
+  { id: 'account_name',      label: 'Account',          type: 'check' },
+  { id: 'num_locations',     label: '# Locs',           type: 'num'   },
+  { id: 'vendor_name',       label: 'Vendor',           type: 'check' },
+  { id: 'status',            label: 'Status',           type: 'check' },
+  { id: 'active_date',       label: 'Active Date',      type: 'date', blankable: true },
+  { id: 'last_process_date', label: 'Last Process Date',type: 'date', blankable: true },
+  { id: 'days_to_active',    label: 'Days to Active',   type: 'num'   },
+];
+const LOCKED_COLS = ['opportunity_owner', 'account_name']; // always visible
+let colOrder   = ALL_COLS.map(c => c.id);
+let colVisible = Object.fromEntries(ALL_COLS.map(c => [c.id, true]));
+
+function renderListHeaders() {
+  const thead = document.getElementById('vrHead');
+  if (!thead) return;
+  const visibleCols = colOrder.filter(id => colVisible[id]);
+  thead.innerHTML = '<tr>' + visibleCols.map(id => {
+    const col = ALL_COLS.find(c => c.id === id);
+    if (!col) return '';
+    let filterDD = '';
+    if (col.type === 'check') {
+      filterDD = `<div class="cf-dd" id="cf-${id}"><div class="cf-title">${col.label}</div><input class="cf-search" id="cfs-${id}" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('${id}')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('${id}')">Select/Deselect all</span><div class="cf-list" id="cfl-${id}"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('${id}')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('${id}')">Clear</button></div></div>`;
+    } else if (col.type === 'num') {
+      const ph = id === 'days_to_active' ? 'e.g. 30' : 'e.g. 10';
+      filterDD = `<div class="cf-dd" id="cf-${id}"><div class="cf-title">${col.label}</div><select class="cf-num-op" id="cfop-${id}"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-${id}" type="number" min="0" placeholder="${ph}"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('${id}')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('${id}')">Clear</button></div></div>`;
+    } else if (col.type === 'date') {
+      const blankOpt = col.blankable ? '<option value="blank">Is blank</option>' : '';
+      filterDD = `<div class="cf-dd" id="cf-${id}"><div class="cf-title">${col.label}</div><select class="cf-num-op" id="cfpreset-${id}" onclick="event.stopPropagation()" onchange="handleDatePreset('${id}')"><option value="">All dates</option><optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option><option value="this_quarter">This Quarter</option><option value="this_year">This Year</option></optgroup>${blankOpt}<option value="custom">Custom range...</option></select><div id="cfcustom-${id}" style="display:none"><input class="cf-date-input" id="cffrom-${id}" type="date" onclick="event.stopPropagation()"><input class="cf-date-input" id="cfto-${id}" type="date" onclick="event.stopPropagation()"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('${id}')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearDateCF('${id}')">Clear</button></div></div>`;
+    }
+    const titleAttr = id === 'days_to_active' ? ' title="Days from close date to active date (or today if no active date)"' : '';
+    return `<th onclick="sortBy('${id}')"${titleAttr}>${col.label} <span class="sort-arrow" id="s-${id}"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('${id}','${col.type}')">▾</span>${filterDD}</th>`;
+  }).join('') + '</tr>';
+}
+
+// ── VIEWS ────────────────────────────────────────────
 const PAGE_KEY = 'vendor-portal';
 let savedViews = [];
-let activeViewId = null;
+let activeViewName = null;
+
+function toggleViewsDropdown() {
+  const wrap = document.getElementById('viewsWrap');
+  const wasOpen = wrap.classList.contains('open');
+  document.querySelectorAll('.ms-wrap.open').forEach(w => w.classList.remove('open'));
+  if (!wasOpen) {
+    wrap.classList.add('open');
+    renderViewsList();
+    renderColManager();
+  }
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#viewsWrap')) document.getElementById('viewsWrap')?.classList.remove('open');
+});
 
 async function loadViewsList() {
   try {
@@ -915,58 +902,99 @@ async function loadViewsList() {
       { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
     );
     if (!res.ok) return;
-    savedViews = await res.json();
-    renderViewsDropdown();
+    const rows = await res.json();
+    savedViews = Array.isArray(rows) ? rows.map(r => ({ id: r.id, name: r.name, ...r.view_data })) : [];
+    renderViewsList();
   } catch(e) { console.error('Views load error:', e); }
 }
 
-function renderViewsDropdown() {
-  const sel = document.getElementById('viewsSelect');
-  sel.innerHTML = '<option value="">— Views —</option>';
-  savedViews.forEach(v => {
-    const opt = document.createElement('option');
-    opt.value = v.id;
-    opt.textContent = v.name;
-    sel.appendChild(opt);
-  });
-  if (activeViewId) {
-    sel.value = activeViewId;
-    document.getElementById('deleteViewBtn').style.display = 'inline-block';
-  } else {
-    document.getElementById('deleteViewBtn').style.display = 'none';
-  }
+function renderViewsList() {
+  const el = document.getElementById('savedViewsList');
+  if (!el) return;
+  if (savedViews.length === 0) { el.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 6px">No saved views yet</div>'; return; }
+  el.innerHTML = savedViews.map(v => `
+    <div class="view-item ${activeViewName===v.name?'active-view':''}" onclick="applyView('${v.name.replace(/'/g,"\'")}')">
+      <span>${v.name}</span>
+      <div class="view-item-actions">
+        <button class="view-item-update" title="Update with current filters" onclick="updateView('${v.name.replace(/'/g,"\'")}',event)">↺</button>
+        <button class="view-item-rename" title="Rename" onclick="renameView('${v.name.replace(/'/g,"\'")}',event)">✎</button>
+        <button class="view-item-del" title="Delete" onclick="deleteView('${v.name.replace(/'/g,"\'")}',event)">✕</button>
+      </div>
+    </div>`).join('');
 }
 
+// ── COLUMN MANAGER ────────────────────────────────────
+let dragSrcId = null;
+function renderColManager() {
+  const el = document.getElementById('colManagerList');
+  if (!el) return;
+  el.innerHTML = colOrder.map(id => {
+    const col = ALL_COLS.find(c => c.id === id);
+    if (!col) return '';
+    const locked = LOCKED_COLS.includes(id);
+    return `<div class="col-manager-item${locked?' locked':''}" data-col="${id}" draggable="${!locked}"
+      ondragstart="colDragStart(event,'${id}')" ondragover="colDragOver(event,'${id}')" ondrop="colDrop(event,'${id}')" ondragleave="colDragLeave(event)">
+      <span class="col-drag-handle">${locked?'🔒':'⠿'}</span>
+      <input type="checkbox" ${colVisible[id]?'checked':''} ${locked?'disabled':''} onchange="toggleColVisible('${id}',this.checked)">
+      <span style="font-size:12px">${col.label}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleColVisible(id, visible) {
+  if (LOCKED_COLS.includes(id)) return;
+  colVisible[id] = visible;
+  renderListHeaders();
+  renderTable();
+}
+
+function colDragStart(e, id) { dragSrcId = id; e.dataTransfer.effectAllowed = 'move'; }
+function colDragOver(e, id) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; document.querySelector(`[data-col="${id}"]`)?.classList.add('drag-over'); }
+function colDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function colDrop(e, targetId) {
+  e.preventDefault();
+  document.querySelectorAll('.col-manager-item').forEach(el => el.classList.remove('drag-over'));
+  if (!dragSrcId || dragSrcId === targetId) return;
+  if (LOCKED_COLS.includes(dragSrcId) || LOCKED_COLS.includes(targetId)) return;
+  const srcIdx = colOrder.indexOf(dragSrcId);
+  const tgtIdx = colOrder.indexOf(targetId);
+  colOrder.splice(srcIdx, 1);
+  colOrder.splice(tgtIdx, 0, dragSrcId);
+  renderColManager();
+  renderListHeaders();
+  renderTable();
+}
+
+// ── VIEW CAPTURE / APPLY ─────────────────────────────
 function captureViewState() {
   const state = {
     search: document.getElementById('searchInput').value,
     groupCol: document.getElementById('groupSelect').value,
+    sortCol, sortDir,
     checkFilters: {},
     numFilters: {},
-    dateFilters: {}
+    dateFilters: {},
+    colOrder: [...colOrder],
+    colVisible: {...colVisible}
   };
-  for (const col in checkFilters) {
-    if (checkFilters[col]?.size > 0) state.checkFilters[col] = [...checkFilters[col]];
-  }
+  for (const col in checkFilters) { if (checkFilters[col]?.size > 0) state.checkFilters[col] = [...checkFilters[col]]; }
   for (const col in numFilters) state.numFilters[col] = numFilters[col];
   for (const col in dateFilters) state.dateFilters[col] = dateFilters[col];
   return state;
 }
 
 function applyViewState(state) {
-  // Clear first
   clearAllFilters();
-  // Search
   if (state.search) document.getElementById('searchInput').value = state.search;
-  // Group
   if (state.groupCol) document.getElementById('groupSelect').value = state.groupCol;
-  // Check filters
+  if (state.sortCol) { sortCol = state.sortCol; sortDir = state.sortDir || 1; }
+  if (state.colOrder?.length) colOrder = [...state.colOrder];
+  if (state.colVisible) colVisible = {...state.colVisible};
   for (const col in (state.checkFilters || {})) {
     checkFilters[col] = new Set(state.checkFilters[col]);
     const th = document.getElementById('cf-' + col)?.closest('th');
     if (th && checkFilters[col].size > 0) th.classList.add('th-filtered');
   }
-  // Num filters
   for (const col in (state.numFilters || {})) {
     numFilters[col] = state.numFilters[col];
     const opEl = document.getElementById('cfop-' + col);
@@ -976,7 +1004,6 @@ function applyViewState(state) {
     const th = document.getElementById('cf-' + col)?.closest('th');
     if (th) th.classList.add('th-filtered');
   }
-  // Date filters
   for (const col in (state.dateFilters || {})) {
     dateFilters[col] = state.dateFilters[col];
     const presetEl = document.getElementById('cfpreset-' + col);
@@ -992,88 +1019,97 @@ function applyViewState(state) {
     const th = document.getElementById('cf-' + col)?.closest('th');
     if (th) th.classList.add('th-filtered');
   }
+  renderListHeaders();
   applyFilters();
 }
 
-function loadView() {
-  const sel = document.getElementById('viewsSelect');
-  const id = sel.value;
-  if (!id) {
-    activeViewId = null;
-    document.getElementById('deleteViewBtn').style.display = 'none';
-    clearAllFilters();
-    return;
-  }
-  activeViewId = id;
-  document.getElementById('deleteViewBtn').style.display = 'inline-block';
-  const view = savedViews.find(v => String(v.id) === String(id));
-  if (view?.view_data) applyViewState(view.view_data);
+function applyView(name) {
+  const view = savedViews.find(v => v.name === name);
+  if (!view) return;
+  activeViewName = name;
+  document.getElementById('viewsBtnLabel').textContent = `⊞ ${name}`;
+  document.getElementById('viewsWrap').classList.remove('open');
+  applyViewState(view);
 }
 
-function openSaveViewModal() {
-  document.getElementById('viewNameInput').value = '';
-  document.getElementById('saveViewModal').style.display = 'flex';
-  setTimeout(() => document.getElementById('viewNameInput').focus(), 50);
-}
-
-function closeSaveViewModal() {
-  document.getElementById('saveViewModal').style.display = 'none';
-}
-
-async function confirmSaveView() {
-  const name = document.getElementById('viewNameInput').value.trim();
-  if (!name) { document.getElementById('viewNameInput').focus(); return; }
+async function saveCurrentView() {
+  const name = prompt('View name:');
+  if (!name?.trim()) return;
   const state = captureViewState();
+  const viewObj = { name: name.trim(), ...state };
   try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/tbl_views`,
-      {
+    const existing = savedViews.find(v => v.name === name.trim());
+    if (existing) {
+      await fetch(`${SUPABASE_URL}/rest/v1/tbl_views?id=eq.${existing.id}`, {
+        method: 'PATCH',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ view_data: state, updated_at: new Date().toISOString() })
+      });
+      savedViews[savedViews.indexOf(existing)] = viewObj;
+    } else {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/tbl_views`, {
         method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation'
-        },
-        body: JSON.stringify({
-          user_email: 'portal@non-alcohol-vendors.com',
-          page: PAGE_KEY,
-          name,
-          view_data: state,
-          updated_at: new Date().toISOString()
-        })
-      }
-    );
-    if (!res.ok) throw new Error(await res.text());
-    const rows = await res.json();
-    closeSaveViewModal();
-    await loadViewsList();
-    // Select the newly saved view
-    if (rows?.[0]?.id) {
-      activeViewId = rows[0].id;
-      document.getElementById('viewsSelect').value = activeViewId;
-      document.getElementById('deleteViewBtn').style.display = 'inline-block';
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+        body: JSON.stringify({ user_email: 'portal@non-alcohol-vendors.com', page: PAGE_KEY, name: name.trim(), view_data: state, updated_at: new Date().toISOString() })
+      });
+      const rows = await res.json();
+      savedViews.push({ ...viewObj, id: rows?.[0]?.id });
     }
-  } catch(e) { console.error('Save view error:', e); alert('Failed to save view. Please try again.'); }
+    activeViewName = name.trim();
+    document.getElementById('viewsBtnLabel').textContent = `⊞ ${name.trim()}`;
+    renderViewsList();
+  } catch(e) { console.error('Save view error:', e); alert('Failed to save view.'); }
 }
 
-async function deleteCurrentView() {
-  if (!activeViewId) return;
-  const view = savedViews.find(v => String(v.id) === String(activeViewId));
-  if (!confirm(`Delete view "${view?.name || activeViewId}"?`)) return;
+async function updateView(name, e) {
+  e.stopPropagation();
+  const view = savedViews.find(v => v.name === name);
+  if (!view) return;
+  const state = captureViewState();
+  Object.assign(view, state);
   try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/tbl_views?id=eq.${activeViewId}`,
-      {
-        method: 'DELETE',
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-      }
-    );
-    if (!res.ok) throw new Error(await res.text());
-    activeViewId = null;
-    await loadViewsList();
-    clearAllFilters();
-  } catch(e) { console.error('Delete view error:', e); alert('Failed to delete view.'); }
+    await fetch(`${SUPABASE_URL}/rest/v1/tbl_views?id=eq.${view.id}`, {
+      method: 'PATCH',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ view_data: state, updated_at: new Date().toISOString() })
+    });
+    if (activeViewName === name) document.getElementById('viewsBtnLabel').textContent = `⊞ ${name}`;
+    renderViewsList();
+  } catch(e2) { console.error('Update view error:', e2); }
+}
+
+async function renameView(oldName, e) {
+  e.stopPropagation();
+  const newName = prompt('Rename view:', oldName);
+  if (!newName?.trim() || newName.trim() === oldName) return;
+  const view = savedViews.find(v => v.name === oldName);
+  if (!view) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/tbl_views?id=eq.${view.id}`, {
+      method: 'PATCH',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newName.trim(), updated_at: new Date().toISOString() })
+    });
+    view.name = newName.trim();
+    if (activeViewName === oldName) { activeViewName = newName.trim(); document.getElementById('viewsBtnLabel').textContent = `⊞ ${newName.trim()}`; }
+    renderViewsList();
+  } catch(e2) { console.error('Rename error:', e2); }
+}
+
+async function deleteView(name, e) {
+  e.stopPropagation();
+  if (!confirm(`Delete view "${name}"?`)) return;
+  const view = savedViews.find(v => v.name === name);
+  if (!view) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/tbl_views?id=eq.${view.id}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    savedViews = savedViews.filter(v => v.name !== name);
+    if (activeViewName === name) { activeViewName = null; document.getElementById('viewsBtnLabel').textContent = '⊞ Views'; }
+    renderViewsList();
+  } catch(e2) { console.error('Delete error:', e2); }
 }
 
 // ── START ──────────────────────────────────────────
