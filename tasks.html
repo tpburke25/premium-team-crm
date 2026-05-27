@@ -294,11 +294,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .adp-copy-btn-fts:hover,.adp-copy-btn-names:hover{opacity:0.8;}
 
 
-.tools-nav { position: relative; }
-.tools-nav-btn { padding: 7px 16px; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; border: none; background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; border-radius: 8px; display: flex; align-items: center; gap: 5px; }
-.tools-nav-btn:hover { color: var(--text); background: var(--surface2); }
-.tools-nav-btn.open { color: var(--text); background: var(--surface2); }
-.tools-dropdown { position: absolute; top: calc(100% + 6px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 6px; min-width: 180px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.tools-chip { position: relative; cursor: pointer; }
+.tools-chip-btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; background: #2a2a2e; border-radius: 20px; border: 1px solid var(--border2); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: #fff; transition: all 0.15s; }
+.tools-chip-btn:hover { background: #333338; border-color: var(--accent); }
+.tools-chip-btn.open { background: #333338; border-color: var(--accent); }
+.tools-chip-btn .tools-caret { font-size: 10px; color: var(--accent); }
+.tools-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 6px; min-width: 180px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
 .tools-dropdown.open { display: block; }
 .tools-dropdown-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; transition: all 0.15s; text-decoration: none; width: 100%; }
 .tools-dropdown-item:hover { background: var(--surface3); color: var(--text); }
@@ -329,15 +330,15 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
     <a href="index.html" class="main-nav-btn">Opportunities</a>
     <a href="tasks.html" class="main-nav-btn active">Tasks</a>
     <a href="accounts.html" class="main-nav-btn">Accounts</a>
-    <div class="tools-nav" id="toolsNav">
-      <button class="tools-nav-btn" id="toolsNavBtn" onclick="toggleToolsNav(event)">Tools <span style="font-size:11px">▾</span></button>
+  </nav>
+  <div class="header-right">
+    <div class="tools-chip" id="toolsNav">
+      <button class="tools-chip-btn" id="toolsNavBtn" onclick="toggleToolsNav(event)">Tools <span class="tools-caret">▾</span></button>
       <div class="tools-dropdown" id="toolsDropdown">
         <a href="https://tpburke25.github.io/fintech-premium-vendors/" target="_blank" class="tools-dropdown-item">🏪 Vendors ↗</a>
         <a href="vendor-portal.html" target="_blank" class="tools-dropdown-item">📋 Vendor Portal ↗</a>
       </div>
     </div>
-  </nav>
-  <div class="header-right">
     <div class="user-chip" id="userChip" onclick="toggleUserMenu()">
       <div class="user-avatar" id="userAvatar">T</div>
       <span class="user-name" id="userName">...</span>
@@ -368,6 +369,7 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
   <div class="loading" id="loadingMsg"><div class="spinner"></div>Loading tasks...</div>
   <table class="list-table" id="taskTable" style="display:none">
     <thead><tr>
+      <th onclick="sortBy('assigned_to')">Assigned To <span class="sort-arrow" id="s-assigned_to"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('assigned_to','check')">▾</span><div class="cf-dd" id="cf-assigned_to"><div class="cf-title">Assigned To</div><input class="cf-search" id="cfs-assigned_to" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('assigned_to')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('assigned_to')">Select / Deselect all</span><div class="cf-list" id="cfl-assigned_to"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('assigned_to')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('assigned_to')">Clear</button></div></div></th>
       <th onclick="sortBy('due_date')">Due Date <span class="sort-arrow" id="s-due_date"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('due_date','date')">▾</span><div class="cf-dd" id="cf-due_date"><div class="cf-title">Due Date</div><select class="cf-num-op" id="cfpreset-due_date" onclick="event.stopPropagation()" onchange="handleDatePreset('due_date')"><option value="">All dates</option><optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option></optgroup><optgroup label="Future"><option value="next_month">Next Month</option><option value="next_30">Next 30 Days</option><option value="next_60">Next 60 Days</option><option value="next_90">Next 90 Days</option><option value="future_all">All Future</option></optgroup><option value="custom">Custom range...</option></select><div id="cfcustom-due_date" style="display:none"><input class="cf-date-input" id="cffrom-due_date" type="date" onclick="event.stopPropagation()"><input class="cf-date-input" id="cfto-due_date" type="date" onclick="event.stopPropagation()"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('due_date')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('due_date')">Clear</button></div></div></th>
       <th onclick="sortBy('type')">Type <span class="sort-arrow" id="s-type"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('type','check')">▾</span><div class="cf-dd" id="cf-type"><div class="cf-title">Type</div><input class="cf-search" id="cfs-type" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('type')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('type')">Select / Deselect all</span><div class="cf-list" id="cfl-type"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('type')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('type')">Clear</button></div></div></th>
       <th onclick="sortBy('subject')">Subject <span class="sort-arrow" id="s-subject"></span></th>
@@ -375,7 +377,6 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
       <th onclick="sortBy('contact_name')">Primary Contact <span class="sort-arrow" id="s-contact_name"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('contact_name','check')">▾</span><div class="cf-dd" id="cf-contact_name"><div class="cf-title">Primary Contact</div><input class="cf-search" id="cfs-contact_name" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('contact_name')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('contact_name')">Select / Deselect all</span><div class="cf-list" id="cfl-contact_name"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('contact_name')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('contact_name')">Clear</button></div></div></th>
       <th onclick="sortBy('days_since_activity')">Days Since Act. <span class="sort-arrow" id="s-days_since_activity"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('days_since_activity','num')">▾</span><div class="cf-dd" id="cf-days_since_activity"><div class="cf-title">Days Since Act.</div><select class="cf-num-op" id="cfop-days_since_activity" onclick="event.stopPropagation()"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-days_since_activity" type="number" min="0" onclick="event.stopPropagation()"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('days_since_activity')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('days_since_activity')">Clear</button></div></div></th>
       <th onclick="sortBy('priority')">Priority <span class="sort-arrow" id="s-priority"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('priority','check')">▾</span><div class="cf-dd" id="cf-priority"><div class="cf-title">Priority</div><input class="cf-search" id="cfs-priority" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('priority')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('priority')">Select / Deselect all</span><div class="cf-list" id="cfl-priority"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('priority')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('priority')">Clear</button></div></div></th>
-      <th onclick="sortBy('assigned_to')">Assigned To <span class="sort-arrow" id="s-assigned_to"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('assigned_to','check')">▾</span><div class="cf-dd" id="cf-assigned_to"><div class="cf-title">Assigned To</div><input class="cf-search" id="cfs-assigned_to" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('assigned_to')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('assigned_to')">Select / Deselect all</span><div class="cf-list" id="cfl-assigned_to"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('assigned_to')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('assigned_to')">Clear</button></div></div></th>
     </tr></thead>
     <tbody id="taskBody"></tbody>
   </table>
@@ -609,13 +610,13 @@ function renderList() {
     const dv=parseFloat(t.days_since_activity);
     const ds=isNaN(dv)?'':dv>30?'color:var(--red)':dv>14?'color:var(--orange)':'color:var(--green)';
     return `<tr onclick="openPanel('${t.activity_id}')" title="${(t.comments||'').replace(/"/g,'&quot;')}">
+      <td>${t.assigned_to||'—'}</td>
       <td class="mono" style="${dateStyle(t)}">${fmtDate(t.due_date)}</td>
       <td>${t.type||'—'}</td><td class="primary">${t.subject||'—'}</td>
       <td>${t.account_name||'—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px">${t.fts_id||''}</span></td>
       <td>${t.contact_name||'—'}</td>
       <td class="mono" style="${ds}">${!isNaN(dv)?dv+'d':'—'}</td>
       <td class="${t.priority==='High'?'priority-high':t.priority==='Low'?'priority-low':''}">${t.priority||'—'}</td>
-      <td>${t.assigned_to||'—'}</td>
     </tr>`;
   }).join('');
   document.querySelectorAll('[id^="s-"]').forEach(el=>el.textContent='');

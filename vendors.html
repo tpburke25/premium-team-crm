@@ -237,11 +237,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .adp-section-toggle { padding-left: 25px !important; }
 
 
-.tools-nav { position: relative; }
-.tools-nav-btn { padding: 7px 16px; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; border: none; background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; border-radius: 8px; display: flex; align-items: center; gap: 5px; }
-.tools-nav-btn:hover { color: var(--text); background: var(--surface2); }
-.tools-nav-btn.open { color: var(--text); background: var(--surface2); }
-.tools-dropdown { position: absolute; top: calc(100% + 6px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 6px; min-width: 180px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.tools-chip { position: relative; cursor: pointer; }
+.tools-chip-btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; background: #2a2a2e; border-radius: 20px; border: 1px solid var(--border2); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: #fff; transition: all 0.15s; }
+.tools-chip-btn:hover { background: #333338; border-color: var(--accent); }
+.tools-chip-btn.open { background: #333338; border-color: var(--accent); }
+.tools-chip-btn .tools-caret { font-size: 10px; color: var(--accent); }
+.tools-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 6px; min-width: 180px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
 .tools-dropdown.open { display: block; }
 .tools-dropdown-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; transition: all 0.15s; text-decoration: none; width: 100%; }
 .tools-dropdown-item:hover { background: var(--surface3); color: var(--text); }
@@ -274,15 +275,15 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
     <a href="index.html" class="main-nav-btn">Opportunities</a>
     <a href="tasks.html" class="main-nav-btn">Tasks</a>
     <a href="accounts.html" class="main-nav-btn">Accounts</a>
-    <div class="tools-nav" id="toolsNav">
-      <button class="tools-nav-btn" id="toolsNavBtn" onclick="toggleToolsNav(event)">Tools <span style="font-size:11px">▾</span></button>
+  </nav>
+  <div class="header-right">
+    <div class="tools-chip" id="toolsNav">
+      <button class="tools-chip-btn" id="toolsNavBtn" onclick="toggleToolsNav(event)">Tools <span class="tools-caret">▾</span></button>
       <div class="tools-dropdown" id="toolsDropdown">
         <a href="https://tpburke25.github.io/fintech-premium-vendors/" target="_blank" class="tools-dropdown-item">🏪 Vendors ↗</a>
         <a href="vendor-portal.html" target="_blank" class="tools-dropdown-item">📋 Vendor Portal ↗</a>
       </div>
     </div>
-  </nav>
-  <div class="header-right">
     <div class="user-chip" id="userChip" onclick="toggleUserMenu()">
       <div class="user-avatar" id="userAvatar">T</div>
       <span class="user-name" id="userName">...</span>
