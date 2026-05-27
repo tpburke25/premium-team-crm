@@ -788,13 +788,14 @@ function sortRows() {
 function updateStats() {
   const total = allRows.length;
   const shown = filteredRows.length;
+  const shownRelationships = filteredRows.filter(r => r.vendor_name).length;
   const uniqueAccounts = new Set(filteredRows.map(r => r.fts_id)).size;
   const vendorFilterActive = checkFilters['vendor_name']?.size > 0;
   const groupCol = document.getElementById('groupSelect').value;
   const flatMode = groupCol === 'vendor_name' || vendorFilterActive;
   document.getElementById('statsBar').textContent = flatMode
-    ? `${shown.toLocaleString()} relationship${shown !== 1 ? 's' : ''} · ${uniqueAccounts.toLocaleString()} account${uniqueAccounts !== 1 ? 's' : ''}${shown < total ? ` (of ${total.toLocaleString()} total)` : ''}`
-    : `${uniqueAccounts.toLocaleString()} account${uniqueAccounts !== 1 ? 's' : ''} · ${shown.toLocaleString()} relationship${shown !== 1 ? 's' : ''}${shown < total ? ` (of ${total.toLocaleString()} total)` : ''}`;
+    ? `${shownRelationships.toLocaleString()} relationship${shownRelationships !== 1 ? 's' : ''} · ${uniqueAccounts.toLocaleString()} account${uniqueAccounts !== 1 ? 's' : ''}${shownRelationships < total ? ` (of ${total.toLocaleString()} total)` : ''}`
+    : `${uniqueAccounts.toLocaleString()} account${uniqueAccounts !== 1 ? 's' : ''} · ${shownRelationships.toLocaleString()} relationship${shownRelationships !== 1 ? 's' : ''}${shownRelationships < total ? ` (of ${total.toLocaleString()} total)` : ''}`;
 
   const statusDefs = [
     { key: 'processing',             label: 'Processing',            color: 'var(--green)', bannerEl: 'bn-processing' },
@@ -809,7 +810,7 @@ function updateStats() {
   });
 
   // Update banner cards
-  document.getElementById('bn-total').textContent = shown.toLocaleString();
+  document.getElementById('bn-total').textContent = shownRelationships.toLocaleString();
   document.getElementById('bn-accounts').textContent = uniqueAccounts.toLocaleString();
   const knownKeys = new Set(statusDefs.map(d => d.key));
   statusDefs.forEach(d => {
