@@ -90,7 +90,19 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 /* TABLE */
 .table-wrap { overflow-x: auto; padding: 0 28px 40px; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 16px; }
-thead th { background: var(--surface); border-bottom: 1px solid var(--border2); padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; position: sticky; top: 57px; z-index: 10; cursor: pointer; user-select: none; }
+thead th { background: var(--surface); border-bottom: 1px solid var(--border2); padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; position: sticky; top: 0; z-index: 10; cursor: pointer; user-select: none; }
+td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 0; }
+th[data-col="opportunity_owner"], td[data-col="opportunity_owner"] { width: 110px; }
+th[data-col="close_date"],        td[data-col="close_date"]        { width: 75px; text-align: center; }
+th[data-col="fts_id"],            td[data-col="fts_id"]            { width: 65px; }
+th[data-col="parent_account"],    td[data-col="parent_account"]    { width: 195px; }
+th[data-col="account_name"],      td[data-col="account_name"]      { width: 235px; }
+th[data-col="num_locations"],     td[data-col="num_locations"]     { width: 55px; text-align: center; }
+th[data-col="vendor_name"],       td[data-col="vendor_name"]       { width: 120px; }
+th[data-col="status"],            td[data-col="status"]            { width: 220px; }
+th[data-col="active_date"],       td[data-col="active_date"]       { width: 75px; text-align: center; }
+th[data-col="last_process_date"], td[data-col="last_process_date"] { width: 75px; text-align: center; }
+th[data-col="days_to_active"],    td[data-col="days_to_active"]    { width: 75px; text-align: center; }
 thead th:hover { color: var(--text2); }
 thead th.th-filtered { color: var(--gold); }
 tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
@@ -180,7 +192,9 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
 .last-synced { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; white-space: nowrap; }
 
 /* COLLAPSIBLE ROWS */
-.acct-parent-row { cursor: pointer; border-bottom: 1px solid var(--border); }
+.acct-toggle-btn { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 3px; cursor: pointer; color: var(--text3); font-size: 10px; margin-right: 4px; flex-shrink: 0; }
+.acct-toggle-btn:hover { background: var(--surface3); color: var(--text); }
+.acct-parent-row { border-bottom: 1px solid var(--border); }
 .acct-parent-row:hover { background: var(--surface2); }
 .acct-sub-row { background: color-mix(in srgb, var(--accent) 5%, transparent); border-bottom: 1px solid var(--border); }
 .acct-sub-row td { padding-top: 7px; padding-bottom: 7px; color: var(--text2); font-size: 12px; }
@@ -329,7 +343,7 @@ const SUPABASE_URL = 'https://idbnpxedwpjrflsqweyh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYm5weGVkd3BqcmZsc3F3ZXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNTY3MDYsImV4cCI6MjA5MjkzMjcwNn0.PL7ftdQbTtkCnfFa3Mwo2H3w_uPXuTh_0o75cu3_FLU';
 const PORTAL_PASSWORD = 'premium$1';
 
-let allRows = [], filteredRows = [];
+let allRows = [], filteredRows = [], totalOppAccounts = 0;
 let sortCol = 'close_date', sortDir = -1;
 const checkFilters = {}, numFilters = {}, dateFilters = {}, cfValues = {};
 
@@ -510,6 +524,7 @@ async function loadData() {
     });
 
     // Step 4: Fetch vendor relationships in batches of 100
+    totalOppAccounts = Object.keys(oppMap).length;
     let vendorRows = [];
     const batchSize = 100;
     for (let i = 0; i < ftsIds.length; i += batchSize) {
@@ -519,7 +534,7 @@ async function loadData() {
       let vPage = 0;
       while (true) {
         const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/tbl_vendor_relationships?select=retailer_fts_id,vendor_name,status,active_date,last_process_date&retailer_fts_id=in.${inClause}&limit=${pageSize}&offset=${vPage * pageSize}`,
+          `${SUPABASE_URL}/rest/v1/tbl_vendor_relationships?select=retailer_fts_id,retailer_name,vendor_name,status,active_date,last_process_date&retailer_fts_id=in.${inClause}&limit=${pageSize}&offset=${vPage * pageSize}`,
           { headers }
         );
         if (!res.ok) break;
@@ -531,22 +546,54 @@ async function loadData() {
       }
     }
 
-    // Step 5: Join into flat rows
-    allRows = vendorRows.map(vr => {
-      const ftsKey = String(parseInt(String(vr.retailer_fts_id).trim(), 10));
-      const opp = oppMap[ftsKey] || {};
-      return {
-        fts_id: ftsKey,
-        account_name: opp.account_name || '—',
-        parent_account: opp.parent_account || '—',
-        num_locations: opp.num_locations || null,
-        opportunity_owner: opp.opportunity_owner || '—',
-        close_date: opp.close_date || null,
-        vendor_name: vr.vendor_name || '—',
-        status: (vr.status || '').trim() || '—',
-        active_date: vr.active_date || null,
-        last_process_date: vr.last_process_date || null
-      };
+    // Step 5: Join — start from oppMap, attach vendor rows where they exist
+    // First build a map of fts_id → vendor rows
+    const vendorMap = {};
+    vendorRows.forEach(vr => {
+      const key = String(parseInt(String(vr.retailer_fts_id).trim(), 10));
+      if (!vendorMap[key]) vendorMap[key] = [];
+      vendorMap[key].push(vr);
+    });
+
+    allRows = [];
+
+    // For each opp in oppMap, emit one row per vendor relationship (or one blank row if none)
+    Object.keys(oppMap).forEach(ftsKey => {
+      const opp = oppMap[ftsKey];
+      const vendors = vendorMap[ftsKey] || [];
+
+      if (vendors.length === 0) {
+        // No vendor relationships — show account with blank vendor info
+        allRows.push({
+          fts_id: ftsKey,
+          account_name: opp.account_name || '—',
+          retailer_name: null,
+          parent_account: opp.parent_account || '—',
+          num_locations: opp.num_locations || null,
+          opportunity_owner: opp.opportunity_owner || '—',
+          close_date: opp.close_date || null,
+          vendor_name: null,
+          status: null,
+          active_date: null,
+          last_process_date: null
+        });
+      } else {
+        vendors.forEach(vr => {
+          allRows.push({
+            fts_id: ftsKey,
+            account_name: opp.account_name || vr.retailer_name || '—',
+            retailer_name: vr.retailer_name || null,
+            parent_account: opp.parent_account || '—',
+            num_locations: opp.num_locations || null,
+            opportunity_owner: opp.opportunity_owner || '—',
+            close_date: opp.close_date || null,
+            vendor_name: vr.vendor_name || '—',
+            status: (vr.status || '').trim() || null,
+            active_date: vr.active_date || null,
+            last_process_date: vr.last_process_date || null
+          });
+        });
+      }
     });
 
     // Build filter value lists
@@ -669,6 +716,7 @@ function clearAllFilters(resetView = true) {
     const lbl = document.getElementById('viewsBtnLabel');
     if (lbl) lbl.textContent = '⊞ Views';
   }
+  expandedAccounts.clear();
   applyFilters();
 }
 
@@ -677,7 +725,7 @@ function applyFilters() {
   const search = document.getElementById('searchInput').value.toLowerCase();
   filteredRows = allRows.filter(r => {
     if (search) {
-      const hay = [r.fts_id, r.account_name, r.parent_account, r.opportunity_owner, r.vendor_name, r.status]
+      const hay = [r.fts_id, r.account_name, r.retailer_name, r.parent_account, r.opportunity_owner, r.vendor_name, r.status]
         .map(v => (v || '').toLowerCase()).join(' ');
       if (!hay.includes(search)) return false;
     }
@@ -853,13 +901,17 @@ function renderTable() {
     if (!accountMap.has(key)) {
       accountMap.set(key, {
         fts_id: r.fts_id,
-        account_name: r.account_name,
+        account_name: r.account_name !== '—' ? r.account_name : null,
         parent_account: r.parent_account,
         opportunity_owner: r.opportunity_owner,
         close_date: r.close_date,
         num_locations: r.num_locations,
         rows: []
       });
+    } else {
+      // Update account_name if we find a better one
+      const acct = accountMap.get(key);
+      if (!acct.account_name && r.account_name !== '—') acct.account_name = r.account_name;
     }
     accountMap.get(key).rows.push(r);
   });
@@ -888,7 +940,8 @@ function renderTable() {
 function accountRowHTML(acct, visibleCols, NCOLS) {
   const key = acct.fts_id || '—';
   const isExpanded = expandedAccounts.has(key);
-  const vendorCount = acct.rows.length;
+  const vendorCount = acct.rows.filter(r => r.vendor_name).length;
+  const hasVendors = vendorCount > 0;
 
   // Status summary counts
   const statusCounts = {};
@@ -906,20 +959,19 @@ function accountRowHTML(acct, visibleCols, NCOLS) {
    .join('');
 
   // Parent row — shows account-level fields + status summary + expand toggle
-  let parentRow = `<tr class="acct-parent-row" onclick="toggleAccount('${key.replace(/'/g,"\\'")}')">`;
-  visibleCols.forEach(id => {
+  let parentRow = `<tr class="acct-parent-row">`;  visibleCols.forEach(id => {
     switch(id) {
-      case 'opportunity_owner': parentRow += `<td>${acct.opportunity_owner || '—'}</td>`; break;
-      case 'close_date':        parentRow += `<td class="mono">${fmtDate(acct.close_date)}</td>`; break;
-      case 'fts_id':            parentRow += `<td class="mono">${acct.fts_id || '—'}</td>`; break;
-      case 'parent_account':    parentRow += `<td>${acct.parent_account || '—'}</td>`; break;
-      case 'account_name':      parentRow += `<td class="primary">${acct.account_name || '—'} <span style="font-size:11px;color:var(--text3);font-weight:400">${isExpanded ? '▾' : '▸'} ${vendorCount}</span></td>`; break;
-      case 'num_locations':     parentRow += `<td class="mono">${acct.num_locations != null ? acct.num_locations.toLocaleString() : '—'}</td>`; break;
-      case 'vendor_name':       parentRow += `<td style="font-size:11px;color:var(--text3)">${vendorCount} vendor${vendorCount!==1?'s':''}</td>`; break;
-      case 'status':            parentRow += `<td>${statusSummary || '—'}</td>`; break;
-      case 'active_date':       parentRow += `<td class="mono">—</td>`; break;
-      case 'last_process_date': parentRow += `<td class="mono">—</td>`; break;
-      case 'days_to_active':    parentRow += `<td class="mono">—</td>`; break;
+      case 'opportunity_owner': parentRow += `<td data-col="opportunity_owner">${acct.opportunity_owner || '—'}</td>`; break;
+      case 'close_date':        parentRow += `<td data-col="close_date" class="mono">${fmtDate(acct.close_date)}</td>`; break;
+      case 'fts_id':            parentRow += `<td data-col="fts_id" class="mono">${acct.fts_id || '—'}</td>`; break;
+      case 'parent_account':    parentRow += `<td data-col="parent_account">${acct.parent_account || '—'}</td>`; break;
+      case 'account_name':      parentRow += `<td data-col="account_name" class="primary">${acct.account_name || acct.rows[0]?.retailer_name || '—'}</td>`; break;
+      case 'num_locations':     parentRow += `<td data-col="num_locations" class="mono">${acct.num_locations != null ? acct.num_locations.toLocaleString() : '—'}</td>`; break;
+      case 'vendor_name':       parentRow += `<td data-col="vendor_name">${hasVendors ? `<span class="acct-toggle-btn" onclick="event.stopPropagation();toggleAccount('${key.replace(/'/g,"\\'")}')"><span class="acct-toggle-icon">${isExpanded ? '▾' : '▸'}</span></span> <span style="font-size:11px;color:var(--text3)">${vendorCount} vendor${vendorCount!==1?'s':''}</span>` : '<span style="font-size:11px;color:var(--text3)">0</span>'}</td>`; break;
+      case 'status':            parentRow += `<td data-col="status">${statusSummary || '—'}</td>`; break;
+      case 'active_date':       parentRow += `<td data-col="active_date" class="mono">—</td>`; break;
+      case 'last_process_date': parentRow += `<td data-col="last_process_date" class="mono">—</td>`; break;
+      case 'days_to_active':    parentRow += `<td data-col="days_to_active" class="mono">—</td>`; break;
       default: parentRow += '<td>—</td>';
     }
   });
@@ -935,17 +987,17 @@ function accountRowHTML(acct, visibleCols, NCOLS) {
       let tr = '<tr class="acct-sub-row">';
       visibleCols.forEach(id => {
         switch(id) {
-          case 'opportunity_owner': tr += `<td></td>`; break;
-          case 'close_date':        tr += `<td></td>`; break;
-          case 'fts_id':            tr += `<td></td>`; break;
-          case 'parent_account':    tr += `<td></td>`; break;
-          case 'account_name':      tr += `<td></td>`; break;
-          case 'num_locations':     tr += `<td></td>`; break;
-          case 'vendor_name':       tr += `<td style="padding-left:20px">${r.vendor_name || '—'}</td>`; break;
-          case 'status':            tr += `<td>${statusBadge(r.status)}</td>`; break;
-          case 'active_date':       tr += `<td class="mono">${fmtDate(r.active_date)}</td>`; break;
-          case 'last_process_date': tr += `<td class="mono">${fmtDate(r.last_process_date)}</td>`; break;
-          case 'days_to_active':    tr += `<td class="mono" style="${daysColor}">${daysLabel}</td>`; break;
+          case 'opportunity_owner': tr += `<td data-col="opportunity_owner"></td>`; break;
+          case 'close_date':        tr += `<td data-col="close_date"></td>`; break;
+          case 'fts_id':            tr += `<td data-col="fts_id"></td>`; break;
+          case 'parent_account':    tr += `<td data-col="parent_account"></td>`; break;
+          case 'account_name':      tr += `<td data-col="account_name"></td>`; break;
+          case 'num_locations':     tr += `<td data-col="num_locations"></td>`; break;
+          case 'vendor_name':       tr += `<td data-col="vendor_name" style="padding-left:20px">${r.vendor_name || '—'}</td>`; break;
+          case 'status':            tr += `<td data-col="status">${statusBadge(r.status)}</td>`; break;
+          case 'active_date':       tr += `<td data-col="active_date" class="mono">${fmtDate(r.active_date)}</td>`; break;
+          case 'last_process_date': tr += `<td data-col="last_process_date" class="mono">${fmtDate(r.last_process_date)}</td>`; break;
+          case 'days_to_active':    tr += `<td data-col="days_to_active" class="mono" style="${daysColor}">${daysLabel}</td>`; break;
           default: tr += '<td>—</td>';
         }
       });
@@ -958,6 +1010,8 @@ function accountRowHTML(acct, visibleCols, NCOLS) {
 }
 
 function toggleAccount(ftsId) {
+  const acct = [...(new Map(filteredRows.map(r => [r.fts_id, r]))).values()].find(r => r.fts_id === ftsId);
+  if (!acct?.vendor_name) return;
   if (expandedAccounts.has(ftsId)) expandedAccounts.delete(ftsId);
   else expandedAccounts.add(ftsId);
   renderTable();
@@ -969,17 +1023,17 @@ function rowHTML(r, visibleCols) {
   const daysColor = days === null ? '' : days <= 14 ? 'color:var(--text)' : days <= 30 ? 'color:var(--gold)' : 'color:var(--red)';
   return '<tr>' + visibleCols.map(id => {
     switch(id) {
-      case 'opportunity_owner':  return `<td>${r.opportunity_owner || '—'}</td>`;
-      case 'close_date':         return `<td class="mono">${fmtDate(r.close_date)}</td>`;
-      case 'fts_id':             return `<td class="mono">${r.fts_id || '—'}</td>`;
-      case 'parent_account':     return `<td>${r.parent_account || '—'}</td>`;
-      case 'account_name':       return `<td class="primary">${r.account_name || '—'}</td>`;
-      case 'num_locations':      return `<td class="mono">${r.num_locations != null ? r.num_locations.toLocaleString() : '—'}</td>`;
-      case 'vendor_name':        return `<td>${r.vendor_name || '—'}</td>`;
-      case 'status':             return `<td>${statusBadge(r.status)}</td>`;
-      case 'active_date':        return `<td class="mono">${fmtDate(r.active_date)}</td>`;
-      case 'last_process_date':  return `<td class="mono">${fmtDate(r.last_process_date)}</td>`;
-      case 'days_to_active':     return `<td class="mono" style="${daysColor}">${daysLabel}</td>`;
+      case 'opportunity_owner':  return `<td data-col="opportunity_owner">${r.opportunity_owner || '—'}</td>`;
+      case 'close_date':         return `<td data-col="close_date" class="mono">${fmtDate(r.close_date)}</td>`;
+      case 'fts_id':             return `<td data-col="fts_id" class="mono">${r.fts_id || '—'}</td>`;
+      case 'parent_account':     return `<td data-col="parent_account">${r.parent_account || '—'}</td>`;
+      case 'account_name':       return `<td data-col="account_name" class="primary">${r.account_name || '—'}</td>`;
+      case 'num_locations':      return `<td data-col="num_locations" class="mono">${r.num_locations != null ? r.num_locations.toLocaleString() : '—'}</td>`;
+      case 'vendor_name':        return `<td data-col="vendor_name">${r.vendor_name || '—'}</td>`;
+      case 'status':             return `<td data-col="status">${statusBadge(r.status)}</td>`;
+      case 'active_date':        return `<td data-col="active_date" class="mono">${fmtDate(r.active_date)}</td>`;
+      case 'last_process_date':  return `<td data-col="last_process_date" class="mono">${fmtDate(r.last_process_date)}</td>`;
+      case 'days_to_active':     return `<td data-col="days_to_active" class="mono" style="${daysColor}">${daysLabel}</td>`;
       default: return '<td>—</td>';
     }
   }).join('') + '</tr>';
@@ -1021,7 +1075,7 @@ function renderListHeaders() {
       filterDD = `<div class="cf-dd" id="cf-${id}"><div class="cf-title">${col.label}</div><select class="cf-num-op" id="cfpreset-${id}" onclick="event.stopPropagation()" onchange="handleDatePreset('${id}')"><option value="">All dates</option><optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option><option value="this_quarter">This Quarter</option><option value="this_year">This Year</option></optgroup>${blankOpt}<option value="custom">Custom range...</option></select><div id="cfcustom-${id}" style="display:none"><input class="cf-date-input" id="cffrom-${id}" type="date" onclick="event.stopPropagation()"><input class="cf-date-input" id="cfto-${id}" type="date" onclick="event.stopPropagation()"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('${id}')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearDateCF('${id}')">Clear</button></div></div>`;
     }
     const titleAttr = id === 'days_to_active' ? ' title="Days from close date to active date (or today if no active date)"' : '';
-    return `<th onclick="sortBy('${id}')"${titleAttr}>${col.label} <span class="sort-arrow" id="s-${id}"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('${id}','${col.type}')">▾</span>${filterDD}</th>`;
+    return `<th data-col="${id}" onclick="sortBy('${id}')"${titleAttr}>${col.label} <span class="sort-arrow" id="s-${id}"></span><span class="cf-btn" onclick="event.stopPropagation();openCF('${id}','${col.type}')">▾</span>${filterDD}</th>`;
   }).join('') + '</tr>';
 }
 
