@@ -257,6 +257,37 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .tools-dropdown-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; transition: all 0.15s; text-decoration: none; width: 100%; }
 .tools-dropdown-item:hover { background: var(--surface3); color: var(--text); }
 
+
+/* ── VIEWS / COL MANAGER (accounts) ── */
+.ms-wrap { position: relative; }
+.ms-btn { display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--text2); transition: all 0.15s; user-select: none; }
+.ms-btn:hover { border-color: var(--accent); color: var(--text); }
+.ms-arrow { font-size: 10px; }
+.ms-dropdown { position: absolute; top: calc(100% + 6px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; z-index: 400; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.ms-wrap.open .ms-dropdown { display: block; }
+.ms-divider { border: none; border-top: 1px solid var(--border); margin: 6px 0; }
+.views-section-title { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 4px 6px; }
+.views-save-btn { width: 100%; padding: 7px 10px; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--text2); cursor: pointer; text-align: left; transition: all 0.15s; }
+.views-save-btn:hover { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); border-color: var(--accent); }
+.view-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; color: var(--text2); transition: all 0.15s; gap: 6px; }
+.view-item:hover { background: var(--surface3); color: var(--text); }
+.view-item.active-view { color: var(--accent); }
+.view-item-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.15s; }
+.view-item:hover .view-item-actions { opacity: 1; }
+.view-item-update, .view-item-rename, .view-item-del { background: none; border: none; cursor: pointer; font-size: 12px; padding: 2px 5px; border-radius: 4px; color: var(--text3); }
+.view-item-update:hover { color: var(--accent); background: var(--surface2); }
+.view-item-rename:hover { color: var(--text); background: var(--surface2); }
+.view-item-del:hover { color: var(--red); background: var(--surface2); }
+.col-manager-item { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 4px; font-size: 12px; color: var(--text2); cursor: grab; user-select: none; }
+.col-manager-item:hover { background: var(--surface3); }
+.col-manager-item.locked { opacity: 0.5; cursor: not-allowed; }
+.col-manager-item input[type=checkbox] { accent-color: var(--accent); cursor: pointer; }
+.col-manager-item.dragging { opacity: 0.4; }
+.col-manager-item.drag-over { border-top: 2px solid var(--accent); }
+.filter-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: color-mix(in srgb, var(--accent) 15%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); border-radius: 20px; font-size: 11px; color: var(--accent); }
+.filter-pill-x { cursor: pointer; opacity: 0.6; font-size: 10px; }
+.filter-pill-x:hover { opacity: 1; }
+
 </style>
 </head>
 <body>
@@ -309,27 +340,32 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
   <div class="toolbar">
     <div class="toolbar-left">
       <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" id="searchInput" placeholder="Search accounts, FTS ID..." oninput="applyFilters()"></div>
+      <!-- Views dropdown -->
+      <div class="ms-wrap" id="viewsWrap">
+        <div class="ms-btn" id="viewsBtn" onclick="toggleViewsDropdown()" style="min-width:90px">
+          <span id="viewsBtnLabel">⊞ Views</span><span class="ms-arrow">▾</span>
+        </div>
+        <div class="ms-dropdown" id="viewsDropdown" style="min-width:260px;padding:10px">
+          <div class="views-section-title">Saved views</div>
+          <div id="savedViewsList" style="margin-bottom:8px"></div>
+          <button class="views-save-btn" onclick="saveCurrentView()">+ Save current view</button>
+          <hr class="ms-divider" style="margin:10px 0">
+          <div class="views-section-title">Manage columns</div>
+          <div id="colManagerList" style="margin-bottom:8px"></div>
+        </div>
+      </div>
       <button class="clear-btn" id="clearBtn" onclick="clearAllFilters()" style="display:none">✕ Clear filters</button>
     </div>
     <div class="stats-bar" id="statsBar"></div>
   </div>
+  <!-- Active filter pills -->
+  <div id="filterPillsBar" style="display:none;padding:8px 28px;border-bottom:1px solid var(--border);background:var(--surface);align-items:center;gap:6px;flex-wrap:wrap"></div>
   <div class="list-wrap">
     <div class="loading" id="loadingMsg"><div class="spinner"></div>Loading accounts...</div>
     <table class="list-table" id="acctTable" style="display:none">
-      <thead><tr>
-        <th onclick="sortBy('fts_id')">FTS ID <span class="sort-arrow" id="s-fts_id"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('fts_id','check')">▾</span><div class="cf-dd" id="cf-fts_id"><div class="cf-title">FTS ID</div><input class="cf-search" id="cfs-fts_id" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('fts_id')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('fts_id')">Select/Deselect all</span><div class="cf-list" id="cfl-fts_id"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('fts_id')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('fts_id')">Clear</button></div></div></th>
-        <th onclick="sortBy('account_name')">Account <span class="sort-arrow" id="s-account_name"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('account_name','check')">▾</span><div class="cf-dd" id="cf-account_name"><div class="cf-title">Account</div><input class="cf-search" id="cfs-account_name" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('account_name')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('account_name')">Select/Deselect all</span><div class="cf-list" id="cfl-account_name"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('account_name')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('account_name')">Clear</button></div></div></th>
-        <th onclick="sortBy('industry')">Industry <span class="sort-arrow" id="s-industry"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('industry','check')">▾</span><div class="cf-dd" id="cf-industry"><div class="cf-title">Industry</div><input class="cf-search" id="cfs-industry" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('industry')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('industry')">Select/Deselect all</span><div class="cf-list" id="cfl-industry"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('industry')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('industry')">Clear</button></div></div></th>
-        <th onclick="sortBy('accounting_package')">Accounting Pkg <span class="sort-arrow" id="s-accounting_package"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('accounting_package','check')">▾</span><div class="cf-dd" id="cf-accounting_package"><div class="cf-title">Accounting Package</div><input class="cf-search" id="cfs-accounting_package" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('accounting_package')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('accounting_package')">Select/Deselect all</span><div class="cf-list" id="cfl-accounting_package"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('accounting_package')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('accounting_package')">Clear</button></div></div></th>
-        <th onclick="sortBy('last_activity_date')">Last Activity <span class="sort-arrow" id="s-last_activity_date"></span></th>
-        <th onclick="sortBy('days_since_activity')">Days Since Act. <span class="sort-arrow" id="s-days_since_activity"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('days_since_activity','num')">▾</span><div class="cf-dd" id="cf-days_since_activity"><div class="cf-title">Days Since Activity</div><select class="cf-num-op" id="cfop-days_since_activity"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-days_since_activity" type="number" min="0" placeholder="e.g. 30"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('days_since_activity')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('days_since_activity')">Clear</button></div></div></th>
-        <th onclick="sortBy('city')">City <span class="sort-arrow" id="s-city"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('city','check')">▾</span><div class="cf-dd" id="cf-city"><div class="cf-title">City</div><input class="cf-search" id="cfs-city" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('city')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('city')">Select/Deselect all</span><div class="cf-list" id="cfl-city"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('city')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('city')">Clear</button></div></div></th>
-        <th onclick="sortBy('state')">State <span class="sort-arrow" id="s-state"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('state','check')">▾</span><div class="cf-dd" id="cf-state"><div class="cf-title">State</div><input class="cf-search" id="cfs-state" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('state')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('state')">Select/Deselect all</span><div class="cf-list" id="cfl-state"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('state')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('state')">Clear</button></div></div></th>
-        <th onclick="sortBy('open_opps')">Open Opps <span class="sort-arrow" id="s-open_opps"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('open_opps','num')">▾</span><div class="cf-dd" id="cf-open_opps"><div class="cf-title">Open Opps</div><select class="cf-num-op" id="cfop-open_opps"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-open_opps" type="number" min="0" placeholder="e.g. 1"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('open_opps')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('open_opps')">Clear</button></div></div></th>
-        <th onclick="sortBy('open_tasks')">Open Tasks <span class="sort-arrow" id="s-open_tasks"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('open_tasks','num')">▾</span><div class="cf-dd" id="cf-open_tasks"><div class="cf-title">Open Tasks</div><select class="cf-num-op" id="cfop-open_tasks"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-open_tasks" type="number" min="0" placeholder="e.g. 1"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('open_tasks')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('open_tasks')">Clear</button></div></div></th>
-        <th onclick="sortBy('asm_flat_rate')">ASM Rate <span class="sort-arrow" id="s-asm_flat_rate"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('asm_flat_rate','num')">▾</span><div class="cf-dd" id="cf-asm_flat_rate"><div class="cf-title">ASM Rate</div><select class="cf-num-op" id="cfop-asm_flat_rate"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-asm_flat_rate" type="number" min="0" placeholder="e.g. 500"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('asm_flat_rate')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('asm_flat_rate')">Clear</button></div></div></th>
-      </tr></thead>
+      <thead><tr id="acctHeaderRow"></tr></thead>
       <tbody id="acctBody"></tbody>
+    </table></tbody>
     </table>
   </div>
 </div>
@@ -346,6 +382,25 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 let currentUser = null;
 let allAccounts = [], filteredAccounts = [], allOpps = [], allTasks = [], allActivities = [];
+
+const ACCT_ALL_COLS = [
+  { id: 'fts_id',             label: 'FTS ID',          type: 'check' },
+  { id: 'account_name',       label: 'Account',         type: 'check' },
+  { id: 'industry',           label: 'Industry',        type: 'check' },
+  { id: 'accounting_package', label: 'Accounting Pkg',  type: 'check' },
+  { id: 'last_activity_date', label: 'Last Activity',   type: 'none'  },
+  { id: 'days_since_activity',label: 'Days Since Act.',  type: 'num'   },
+  { id: 'city',               label: 'City',            type: 'check' },
+  { id: 'state',              label: 'State',           type: 'check' },
+  { id: 'open_opps',          label: 'Open Opps',       type: 'num'   },
+  { id: 'open_tasks',         label: 'Open Tasks',      type: 'num'   },
+  { id: 'asm_flat_rate',      label: 'ASM Rate',        type: 'num'   },
+];
+const ACCT_LOCKED_COLS = [];
+let acctColOrder   = ACCT_ALL_COLS.map(c => c.id);
+let acctColVisible = Object.fromEntries(ACCT_ALL_COLS.map(c => [c.id, true]));
+let acctSavedViews = [];
+let acctActiveView = null;
 let sortCol = 'account_name', sortDir = 1;
 const checkFilters = {}, numFilters = {}, cfValues = {};
 
@@ -436,11 +491,11 @@ async function loadData() {
       fetchAll('tbl_activities','assigned_to')
     ]);
     allOpps=opps; allTasks=tasks; allActivities=acts;
-    buildAccountList();
+    await buildAccountList();
   } catch(e) { console.error('Load error:',e); }
 }
 
-function buildAccountList() {
+async function buildAccountList() {
   const map={};
   allOpps.forEach(o=>{
     if(!o.account_id) return;
@@ -465,6 +520,7 @@ function buildAccountList() {
   ['fts_id','account_name','industry','accounting_package','city','state'].forEach(col=>{
     cfValues[col]=[...new Set(allAccounts.map(a=>a[col]).filter(Boolean))].sort();
   });
+  await loadViews();
   applyFilters();
   document.getElementById('loadingMsg').style.display='none';
   document.getElementById('acctTable').style.display='table';
@@ -597,7 +653,42 @@ function getLastActivity(accountId) {
   return `${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCFullYear()).slice(-2)}`;
 }
 
+function renderAcctHeaders() {
+  const row = document.getElementById('acctHeaderRow');
+  if (!row) return;
+  const visibleCols = acctColOrder.filter(id => acctColVisible[id]);
+  row.innerHTML = visibleCols.map(id => {
+    const col = ACCT_ALL_COLS.find(c => c.id === id);
+    if (!col) return '';
+    const arrow = `<span class="sort-arrow" id="s-${id}"></span>`;
+    if (col.type === 'check') {
+      return `<th id="cfth-${id}" onclick="sortBy('${id}')">${col.label} ${arrow}
+        <span class="cf-btn" onclick="event.stopPropagation();openCF('${id}','check')">▾</span>
+        <div class="cf-dd" id="cf-${id}">
+          <div class="cf-title">${col.label}</div>
+          <input class="cf-search" id="cfs-${id}" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('${id}')">
+          <span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('${id}')">Select/Deselect all</span>
+          <div class="cf-list" id="cfl-${id}"></div>
+          <div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('${id}')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('${id}')">Clear</button></div>
+        </div></th>`;
+    } else if (col.type === 'num') {
+      return `<th id="cfth-${id}" onclick="sortBy('${id}')">${col.label} ${arrow}
+        <span class="cf-btn" onclick="event.stopPropagation();openCF('${id}','num')">▾</span>
+        <div class="cf-dd" id="cf-${id}">
+          <div class="cf-title">${col.label}</div>
+          <select class="cf-num-op" id="cfop-${id}"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select>
+          <input class="cf-num-val" id="cfval-${id}" type="number" min="0" placeholder="e.g. 1">
+          <div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('${id}')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('${id}')">Clear</button></div>
+        </div></th>`;
+    } else {
+      return `<th onclick="sortBy('${id}')">${col.label} ${arrow}</th>`;
+    }
+  }).join('');
+}
+
 function renderList(){
+  renderAcctHeaders();
+  const visibleCols = acctColOrder.filter(id => acctColVisible[id]);
   const sorted=[...filteredAccounts].sort((a,b)=>{
     let av=a[sortCol]??'',bv=b[sortCol]??'';
     if(typeof av==='number'||typeof bv==='number') return ((parseFloat(av)||0)<(parseFloat(bv)||0)?-sortDir:sortDir);
@@ -606,18 +697,23 @@ function renderList(){
   document.getElementById('acctBody').innerHTML=sorted.map(a=>{
     const dv=parseFloat(a.days_since_activity),hasActive=a.open_opps>0||a.open_tasks>0;
     const ds=hasActive?daysStyle(a.days_since_activity):'';
-    return `<tr onclick="openAccount('${a.account_id}')">
-      <td class="mono">${a.fts_id||'—'}</td>
-      <td class="primary">${a.account_name||'—'}</td>
-      <td>${a.industry||'—'}</td>
-      <td>${a.accounting_package||'—'}</td>
-      <td class="mono">${getLastActivity(a.account_id)}</td>
-      <td class="mono" style="${ds}">${!isNaN(dv)?dv+'d':'—'}</td>
-      <td>${a.city||'—'}</td><td>${a.state||'—'}</td>
-      <td class="mono" style="${a.open_opps>0?'color:var(--accent)':''}">${a.open_opps}</td>
-      <td class="mono" style="${a.open_tasks>0?'color:var(--gold)':''}">${a.open_tasks}</td>
-      <td class="mono">${a.asm_flat_rate!==null&&a.asm_flat_rate!==undefined?'$'+parseFloat(a.asm_flat_rate).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</td>
-    </tr>`;
+    const cells = visibleCols.map(id => {
+      switch(id) {
+        case 'fts_id':             return `<td class="mono">${a.fts_id||'—'}</td>`;
+        case 'account_name':       return `<td class="primary">${a.account_name||'—'}</td>`;
+        case 'industry':           return `<td>${a.industry||'—'}</td>`;
+        case 'accounting_package': return `<td>${a.accounting_package||'—'}</td>`;
+        case 'last_activity_date': return `<td class="mono">${getLastActivity(a.account_id)}</td>`;
+        case 'days_since_activity':return `<td class="mono" style="${ds}">${!isNaN(dv)?dv+'d':'—'}</td>`;
+        case 'city':               return `<td>${a.city||'—'}</td>`;
+        case 'state':              return `<td>${a.state||'—'}</td>`;
+        case 'open_opps':          return `<td class="mono" style="${a.open_opps>0?'color:var(--accent)':''}">${a.open_opps}</td>`;
+        case 'open_tasks':         return `<td class="mono" style="${a.open_tasks>0?'color:var(--gold)':''}">${a.open_tasks}</td>`;
+        case 'asm_flat_rate':      return `<td class="mono">${a.asm_flat_rate!==null&&a.asm_flat_rate!==undefined?'$'+parseFloat(a.asm_flat_rate).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</td>`;
+        default: return '<td>—</td>';
+      }
+    }).join('');
+    return `<tr onclick="openAccount('${a.account_id}')">${cells}</tr>`;
   }).join('');
   document.querySelectorAll('[id^="s-"]').forEach(el=>el.textContent='');
   const arrow=document.getElementById(`s-${sortCol}`);if(arrow) arrow.textContent=sortDir===1?'↑':'↓';
@@ -1110,6 +1206,209 @@ document.addEventListener('click', function(e) {
     document.getElementById('toolsNavBtn').classList.remove('open');
   }
 });
+
+
+// ── ACCOUNTS VIEWS / COL MANAGER ─────────────────────────────────────────
+
+function toggleViewsDropdown() {
+  const wrap = document.getElementById('viewsWrap');
+  if (wrap) wrap.classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('viewsWrap');
+  if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
+});
+
+async function loadViews() {
+  if (!currentUser?.email) { acctSavedViews = []; renderViewsList(); renderColManager(); return; }
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/tbl_views?user_email=eq.${encodeURIComponent(currentUser.email)}&page=eq.accounts&select=name,view_data&order=updated_at.asc`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}` }
+    });
+    const rows = await res.json();
+    acctSavedViews = Array.isArray(rows) ? rows.map(r => ({ name: r.name, ...r.view_data })) : [];
+  } catch(e) { acctSavedViews = []; }
+  renderViewsList();
+  renderColManager();
+}
+
+async function saveViewsToDB(view) {
+  if (!currentUser?.email) return;
+  const { name, ...view_data } = view;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/tbl_views`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ user_email: currentUser.email, page: 'accounts', name, view_data, updated_at: new Date().toISOString() })
+    });
+  } catch(e) { console.error('Failed to save view:', e); }
+}
+
+async function saveCurrentView() {
+  const name = prompt('Name this view:');
+  if (!name) return;
+  const view = {
+    name,
+    checkFilters: JSON.parse(JSON.stringify(checkFilters, (k,v) => v instanceof Set ? [...v] : v)),
+    numFilters: JSON.parse(JSON.stringify(numFilters)),
+    sortCol, sortDir, colOrder: [...acctColOrder], colVisible: {...acctColVisible}
+  };
+  const existing = acctSavedViews.findIndex(v => v.name === name);
+  if (existing >= 0) acctSavedViews[existing] = view; else acctSavedViews.push(view);
+  acctActiveView = name;
+  await saveViewsToDB(view);
+  renderViewsList();
+  document.getElementById('viewsBtnLabel').textContent = `⊞ ${name}`;
+}
+
+function applyView(name) {
+  const view = acctSavedViews.find(v => v.name === name);
+  if (!view) return;
+  acctActiveView = name;
+  Object.keys(checkFilters).forEach(k => delete checkFilters[k]);
+  Object.keys(numFilters).forEach(k => delete numFilters[k]);
+  Object.entries(view.checkFilters || {}).forEach(([id, vals]) => { checkFilters[id] = new Set(vals); });
+  Object.assign(numFilters, view.numFilters || {});
+  sortCol = view.sortCol || 'account_name';
+  sortDir = view.sortDir || 1;
+  acctColOrder   = [...(view.colOrder   || ACCT_ALL_COLS.map(c=>c.id))];
+  acctColVisible = {...(view.colVisible || Object.fromEntries(ACCT_ALL_COLS.map(c=>[c.id,true])))};
+  document.getElementById('viewsWrap').classList.remove('open');
+  document.getElementById('viewsBtnLabel').textContent = `⊞ ${name}`;
+  renderColManager();
+  applyFilters();
+  updateFilterPills();
+}
+
+async function deleteView(name, e) {
+  e.stopPropagation();
+  acctSavedViews = acctSavedViews.filter(v => v.name !== name);
+  if (acctActiveView === name) { acctActiveView = null; document.getElementById('viewsBtnLabel').textContent = '⊞ Views'; }
+  renderViewsList();
+  if (!currentUser?.email) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/tbl_views?user_email=eq.${encodeURIComponent(currentUser.email)}&page=eq.accounts&name=eq.${encodeURIComponent(name)}`, {
+      method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}` }
+    });
+  } catch(e) {}
+}
+
+async function renameView(oldName, e) {
+  e.stopPropagation();
+  const newName = prompt('Rename view:', oldName);
+  if (!newName || newName === oldName) return;
+  const view = acctSavedViews.find(v => v.name === oldName);
+  if (!view) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/tbl_views?user_email=eq.${encodeURIComponent(currentUser.email)}&page=eq.accounts&name=eq.${encodeURIComponent(oldName)}`, {
+      method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}` }
+    });
+  } catch(e) {}
+  view.name = newName;
+  if (acctActiveView === oldName) { acctActiveView = newName; document.getElementById('viewsBtnLabel').textContent = `⊞ ${newName}`; }
+  await saveViewsToDB(view);
+  renderViewsList();
+}
+
+async function updateView(name, e) {
+  e.stopPropagation();
+  const view = {
+    name,
+    checkFilters: JSON.parse(JSON.stringify(checkFilters, (k,v) => v instanceof Set ? [...v] : v)),
+    numFilters: JSON.parse(JSON.stringify(numFilters)),
+    sortCol, sortDir, colOrder: [...acctColOrder], colVisible: {...acctColVisible}
+  };
+  const existing = acctSavedViews.findIndex(v => v.name === name);
+  if (existing >= 0) acctSavedViews[existing] = view;
+  acctActiveView = name;
+  document.getElementById('viewsBtnLabel').textContent = `⊞ ${name}`;
+  await saveViewsToDB(view);
+  renderViewsList();
+}
+
+function renderViewsList() {
+  const el = document.getElementById('savedViewsList');
+  if (!el) return;
+  if (acctSavedViews.length === 0) { el.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 6px">No saved views yet</div>'; return; }
+  el.innerHTML = acctSavedViews.map(v => `
+    <div class="view-item ${acctActiveView===v.name?'active-view':''}" onclick="applyView('${v.name.replace(/'/g,"\'")}')">
+      <span>${v.name}</span>
+      <div class="view-item-actions">
+        <button class="view-item-update" title="Update" onclick="updateView('${v.name.replace(/'/g,"\'")}',event)">↺</button>
+        <button class="view-item-rename" title="Rename" onclick="renameView('${v.name.replace(/'/g,"\'")}',event)">✎</button>
+        <button class="view-item-del" title="Delete" onclick="deleteView('${v.name.replace(/'/g,"\'")}',event)">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderColManager() {
+  const el = document.getElementById('colManagerList');
+  if (!el) return;
+  el.innerHTML = acctColOrder.map(id => {
+    const col = ACCT_ALL_COLS.find(c => c.id === id);
+    if (!col) return '';
+    const locked = ACCT_LOCKED_COLS.includes(id);
+    return `<div class="col-manager-item${locked?' locked':''}" data-col="${id}" draggable="${!locked}"
+      ondragstart="acctColDragStart(event,'${id}')" ondragover="acctColDragOver(event,'${id}')" ondrop="acctColDrop(event,'${id}')" ondragleave="acctColDragLeave(event)">
+      <span class="col-drag-handle">${locked?'🔒':'⠿'}</span>
+      <input type="checkbox" ${acctColVisible[id]?'checked':''} ${locked?'disabled':''} onchange="toggleAcctColVisible('${id}',this.checked)">
+      <span style="font-size:12px">${col.label}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleAcctColVisible(id, visible) {
+  if (ACCT_LOCKED_COLS.includes(id)) return;
+  acctColVisible[id] = visible;
+  renderList();
+}
+
+let acctDragSrcId = null;
+function acctColDragStart(e, id) { acctDragSrcId = id; e.dataTransfer.effectAllowed = 'move'; }
+function acctColDragOver(e, id) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; document.querySelector(`[data-col="${id}"]`)?.classList.add('drag-over'); }
+function acctColDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function acctColDrop(e, targetId) {
+  e.preventDefault();
+  document.querySelectorAll('.col-manager-item').forEach(el => el.classList.remove('drag-over'));
+  if (!acctDragSrcId || acctDragSrcId === targetId) return;
+  if (ACCT_LOCKED_COLS.includes(acctDragSrcId) || ACCT_LOCKED_COLS.includes(targetId)) return;
+  const srcIdx = acctColOrder.indexOf(acctDragSrcId);
+  const tgtIdx = acctColOrder.indexOf(targetId);
+  acctColOrder.splice(srcIdx, 1);
+  acctColOrder.splice(tgtIdx, 0, acctDragSrcId);
+  renderColManager();
+  renderList();
+}
+
+function updateFilterPills() {
+  const bar = document.getElementById('filterPillsBar');
+  if (!bar) return;
+  const pills = [];
+  const search = document.getElementById('searchInput')?.value;
+  if (search) pills.push({ label: `Search: ${search}`, clear: () => { document.getElementById('searchInput').value=''; applyFilters(); updateFilterPills(); } });
+  Object.entries(checkFilters).forEach(([id, sel]) => {
+    if (!sel || sel.size === 0) return;
+    const col = ACCT_ALL_COLS.find(c => c.id === id);
+    if (!col) return;
+    [...sel].forEach(v => pills.push({ label: `${col.label}: ${v}`, clear: () => { sel.delete(v); applyFilters(); updateFilterPills(); } }));
+  });
+  Object.entries(numFilters).forEach(([id, f]) => {
+    if (!f) return;
+    const col = ACCT_ALL_COLS.find(c => c.id === id);
+    if (!col) return;
+    if (f.op) {
+      const opLabel = {gt:'>',gte:'≥',lt:'<',lte:'≤',eq:'='};
+      pills.push({ label: `${col.label} ${opLabel[f.op]} ${f.val}`, clear: () => { clearNumCF(id); } });
+    }
+  });
+  if (pills.length === 0) { bar.style.display = 'none'; document.getElementById('clearBtn').style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  document.getElementById('clearBtn').style.display = 'inline-block';
+  bar.innerHTML = '<span style="font-size:11px;color:var(--text3);margin-right:4px">Filters:</span>' +
+    pills.map((p,i) => `<span class="filter-pill">${p.label}<span class="filter-pill-x" onclick="clearPill(${i})">✕</span></span>`).join('');
+  window._pillClears = pills.map(p => p.clear);
+}
+function clearPill(i) { if(window._pillClears && window._pillClears[i]) window._pillClears[i](); }
 
 </script>
 

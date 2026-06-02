@@ -304,6 +304,37 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .tools-dropdown-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; font-size: 13px; color: var(--text2); cursor: pointer; transition: all 0.15s; text-decoration: none; width: 100%; }
 .tools-dropdown-item:hover { background: var(--surface3); color: var(--text); }
 
+
+/* ── VIEWS / COL MANAGER (tasks) ── */
+.ms-wrap { position: relative; }
+.ms-btn { display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--text2); transition: all 0.15s; user-select: none; }
+.ms-btn:hover { border-color: var(--accent); color: var(--text); }
+.ms-arrow { font-size: 10px; }
+.ms-dropdown { position: absolute; top: calc(100% + 6px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; z-index: 400; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.ms-wrap.open .ms-dropdown { display: block; }
+.ms-divider { border: none; border-top: 1px solid var(--border); margin: 6px 0; }
+.views-section-title { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 4px 6px; }
+.views-save-btn { width: 100%; padding: 7px 10px; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--text2); cursor: pointer; text-align: left; transition: all 0.15s; }
+.views-save-btn:hover { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); border-color: var(--accent); }
+.view-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; color: var(--text2); transition: all 0.15s; gap: 6px; }
+.view-item:hover { background: var(--surface3); color: var(--text); }
+.view-item.active-view { color: var(--accent); }
+.view-item-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.15s; }
+.view-item:hover .view-item-actions { opacity: 1; }
+.view-item-update, .view-item-rename, .view-item-del { background: none; border: none; cursor: pointer; font-size: 12px; padding: 2px 5px; border-radius: 4px; color: var(--text3); }
+.view-item-update:hover { color: var(--accent); background: var(--surface2); }
+.view-item-rename:hover { color: var(--text); background: var(--surface2); }
+.view-item-del:hover { color: var(--red); background: var(--surface2); }
+.col-manager-item { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 4px; font-size: 12px; color: var(--text2); cursor: grab; user-select: none; }
+.col-manager-item:hover { background: var(--surface3); }
+.col-manager-item.locked { opacity: 0.5; cursor: not-allowed; }
+.col-manager-item input[type=checkbox] { accent-color: var(--accent); cursor: pointer; }
+.col-manager-item.dragging { opacity: 0.4; }
+.col-manager-item.drag-over { border-top: 2px solid var(--accent); }
+.filter-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: color-mix(in srgb, var(--accent) 15%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); border-radius: 20px; font-size: 11px; color: var(--accent); }
+.filter-pill-x { cursor: pointer; opacity: 0.6; font-size: 10px; }
+.filter-pill-x:hover { opacity: 1; }
+
 </style>
 </head>
 <body>
@@ -352,32 +383,36 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
   </div>
 </div>
 
-<div class="toolbar">
+<div class="toolbar" id="tasksToolbar">
   <div class="toolbar-left">
     <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" id="taskSearch" placeholder="Search tasks, accounts..." oninput="applyFilters()"></div>
-    <div class="tab-group">
-      <button class="tab-btn active" id="tabList" onclick="switchView('list')">≡ List</button>
-      <button class="tab-btn" id="tabCal" onclick="switchView('calendar')">📅 Month</button>
-      <button class="tab-btn" id="tabWeek" onclick="switchView('week')">📋 Work Week</button>
+    <!-- Views dropdown -->
+    <div class="ms-wrap" id="viewsWrap">
+      <div class="ms-btn" id="viewsBtn" onclick="toggleViewsDropdown()" style="min-width:90px">
+        <span id="viewsBtnLabel">⊞ Views</span><span class="ms-arrow">▾</span>
+      </div>
+      <div class="ms-dropdown" id="viewsDropdown" style="min-width:260px;padding:10px">
+        <div class="views-section-title">Saved views</div>
+        <div id="savedViewsList" style="margin-bottom:8px"></div>
+        <button class="views-save-btn" onclick="saveCurrentView()">+ Save current view</button>
+        <hr class="ms-divider" style="margin:10px 0">
+        <div class="views-section-title">Manage columns</div>
+        <div id="colManagerList" style="margin-bottom:8px"></div>
+      </div>
     </div>
     <button class="clear-btn" id="clearBtn" onclick="clearFilters()" style="display:none">✕ Clear filters</button>
   </div>
   <div class="stats-bar" id="statsBar"></div>
 </div>
+<!-- Active filter pills -->
+<div id="filterPillsBar" style="display:none;padding:8px 28px;border-bottom:1px solid var(--border);background:var(--surface);align-items:center;gap:6px;flex-wrap:wrap"></div>
 
 <div class="list-wrap" id="listView">
   <div class="loading" id="loadingMsg"><div class="spinner"></div>Loading tasks...</div>
   <table class="list-table" id="taskTable" style="display:none">
-    <thead><tr>
-      <th onclick="sortBy('assigned_to')">Assigned To <span class="sort-arrow" id="s-assigned_to"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('assigned_to','check')">▾</span><div class="cf-dd" id="cf-assigned_to"><div class="cf-title">Assigned To</div><input class="cf-search" id="cfs-assigned_to" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('assigned_to')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('assigned_to')">Select / Deselect all</span><div class="cf-list" id="cfl-assigned_to"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('assigned_to')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('assigned_to')">Clear</button></div></div></th>
-      <th onclick="sortBy('due_date')">Due Date <span class="sort-arrow" id="s-due_date"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('due_date','date')">▾</span><div class="cf-dd" id="cf-due_date"><div class="cf-title">Due Date</div><select class="cf-num-op" id="cfpreset-due_date" onclick="event.stopPropagation()" onchange="handleDatePreset('due_date')"><option value="">All dates</option><optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option></optgroup><optgroup label="Future"><option value="next_month">Next Month</option><option value="next_30">Next 30 Days</option><option value="next_60">Next 60 Days</option><option value="next_90">Next 90 Days</option><option value="future_all">All Future</option></optgroup><option value="custom">Custom range...</option></select><div id="cfcustom-due_date" style="display:none"><input class="cf-date-input" id="cffrom-due_date" type="date" onclick="event.stopPropagation()"><input class="cf-date-input" id="cfto-due_date" type="date" onclick="event.stopPropagation()"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('due_date')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('due_date')">Clear</button></div></div></th>
-      <th onclick="sortBy('type')">Type <span class="sort-arrow" id="s-type"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('type','check')">▾</span><div class="cf-dd" id="cf-type"><div class="cf-title">Type</div><input class="cf-search" id="cfs-type" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('type')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('type')">Select / Deselect all</span><div class="cf-list" id="cfl-type"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('type')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('type')">Clear</button></div></div></th>
-      <th onclick="sortBy('subject')">Subject <span class="sort-arrow" id="s-subject"></span></th>
-      <th onclick="sortBy('account_name')">Account <span class="sort-arrow" id="s-account_name"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('account_name','check')">▾</span><div class="cf-dd" id="cf-account_name"><div class="cf-title">Account</div><input class="cf-search" id="cfs-account_name" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('account_name')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('account_name')">Select / Deselect all</span><div class="cf-list" id="cfl-account_name"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('account_name')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('account_name')">Clear</button></div></div></th>
-      <th onclick="sortBy('contact_name')">Primary Contact <span class="sort-arrow" id="s-contact_name"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('contact_name','check')">▾</span><div class="cf-dd" id="cf-contact_name"><div class="cf-title">Primary Contact</div><input class="cf-search" id="cfs-contact_name" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('contact_name')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('contact_name')">Select / Deselect all</span><div class="cf-list" id="cfl-contact_name"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('contact_name')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('contact_name')">Clear</button></div></div></th>
-      <th onclick="sortBy('days_since_activity')">Days Since Act. <span class="sort-arrow" id="s-days_since_activity"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('days_since_activity','num')">▾</span><div class="cf-dd" id="cf-days_since_activity"><div class="cf-title">Days Since Act.</div><select class="cf-num-op" id="cfop-days_since_activity" onclick="event.stopPropagation()"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select><input class="cf-num-val" id="cfval-days_since_activity" type="number" min="0" onclick="event.stopPropagation()"><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('days_since_activity')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('days_since_activity')">Clear</button></div></div></th>
-      <th onclick="sortBy('priority')">Priority <span class="sort-arrow" id="s-priority"></span> <span class="cf-btn" onclick="event.stopPropagation();openCF('priority','check')">▾</span><div class="cf-dd" id="cf-priority"><div class="cf-title">Priority</div><input class="cf-search" id="cfs-priority" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('priority')"><span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('priority')">Select / Deselect all</span><div class="cf-list" id="cfl-priority"></div><div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('priority')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('priority')">Clear</button></div></div></th>
-    </tr></thead>
+    <thead>
+      <tr id="taskHeaderRow"></tr>
+    </thead>
     <tbody id="taskBody"></tbody>
   </table>
 </div>
@@ -428,6 +463,22 @@ const checkFilters = {};
 const numFilters   = {};
 const cfValues     = {};
 let sortCol = 'due_date', sortDir = 1;
+
+const TASK_ALL_COLS = [
+  { id: 'assigned_to',       label: 'Assigned To',     type: 'check' },
+  { id: 'due_date',          label: 'Due Date',         type: 'date'  },
+  { id: 'type',              label: 'Type',             type: 'check' },
+  { id: 'subject',           label: 'Subject',          type: 'none'  },
+  { id: 'account_name',      label: 'Account',          type: 'check' },
+  { id: 'contact_name',      label: 'Primary Contact',  type: 'check' },
+  { id: 'days_since_activity', label: 'Days Since Act.', type: 'num'  },
+  { id: 'priority',          label: 'Priority',         type: 'check' },
+];
+const TASK_LOCKED_COLS = [];
+let taskColOrder   = TASK_ALL_COLS.map(c => c.id);
+let taskColVisible = Object.fromEntries(TASK_ALL_COLS.map(c => [c.id, true]));
+let taskSavedViews = [];
+let taskActiveView = null;
 let currentView = 'list';
 let calViewMode = 'month';
 let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
@@ -534,6 +585,7 @@ async function loadTasks() {
     allTasks = all;
     document.getElementById('loadingMsg').style.display = 'none';
     document.getElementById('taskTable').style.display = 'table';
+    await loadViews();
     applyFilters();
   } catch(e) { console.error('Tasks load error:', e); }
 }
@@ -548,11 +600,13 @@ function applyFilters() {
   const today  = new Date().toISOString().slice(0,10);
 
   filteredTasks = allTasks.filter(t => {
-    // Checkbox filters
+    // Checkbox filters (supports '(Blank)' sentinel)
     for (const col of Object.keys(checkFilters)) {
       const sel = checkFilters[col];
       if (!sel || sel.size === 0) continue;
-      const val = t[col];
+      const val = t[col] || null;
+      const isBlank = !val;
+      if (sel.has('(Blank)') && isBlank) continue;
       if (!sel.has(val)) return false;
     }
     // Numeric / date filters
@@ -560,6 +614,13 @@ function applyFilters() {
       const f = numFilters[col];
       if (!f) continue;
       if (f.preset !== undefined) {
+        if (f.preset === 'blank_date') { if (t.due_date) return false; continue; }
+        if (f.preset === 'past_due') {
+          if (!t.due_date) return false;
+          const dd = t.due_date.slice(0,10);
+          if (dd >= today) return false;
+          continue;
+        }
         if (!t.due_date) return false;
         if (!passesDateCF(t.due_date, f)) return false;
       } else if (f.op) {
@@ -604,20 +665,80 @@ function updateStats() {
 function fmtDate(val) { if(!val) return '—'; const d=new Date(val); return `${String(d.getUTCMonth()+1).padStart(2,'0')}/${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCFullYear()).slice(-2)}`; }
 function dateStyle(t) { if(!t.due_date||t.status==='Completed') return ''; const dd=t.due_date.slice(0,10),td=new Date().toISOString().slice(0,10); if(dd<td) return 'color:var(--red);font-weight:500'; if(dd===td) return 'color:var(--gold);font-weight:500'; return ''; }
 
+function renderTaskHeaders() {
+  const row = document.getElementById('taskHeaderRow');
+  if (!row) return;
+  const visibleCols = taskColOrder.filter(id => taskColVisible[id]);
+  row.innerHTML = visibleCols.map(id => {
+    const col = TASK_ALL_COLS.find(c => c.id === id);
+    if (!col) return '';
+    const arrow = `<span class="sort-arrow" id="s-${id}"></span>`;
+    if (col.type === 'check') {
+      return `<th id="cfth-${id}" onclick="sortBy('${id}')">${col.label} ${arrow}
+        <span class="cf-btn" onclick="event.stopPropagation();openCF('${id}','check')">▾</span>
+        <div class="cf-dd" id="cf-${id}">
+          <div class="cf-title">${col.label}</div>
+          <input class="cf-search" id="cfs-${id}" placeholder="Search..." onclick="event.stopPropagation()" oninput="renderCFList('${id}')">
+          <span class="cf-sel-all" onclick="event.stopPropagation();toggleAllCF('${id}')">Select / Deselect all</span>
+          <div class="cf-list" id="cfl-${id}"></div>
+          <div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyCF('${id}')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearCF('${id}')">Clear</button></div>
+        </div></th>`;
+    } else if (col.type === 'date') {
+      return `<th id="cfth-${id}" onclick="sortBy('${id}')">${col.label} ${arrow}
+        <span class="cf-btn" onclick="event.stopPropagation();openCF('${id}','date')">▾</span>
+        <div class="cf-dd" id="cf-${id}">
+          <div class="cf-title">${col.label}</div>
+          <select class="cf-num-op" id="cfpreset-${id}" onclick="event.stopPropagation()" onchange="handleDatePreset('${id}')">
+            <option value="">All dates</option>
+            <option value="past_due">Past Due</option>
+            <option value="blank_date">Blank</option>
+            <optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option></optgroup>
+            <optgroup label="Future"><option value="next_month">Next Month</option><option value="next_30">Next 30 Days</option><option value="next_60">Next 60 Days</option><option value="next_90">Next 90 Days</option><option value="future_all">All Future</option></optgroup>
+            <option value="custom">Custom range...</option>
+          </select>
+          <div id="cfcustom-${id}" style="display:none">
+            <input class="cf-date-input" id="cffrom-${id}" type="date" onclick="event.stopPropagation()">
+            <input class="cf-date-input" id="cfto-${id}" type="date" onclick="event.stopPropagation()">
+          </div>
+          <div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyDateCF('${id}')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('${id}')">Clear</button></div>
+        </div></th>`;
+    } else if (col.type === 'num') {
+      return `<th id="cfth-${id}" onclick="sortBy('${id}')">${col.label} ${arrow}
+        <span class="cf-btn" onclick="event.stopPropagation();openCF('${id}','num')">▾</span>
+        <div class="cf-dd" id="cf-${id}">
+          <div class="cf-title">${col.label}</div>
+          <select class="cf-num-op" id="cfop-${id}" onclick="event.stopPropagation()"><option value="">Any</option><option value="gt">Greater than</option><option value="gte">≥</option><option value="lt">Less than</option><option value="lte">≤</option><option value="eq">Equal to</option></select>
+          <input class="cf-num-val" id="cfval-${id}" type="number" min="0" onclick="event.stopPropagation()">
+          <div class="cf-btns"><button class="cf-apply" onclick="event.stopPropagation();applyNumCF('${id}')">Apply</button><button class="cf-clear-btn" onclick="event.stopPropagation();clearNumCF('${id}')">Clear</button></div>
+        </div></th>`;
+    } else {
+      return `<th onclick="sortBy('${id}')">${col.label} ${arrow}</th>`;
+    }
+  }).join('');
+}
+
 function renderList() {
+  renderTaskHeaders();
+  const visibleCols = taskColOrder.filter(id => taskColVisible[id]);
   const sorted=[...filteredTasks].sort((a,b)=>{ let av=a[sortCol]??'',bv=b[sortCol]??''; if(typeof av==='string') av=av.toLowerCase(); if(typeof bv==='string') bv=bv.toLowerCase(); return av<bv?-sortDir:av>bv?sortDir:0; });
+  const dv_fn = t => parseFloat(t.days_since_activity);
   document.getElementById('taskBody').innerHTML=sorted.map(t=>{
-    const dv=parseFloat(t.days_since_activity);
+    const dv=dv_fn(t);
     const ds=isNaN(dv)?'':dv>30?'color:var(--red)':dv>14?'color:var(--orange)':'color:var(--green)';
-    return `<tr onclick="openPanel('${t.activity_id}')" title="${(t.comments||'').replace(/"/g,'&quot;')}">
-      <td>${t.assigned_to||'—'}</td>
-      <td class="mono" style="${dateStyle(t)}">${fmtDate(t.due_date)}</td>
-      <td>${t.type||'—'}</td><td class="primary">${t.subject||'—'}</td>
-      <td>${t.account_name||'—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px">${t.fts_id||''}</span></td>
-      <td>${t.contact_name||'—'}</td>
-      <td class="mono" style="${ds}">${!isNaN(dv)?dv+'d':'—'}</td>
-      <td class="${t.priority==='High'?'priority-high':t.priority==='Low'?'priority-low':''}">${t.priority||'—'}</td>
-    </tr>`;
+    const cells = visibleCols.map(id => {
+      switch(id) {
+        case 'assigned_to':        return `<td>${t.assigned_to||'—'}</td>`;
+        case 'due_date':           return `<td class="mono" style="${dateStyle(t)}">${fmtDate(t.due_date)}</td>`;
+        case 'type':               return `<td>${t.type||'—'}</td>`;
+        case 'subject':            return `<td class="primary">${t.subject||'—'}</td>`;
+        case 'account_name':       return `<td>${t.account_name||'—'}<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:6px">${t.fts_id||''}</span></td>`;
+        case 'contact_name':       return `<td>${t.contact_name||'—'}</td>`;
+        case 'days_since_activity':return `<td class="mono" style="${ds}">${!isNaN(dv)?dv+'d':'—'}</td>`;
+        case 'priority':           return `<td class="${t.priority==='High'?'priority-high':t.priority==='Low'?'priority-low':''}">${t.priority||'—'}</td>`;
+        default: return '<td>—</td>';
+      }
+    }).join('');
+    return `<tr onclick="openPanel('${t.activity_id}')" title="${(t.comments||'').replace(/"/g,'&quot;')}">${cells}</tr>`;
   }).join('');
   document.querySelectorAll('[id^="s-"]').forEach(el=>el.textContent='');
   const arrow=document.getElementById(`s-${sortCol}`); if(arrow) arrow.textContent=sortDir===1?'↑':'↓';
@@ -812,9 +933,12 @@ function applyDateCF(col) {
 }
 
 function passesDateCF(dateStr, f) {
+  if (!dateStr) return false;
   const [_dy,_dm,_dd] = dateStr.slice(0,10).split('-').map(Number); const d = new Date(_dy,_dm-1,_dd);
   const now = new Date(); now.setHours(0,0,0,0);
   const p = f.preset;
+  if (p === 'blank_date') return false; // handled upstream
+  if (p === 'past_due') { return d < now; }
   if (p === 'custom') {
     if (f.from && dateStr < f.from) return false;
     if (f.to   && dateStr > f.to)   return false;
@@ -1301,6 +1425,229 @@ document.addEventListener('click', function(e) {
     document.getElementById('toolsNavBtn').classList.remove('open');
   }
 });
+
+
+// ── TASKS VIEWS / COL MANAGER ────────────────────────────────────────────
+
+function toggleViewsDropdown() {
+  const wrap = document.getElementById('viewsWrap');
+  if (wrap) wrap.classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('viewsWrap');
+  const btn  = document.getElementById('viewsBtn');
+  if (wrap && btn && !wrap.contains(e.target)) wrap.classList.remove('open');
+});
+
+async function loadViews() {
+  if (!currentUser?.email) { taskSavedViews = []; renderViewsList(); renderColManager(); return; }
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/tbl_views?user_email=eq.${encodeURIComponent(currentUser.email)}&page=eq.tasks&select=name,view_data&order=updated_at.asc`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}` }
+    });
+    const rows = await res.json();
+    taskSavedViews = Array.isArray(rows) ? rows.map(r => ({ name: r.name, ...r.view_data })) : [];
+  } catch(e) { taskSavedViews = []; }
+  renderViewsList();
+  renderColManager();
+}
+
+async function saveViewsToDB(view) {
+  if (!currentUser?.email) return;
+  const { name, ...view_data } = view;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/tbl_views`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ user_email: currentUser.email, page: 'tasks', name, view_data, updated_at: new Date().toISOString() })
+    });
+  } catch(e) { console.error('Failed to save view:', e); }
+}
+
+async function saveCurrentView() {
+  const name = prompt('Name this view:');
+  if (!name) return;
+  const view = {
+    name,
+    checkFilters: JSON.parse(JSON.stringify(checkFilters, (k,v) => v instanceof Set ? [...v] : v)),
+    numFilters: JSON.parse(JSON.stringify(numFilters)),
+    sortCol, sortDir, colOrder: [...taskColOrder], colVisible: {...taskColVisible}
+  };
+  const existing = taskSavedViews.findIndex(v => v.name === name);
+  if (existing >= 0) taskSavedViews[existing] = view; else taskSavedViews.push(view);
+  taskActiveView = name;
+  await saveViewsToDB(view);
+  renderViewsList();
+  document.getElementById('viewsBtnLabel').textContent = `⊞ ${name}`;
+}
+
+function applyView(name) {
+  const view = taskSavedViews.find(v => v.name === name);
+  if (!view) return;
+  taskActiveView = name;
+  Object.keys(checkFilters).forEach(k => delete checkFilters[k]);
+  Object.keys(numFilters).forEach(k => delete numFilters[k]);
+  Object.entries(view.checkFilters || {}).forEach(([id, vals]) => { checkFilters[id] = new Set(vals); });
+  Object.assign(numFilters, view.numFilters || {});
+  sortCol = view.sortCol || 'due_date';
+  sortDir = view.sortDir || 1;
+  taskColOrder   = [...(view.colOrder   || TASK_ALL_COLS.map(c=>c.id))];
+  taskColVisible = {...(view.colVisible || Object.fromEntries(TASK_ALL_COLS.map(c=>[c.id,true])))};
+  document.getElementById('viewsWrap').classList.remove('open');
+  document.getElementById('viewsBtnLabel').textContent = `⊞ ${name}`;
+  renderColManager();
+  applyFilters();
+  updateFilterPills();
+}
+
+async function deleteView(name, e) {
+  e.stopPropagation();
+  taskSavedViews = taskSavedViews.filter(v => v.name !== name);
+  if (taskActiveView === name) { taskActiveView = null; document.getElementById('viewsBtnLabel').textContent = '⊞ Views'; }
+  renderViewsList();
+  if (!currentUser?.email) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/tbl_views?user_email=eq.${encodeURIComponent(currentUser.email)}&page=eq.tasks&name=eq.${encodeURIComponent(name)}`, {
+      method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}` }
+    });
+  } catch(e) { console.error(e); }
+}
+
+async function renameView(oldName, e) {
+  e.stopPropagation();
+  const newName = prompt('Rename view:', oldName);
+  if (!newName || newName === oldName) return;
+  const view = taskSavedViews.find(v => v.name === oldName);
+  if (!view) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/tbl_views?user_email=eq.${encodeURIComponent(currentUser.email)}&page=eq.tasks&name=eq.${encodeURIComponent(oldName)}`, {
+      method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentUser.token}` }
+    });
+  } catch(e) {}
+  view.name = newName;
+  if (taskActiveView === oldName) { taskActiveView = newName; document.getElementById('viewsBtnLabel').textContent = `⊞ ${newName}`; }
+  await saveViewsToDB(view);
+  renderViewsList();
+}
+
+async function updateView(name, e) {
+  e.stopPropagation();
+  const view = {
+    name,
+    checkFilters: JSON.parse(JSON.stringify(checkFilters, (k,v) => v instanceof Set ? [...v] : v)),
+    numFilters: JSON.parse(JSON.stringify(numFilters)),
+    sortCol, sortDir, colOrder: [...taskColOrder], colVisible: {...taskColVisible}
+  };
+  const existing = taskSavedViews.findIndex(v => v.name === name);
+  if (existing >= 0) taskSavedViews[existing] = view;
+  taskActiveView = name;
+  document.getElementById('viewsBtnLabel').textContent = `⊞ ${name}`;
+  await saveViewsToDB(view);
+  renderViewsList();
+}
+
+function renderViewsList() {
+  const el = document.getElementById('savedViewsList');
+  if (!el) return;
+  if (taskSavedViews.length === 0) { el.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 6px">No saved views yet</div>'; return; }
+  el.innerHTML = taskSavedViews.map(v => `
+    <div class="view-item ${taskActiveView===v.name?'active-view':''}" onclick="applyView('${v.name.replace(/'/g,"\'")}')">
+      <span>${v.name}</span>
+      <div class="view-item-actions">
+        <button class="view-item-update" title="Update with current filters" onclick="updateView('${v.name.replace(/'/g,"\'")}',event)">↺</button>
+        <button class="view-item-rename" title="Rename" onclick="renameView('${v.name.replace(/'/g,"\'")}',event)">✎</button>
+        <button class="view-item-del" title="Delete" onclick="deleteView('${v.name.replace(/'/g,"\'")}',event)">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── COLUMN MANAGER ────────────────────────────────
+let taskDragSrcId = null;
+function renderColManager() {
+  const el = document.getElementById('colManagerList');
+  if (!el) return;
+  el.innerHTML = taskColOrder.map(id => {
+    const col = TASK_ALL_COLS.find(c => c.id === id);
+    if (!col) return '';
+    const locked = TASK_LOCKED_COLS.includes(id);
+    return `<div class="col-manager-item${locked?' locked':''}" data-col="${id}" draggable="${!locked}"
+      ondragstart="taskColDragStart(event,'${id}')" ondragover="taskColDragOver(event,'${id}')" ondrop="taskColDrop(event,'${id}')" ondragleave="taskColDragLeave(event)">
+      <span class="col-drag-handle">${locked?'🔒':'⠿'}</span>
+      <input type="checkbox" ${taskColVisible[id]?'checked':''} ${locked?'disabled':''} onchange="toggleTaskColVisible('${id}',this.checked)">
+      <span style="font-size:12px">${col.label}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleTaskColVisible(id, visible) {
+  if (TASK_LOCKED_COLS.includes(id)) return;
+  taskColVisible[id] = visible;
+  renderList();
+}
+
+function taskColDragStart(e, id) { taskDragSrcId = id; e.dataTransfer.effectAllowed = 'move'; }
+function taskColDragOver(e, id) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; document.querySelector(`[data-col="${id}"]`)?.classList.add('drag-over'); }
+function taskColDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function taskColDrop(e, targetId) {
+  e.preventDefault();
+  document.querySelectorAll('.col-manager-item').forEach(el => el.classList.remove('drag-over'));
+  if (!taskDragSrcId || taskDragSrcId === targetId) return;
+  if (TASK_LOCKED_COLS.includes(taskDragSrcId) || TASK_LOCKED_COLS.includes(targetId)) return;
+  const srcIdx = taskColOrder.indexOf(taskDragSrcId);
+  const tgtIdx = taskColOrder.indexOf(targetId);
+  taskColOrder.splice(srcIdx, 1);
+  taskColOrder.splice(tgtIdx, 0, taskDragSrcId);
+  renderColManager();
+  renderList();
+}
+
+// ── FILTER PILLS (tasks) ─────────────────────────
+function updateFilterPills() {
+  const bar = document.getElementById('filterPillsBar');
+  if (!bar) return;
+  const pills = [];
+  const search = document.getElementById('taskSearch')?.value;
+  if (search) pills.push({ label: `Search: ${search}`, clear: () => { document.getElementById('taskSearch').value=''; applyFilters(); updateFilterPills(); } });
+  Object.entries(checkFilters).forEach(([id, sel]) => {
+    if (!sel || sel.size === 0) return;
+    const col = TASK_ALL_COLS.find(c => c.id === id);
+    if (!col) return;
+    [...sel].forEach(v => pills.push({ label: `${col.label}: ${v}`, clear: () => { sel.delete(v); applyFilters(); updateFilterPills(); } }));
+  });
+  Object.entries(numFilters).forEach(([id, f]) => {
+    if (!f) return;
+    const col = TASK_ALL_COLS.find(c => c.id === id);
+    if (!col) return;
+    if (f.preset) {
+      const lbl = f.preset === 'custom' ? `${col.label}: ${f.from||''}–${f.to||''}` : f.preset === 'past_due' ? `${col.label}: Past Due` : f.preset === 'blank_date' ? `${col.label}: Blank` : `${col.label}: ${f.preset.replace(/_/g,' ')}`;
+      pills.push({ label: lbl, clear: () => { clearNumCF(id); } });
+    } else if (f.op) {
+      const opLabel = {gt:'>',gte:'≥',lt:'<',lte:'≤',eq:'='};
+      pills.push({ label: `${col.label} ${opLabel[f.op]} ${f.val}`, clear: () => { clearNumCF(id); } });
+    }
+  });
+  if (pills.length === 0) { bar.style.display = 'none'; document.getElementById('clearBtn').style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  document.getElementById('clearBtn').style.display = 'inline-block';
+  bar.innerHTML = '<span style="font-size:11px;color:var(--text3);margin-right:4px">Filters:</span>' +
+    pills.map((p,i) => `<span class="filter-pill">${p.label}<span class="filter-pill-x" onclick="clearPill(${i})">✕</span></span>`).join('');
+  window._pillClears = pills.map(p => p.clear);
+}
+function clearPill(i) { if(window._pillClears && window._pillClears[i]) window._pillClears[i](); }
+
+
+function clearFilters() {
+  Object.keys(checkFilters).forEach(k => { if(checkFilters[k]) checkFilters[k].clear(); });
+  Object.keys(numFilters).forEach(k => delete numFilters[k]);
+  const si = document.getElementById('taskSearch'); if(si) si.value='';
+  // Reset date presets
+  document.querySelectorAll('[id^="cfpreset-"]').forEach(el => { el.value=''; });
+  document.querySelectorAll('[id^="cfcustom-"]').forEach(el => { el.style.display='none'; });
+  document.querySelectorAll('th.th-filtered').forEach(th => th.classList.remove('th-filtered'));
+  document.getElementById('clearBtn').style.display='none';
+  applyFilters();
+  updateFilterPills();
+}
 
 </script>
 </body>

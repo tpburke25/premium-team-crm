@@ -1218,6 +1218,7 @@ function renderListHeaders() {
           <div class="cf-title">${col.label}</div>
           <select class="cf-num-op" id="cfpreset-${id}" onclick="event.stopPropagation()" onchange="handleDatePreset('${id}')">
             <option value="">All dates</option>
+            <option value="past_due">Past Due</option>
             <optgroup label="Past"><option value="this_month">This Month</option><option value="last_30">Last 30 Days</option><option value="last_60">Last 60 Days</option><option value="last_90">Last 90 Days</option><option value="this_quarter">This Quarter</option><option value="this_year">This Year</option></optgroup>
             <optgroup label="Future"><option value="next_month">Next Month</option><option value="next_30">Next 30 Days</option><option value="next_60">Next 60 Days</option><option value="next_90">Next 90 Days</option><option value="future_all">All Future</option></optgroup>
             <option value="custom">Custom range...</option>
@@ -1290,6 +1291,7 @@ function passesDateFilter(dateStr, f) {
   else if (p === 'next_30')  { start.setDate(start.getDate()+1); end.setDate(end.getDate()+30); }
   else if (p === 'next_60')  { start.setDate(start.getDate()+1); end.setDate(end.getDate()+60); }
   else if (p === 'next_90')  { start.setDate(start.getDate()+1); end.setDate(end.getDate()+90); }
+  else if (p === 'past_due') { return d < now; }
   else if (p === 'future_all') { start.setDate(start.getDate()+1); end.setFullYear(end.getFullYear()+10); }
   return d >= start && d <= end;
 }
@@ -1315,7 +1317,7 @@ function updateFilterPills() {
     const col = ALL_COLS.find(c => c.id === id);
     if (!col) return;
     if (f.preset) {
-      const lbl = f.preset === 'custom' ? `${col.label}: ${f.from||''}–${f.to||''}` : `${col.label}: ${f.preset.replace(/_/g,' ')}`;
+      const lbl = f.preset === 'custom' ? `${col.label}: ${f.from||''}–${f.to||''}` : f.preset === 'past_due' ? `${col.label}: Past Due` : `${col.label}: ${f.preset.replace(/_/g,' ')}`;
       pills.push({ label: lbl, clear: () => { clearNumCF(id); } });
     } else if (f.op) {
       const opLabel = {gt:'>',gte:'≥',lt:'<',lte:'≤',eq:'='};
@@ -2068,6 +2070,7 @@ function passesDateCF(dateStr, f) {
   else if (p === 'next_30') { start.setDate(start.getDate()+1); end.setDate(end.getDate()+30); }
   else if (p === 'next_60') { start.setDate(start.getDate()+1); end.setDate(end.getDate()+60); }
   else if (p === 'next_90') { start.setDate(start.getDate()+1); end.setDate(end.getDate()+90); }
+  else if (p === 'past_due') { return d < now; }
   else if (p === 'future_all') { start.setDate(start.getDate()+1); end.setFullYear(end.getFullYear()+10); }
   return d >= start && d <= end;
 }
