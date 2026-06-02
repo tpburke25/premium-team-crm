@@ -1645,6 +1645,9 @@ function clearFilters() {
   document.querySelectorAll('[id^="cfcustom-"]').forEach(el => { el.style.display='none'; });
   document.querySelectorAll('th.th-filtered').forEach(th => th.classList.remove('th-filtered'));
   document.getElementById('clearBtn').style.display='none';
+  taskActiveView = null;
+  const vbl = document.getElementById('viewsBtnLabel'); if (vbl) vbl.textContent = '⊞ Views';
+  renderViewsList();
   applyFilters();
   updateFilterPills();
 }

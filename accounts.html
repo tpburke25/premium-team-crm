@@ -613,7 +613,11 @@ function clearAllFilters(){
     if(op) op.value=''; if(vl) vl.value='';
     const th=document.getElementById('cf-'+col)?.closest('th'); if(th) th.classList.remove('th-filtered');
   });
+  acctActiveView = null;
+  const vbl = document.getElementById('viewsBtnLabel'); if (vbl) vbl.textContent = '⊞ Views';
+  renderViewsList();
   applyFilters();
+  updateFilterPills();
 }
 
 function applyFilters(){
