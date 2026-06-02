@@ -335,6 +335,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .filter-pill-x { cursor: pointer; opacity: 0.6; font-size: 10px; }
 .filter-pill-x:hover { opacity: 1; }
 
+
+.export-chip { position: relative; }
+.export-chip-btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; background: #2a2a2e; border-radius: 20px; border: 1px solid var(--border2); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: #fff; transition: all 0.15s; }
+.export-chip-btn:hover { background: #333338; border-color: var(--accent); }
+
 </style>
 </head>
 <body>
@@ -363,6 +368,9 @@ if (localStorage.getItem('crm_theme') === 'light') document.documentElement.styl
     <a href="accounts.html" class="main-nav-btn">Accounts</a>
   </nav>
   <div class="header-right">
+    <div class="export-chip">
+      <button class="export-chip-btn" onclick="exportXLSX()">⬇ Export</button>
+    </div>
     <div class="tools-chip" id="toolsNav">
       <button class="tools-chip-btn" id="toolsNavBtn" onclick="toggleToolsNav(event)">Tools <span class="tools-caret">▾</span></button>
       <div class="tools-dropdown" id="toolsDropdown">
@@ -1650,6 +1658,36 @@ function clearFilters() {
   renderViewsList();
   applyFilters();
   updateFilterPills();
+}
+
+
+// ── EXPORT ───────────────────────────────────────────────────────────────────
+function exportXLSX() {
+  if (typeof XLSX === 'undefined') {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = () => doExport();
+    document.head.appendChild(s);
+  } else {
+    doExport();
+  }
+}
+
+function doExport() {
+  const cols = taskColOrder.filter(id => taskColVisible[id]);
+  const headers = cols.map(id => {
+    const col = TASK_ALL_COLS.find(c => c.id === id);
+    return col ? col.label : id;
+  });
+  const rows = filteredTasks.map(row => cols.map(id => {
+    const val = row[id];
+    if (val === null || val === undefined) return '';
+    return val;
+  }));
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Tasks');
+  XLSX.writeFile(wb, 'tasks.xlsx');
 }
 
 </script>
