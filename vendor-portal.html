@@ -126,7 +126,7 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
 .cf-wrap { position: relative; display: inline; }
 .cf-btn { margin-left: 3px; opacity: 0.4; cursor: pointer; font-size: 10px; }
 .cf-btn:hover { opacity: 1; color: var(--gold); }
-.cf-dd { position: absolute; top: calc(100% + 4px); left: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 8px; min-width: 200px; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+.cf-dd { position: fixed; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 8px; min-width: 200px; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
 .cf-dd.open { display: block; }
 .cf-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); margin-bottom: 6px; font-weight: 500; }
 .cf-search { width: 100%; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 6px 8px; font-size: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 5px; }
@@ -394,7 +394,6 @@ function clearDateCF(col) {
   if (custom) custom.style.display = 'none';
   const th = document.getElementById('cf-' + col)?.closest('th');
   if (th) th.classList.remove('th-filtered');
-  document.querySelectorAll('.cf-dd.open').forEach(d => d.classList.remove('open'));
   applyFilters();
 }
 
@@ -410,7 +409,8 @@ function passesDate(col, rawVal) {
     return true;
   }
   const now = new Date(); now.setHours(0,0,0,0);
-  const d = new Date(dateStr);
+  const [_dy,_dm,_dd] = dateStr.slice(0,10).split('-').map(Number);
+  const d = new Date(_dy, _dm-1, _dd);
   const start = new Date(now), end = new Date(now);
   const p = f.preset;
   if (p === 'this_month')    { start.setDate(1); end.setMonth(end.getMonth()+1,0); }
@@ -522,8 +522,8 @@ async function loadData() {
       const key = String(parseInt(o.fts_id.trim(), 10));
       if (isNaN(parseInt(key, 10))) return;
       const existing = oppMap[key];
-      const oDate = o.close_date ? new Date(o.close_date).getTime() : 0;
-      const eDate = existing?.close_date ? new Date(existing.close_date).getTime() : 0;
+      const oDate = o.close_date ? parseLocalDate(o.close_date).getTime() : 0;
+      const eDate = existing?.close_date ? parseLocalDate(existing.close_date).getTime() : 0;
       if (!existing || oDate > eDate) {
         oppMap[key] = { account_name: o.account_name, parent_account: o.parent_account, num_locations: o.num_locations, opportunity_owner: o.opportunity_owner, close_date: o.close_date || null };
       }
@@ -626,7 +626,19 @@ async function loadData() {
 function openCF(col, type) {
   document.querySelectorAll('.cf-dd.open').forEach(d => d.classList.remove('open'));
   const dd = document.getElementById('cf-' + col);
+  const btn = document.getElementById('cfbtn-' + col) || document.querySelector(`[onclick*="openCF('${col}'"]`);
+  const th = dd.closest('th');
+  const anchor = th ? th.getBoundingClientRect() : { left: 0, bottom: 0, top: 0 };
   dd.classList.add('open');
+  // Position below the header by default
+  const ddHeight = 300;
+  const spaceBelow = window.innerHeight - anchor.bottom;
+  if (spaceBelow < ddHeight) {
+    dd.style.top = (anchor.top - ddHeight) + 'px';
+  } else {
+    dd.style.top = (anchor.bottom + 4) + 'px';
+  }
+  dd.style.left = anchor.left + 'px';
   if (type === 'check') renderCFList(col);
 }
 document.addEventListener('click', e => {
@@ -667,10 +679,9 @@ function applyCF(col) {
 
 function clearCF(col) {
   if (checkFilters[col]) checkFilters[col].clear();
-  const th = document.getElementById('cf-' + col).closest('th');
+  const th = document.getElementById('cf-' + col)?.closest('th');
   if (th) th.classList.remove('th-filtered');
   renderCFList(col);
-  document.querySelectorAll('.cf-dd.open').forEach(d => d.classList.remove('open'));
   applyFilters();
 }
 
@@ -690,9 +701,8 @@ function clearNumCF(col) {
   delete numFilters[col];
   document.getElementById('cfop-' + col).value = '';
   document.getElementById('cfval-' + col).value = '';
-  const th = document.getElementById('cf-' + col).closest('th');
+  const th = document.getElementById('cf-' + col)?.closest('th');
   if (th) th.classList.remove('th-filtered');
-  document.querySelectorAll('.cf-dd.open').forEach(d => d.classList.remove('open'));
   applyFilters();
 }
 
@@ -759,6 +769,39 @@ function applyFilters() {
     || Object.keys(dateFilters).length > 0;
   document.getElementById('clearBtn').style.display = hasAny ? 'inline-block' : 'none';
 
+  // Rebuild filter dropdown options — each column shows values present in the
+  // results filtered by everything EXCEPT that column's own filter, so you can
+  // still see/uncheck your current selection while other filters narrow the list.
+  ['fts_id', 'account_name', 'parent_account', 'opportunity_owner', 'vendor_name', 'status', 'store_number'].forEach(col => {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const otherRows = allRows.filter(r => {
+      if (search) {
+        const hay = [r.fts_id, r.account_name, r.retailer_name, r.parent_account, r.opportunity_owner, r.vendor_name, r.status, r.store_number]
+          .map(v => (v || '').toLowerCase()).join(' ');
+        if (!hay.includes(search)) return false;
+      }
+      for (const c of ['fts_id', 'account_name', 'parent_account', 'opportunity_owner', 'vendor_name', 'status', 'store_number']) {
+        if (c === col) continue; // skip own filter
+        if (checkFilters[c]?.size > 0) {
+          let val = (r[c] || '').trim();
+          if (c === 'status' && !val) val = '—';
+          const filterVals = [...checkFilters[c]].map(v => v.toLowerCase());
+          if (!filterVals.includes(val.toLowerCase())) return false;
+        }
+      }
+      if (!passesNum('num_locations', r.num_locations)) return false;
+      if (!passesNum('days_to_active', daysToActive(r))) return false;
+      if (!passesDate('close_date', r.close_date)) return false;
+      if (!passesDate('active_date', r.active_date)) return false;
+      if (!passesDate('last_process_date', r.last_process_date)) return false;
+      return true;
+    });
+    cfValues[col] = [...new Set(otherRows.map(r => r[col]).filter(v => v && v !== '—'))].sort();
+    if (col === 'status') cfValues[col] = ['—', ...cfValues[col]];
+    const dd = document.getElementById('cf-' + col);
+    if (dd?.classList.contains('open')) renderCFList(col);
+  });
+
   sortRows();
   renderTable();
   updateStats();
@@ -773,11 +816,17 @@ function sortBy(col) {
   renderTable();
 }
 
+function parseLocalDate(str) {
+  if (!str) return null;
+  const [y,m,d] = str.slice(0,10).split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+
 function daysToActive(r) {
   if (!r.close_date) return null;
-  const start = new Date(r.close_date);
-  const end = r.active_date ? new Date(r.active_date) : new Date();
-  if (isNaN(start) || isNaN(end)) return null;
+  const start = parseLocalDate(r.close_date);
+  const end = r.active_date ? parseLocalDate(r.active_date) : new Date();
+  if (!start || isNaN(start) || isNaN(end)) return null;
   return Math.round((end - start) / (1000 * 60 * 60 * 24));
 }
 
@@ -786,7 +835,7 @@ function sortRows() {
     let av = a[sortCol], bv = b[sortCol];
     if (sortCol === 'num_locations') { av = parseFloat(av) || 0; bv = parseFloat(bv) || 0; return (av - bv) * sortDir; }
     if (['active_date', 'last_process_date', 'close_date'].includes(sortCol)) {
-      av = av ? new Date(av).getTime() : 0; bv = bv ? new Date(bv).getTime() : 0;
+      av = av ? parseLocalDate(av).getTime() : 0; bv = bv ? parseLocalDate(bv).getTime() : 0;
       return (av - bv) * sortDir;
     }
     if (sortCol === 'days_to_active') { av = daysToActive(a) ?? Infinity; bv = daysToActive(b) ?? Infinity; return (av - bv) * sortDir; }
