@@ -98,6 +98,7 @@ th[data-col="close_date"],        td[data-col="close_date"]        { width: 75px
 th[data-col="fts_id"],            td[data-col="fts_id"]            { width: 65px; }
 th[data-col="parent_account"],    td[data-col="parent_account"]    { width: 195px; }
 th[data-col="account_name"],      td[data-col="account_name"]      { width: 235px; }
+th[data-col="store_number"],      td[data-col="store_number"]      { width: 80px; text-align: center; }
 th[data-col="num_locations"],     td[data-col="num_locations"]     { width: 55px; text-align: center; }
 th[data-col="vendor_name"],       td[data-col="vendor_name"]       { width: 120px; }
 th[data-col="status"],            td[data-col="status"]            { width: 220px; }
@@ -257,7 +258,7 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
           <div class="dropdown-email" id="dropdownEmail">Non-Alcohol Vendor Requests</div>
           <div class="dropdown-role" id="dropdownRole">Viewer</div>
         </div>
-        <button class="dropdown-item" onclick="toggleTheme()" id="themeToggleBtn">☀ Light mode</button>
+        <button class="dropdown-item" onclick="toggleTheme()" id="themeToggleBtn">🌙 Dark mode</button>
         <button class="dropdown-item danger" onclick="doLogout()">⎋ Sign out</button>
       </div>
     </div>
@@ -289,6 +290,10 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
   <div class="banner-card gold">
     <div class="banner-card-label">Waiting on Retailer</div>
     <div class="banner-card-value" id="bn-wor">—</div>
+  </div>
+  <div class="banner-card">
+    <div class="banner-card-label">No Requests</div>
+    <div class="banner-card-value" id="bn-norequests" style="color:var(--text3)">—</div>
   </div>
 </div>
 
@@ -423,7 +428,7 @@ function toggleTheme() {
   localStorage.setItem('portal_theme', isLight ? 'light' : 'dark');
   document.getElementById('themeToggleBtn').textContent = isLight ? '🌙 Dark mode' : '☀ Light mode';
 }
-if (localStorage.getItem('portal_theme') === 'light') {
+if (localStorage.getItem('portal_theme') !== 'dark') {
   document.body.classList.add('light');
   document.addEventListener('DOMContentLoaded', () => {
     const b = document.getElementById('themeToggleBtn'); if (b) b.textContent = '🌙 Dark mode';
@@ -535,7 +540,7 @@ async function loadData() {
       let vPage = 0;
       while (true) {
         const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/tbl_vendor_relationships?select=retailer_fts_id,retailer_name,vendor_name,status,active_date,last_process_date&retailer_fts_id=in.${inClause}&limit=${pageSize}&offset=${vPage * pageSize}`,
+          `${SUPABASE_URL}/rest/v1/tbl_vendor_relationships?select=retailer_fts_id,retailer_name,vendor_name,store_number,status,active_date,last_process_date&retailer_fts_id=in.${inClause}&limit=${pageSize}&offset=${vPage * pageSize}`,
           { headers }
         );
         if (!res.ok) break;
@@ -589,6 +594,7 @@ async function loadData() {
             opportunity_owner: opp.opportunity_owner || '—',
             close_date: opp.close_date || null,
             vendor_name: vr.vendor_name || '—',
+              store_number: vr.store_number || null,
             status: (vr.status || '').trim() || null,
             active_date: vr.active_date || null,
             last_process_date: vr.last_process_date || null
@@ -598,8 +604,9 @@ async function loadData() {
     });
 
     // Build filter value lists
-    ['fts_id', 'account_name', 'parent_account', 'opportunity_owner', 'vendor_name', 'status'].forEach(col => {
+    ['fts_id', 'account_name', 'parent_account', 'opportunity_owner', 'vendor_name', 'status', 'store_number'].forEach(col => {
       cfValues[col] = [...new Set(allRows.map(r => r[col]).filter(v => v && v !== '—'))].sort();
+      if (col === 'status') cfValues[col] = ['—', ...cfValues[col]];
     });
 
     document.getElementById('loadingMsg').style.display = 'none';
@@ -699,7 +706,7 @@ function passesNum(col, val) {
 
 function clearAllFilters(resetView = true) {
   document.getElementById('searchInput').value = '';
-  ['fts_id', 'account_name', 'parent_account', 'opportunity_owner', 'vendor_name', 'status'].forEach(col => {
+  ['fts_id', 'account_name', 'parent_account', 'opportunity_owner', 'vendor_name', 'status', 'store_number'].forEach(col => {
     if (checkFilters[col]) checkFilters[col].clear();
     const th = document.getElementById('cf-' + col)?.closest('th');
     if (th) th.classList.remove('th-filtered');
@@ -726,13 +733,14 @@ function applyFilters() {
   const search = document.getElementById('searchInput').value.toLowerCase();
   filteredRows = allRows.filter(r => {
     if (search) {
-      const hay = [r.fts_id, r.account_name, r.retailer_name, r.parent_account, r.opportunity_owner, r.vendor_name, r.status]
+      const hay = [r.fts_id, r.account_name, r.retailer_name, r.parent_account, r.opportunity_owner, r.vendor_name, r.status, r.store_number]
         .map(v => (v || '').toLowerCase()).join(' ');
       if (!hay.includes(search)) return false;
     }
-    for (const col of ['fts_id', 'account_name', 'parent_account', 'opportunity_owner', 'vendor_name', 'status']) {
+    for (const col of ['fts_id', 'account_name', 'parent_account', 'opportunity_owner', 'vendor_name', 'status', 'store_number']) {
       if (checkFilters[col]?.size > 0) {
-        const val = (r[col] || '').trim();
+        let val = (r[col] || '').trim();
+        if (col === 'status' && !val) val = '—';
         const filterVals = [...checkFilters[col]].map(v => v.toLowerCase());
         if (!filterVals.includes(val.toLowerCase())) return false;
       }
@@ -813,6 +821,8 @@ function updateStats() {
   // Update banner cards
   document.getElementById('bn-total').textContent = shownRelationships.toLocaleString();
   document.getElementById('bn-accounts').textContent = uniqueAccounts.toLocaleString();
+  const noRequestsCount = new Set(filteredRows.filter(r => !r.vendor_name).map(r => r.fts_id)).size;
+  document.getElementById('bn-norequests').textContent = noRequestsCount.toLocaleString();
   const knownKeys = new Set(statusDefs.map(d => d.key));
   statusDefs.forEach(d => {
     const el = document.getElementById(d.bannerEl);
@@ -968,6 +978,7 @@ function accountRowHTML(acct, visibleCols, NCOLS) {
       case 'fts_id':            parentRow += `<td data-col="fts_id" class="mono">${acct.fts_id || '—'}</td>`; break;
       case 'parent_account':    parentRow += `<td data-col="parent_account">${acct.parent_account || '—'}</td>`; break;
       case 'account_name':      parentRow += `<td data-col="account_name" class="primary">${acct.account_name || acct.rows[0]?.retailer_name || '—'}</td>`; break;
+      case 'store_number':      parentRow += `<td data-col="store_number"></td>`; break;
       case 'num_locations':     parentRow += `<td data-col="num_locations" class="mono">${acct.num_locations != null ? acct.num_locations.toLocaleString() : '—'}</td>`; break;
       case 'vendor_name':       parentRow += `<td data-col="vendor_name">${hasVendors ? `<span class="acct-toggle-btn" onclick="event.stopPropagation();toggleAccount('${key.replace(/'/g,"\\'")}')"><span class="acct-toggle-icon">${isExpanded ? '▾' : '▸'}</span></span> <span style="font-size:11px;color:var(--text3)">${vendorCount} vendor${vendorCount!==1?'s':''}</span>` : '<span style="font-size:11px;color:var(--text3)">0</span>'}</td>`; break;
       case 'status':            parentRow += `<td data-col="status">${statusSummary || '—'}</td>`; break;
@@ -994,6 +1005,7 @@ function accountRowHTML(acct, visibleCols, NCOLS) {
           case 'fts_id':            tr += `<td data-col="fts_id"></td>`; break;
           case 'parent_account':    tr += `<td data-col="parent_account"></td>`; break;
           case 'account_name':      tr += `<td data-col="account_name"></td>`; break;
+          case 'store_number':      tr += `<td data-col="store_number" class="mono">${r.store_number != null ? r.store_number : '—'}</td>`; break;
           case 'num_locations':     tr += `<td data-col="num_locations"></td>`; break;
           case 'vendor_name':       tr += `<td data-col="vendor_name" style="padding-left:20px">${r.vendor_name || '—'}</td>`; break;
           case 'status':            tr += `<td data-col="status">${statusBadge(r.status)}</td>`; break;
@@ -1030,6 +1042,7 @@ function rowHTML(r, visibleCols) {
       case 'fts_id':             return `<td data-col="fts_id" class="mono">${r.fts_id || '—'}</td>`;
       case 'parent_account':     return `<td data-col="parent_account">${r.parent_account || '—'}</td>`;
       case 'account_name':       return `<td data-col="account_name" class="primary">${r.account_name || '—'}</td>`;
+      case 'store_number':       return `<td data-col="store_number" class="mono">${r.store_number != null ? r.store_number : '—'}</td>`;
       case 'num_locations':      return `<td data-col="num_locations" class="mono">${r.num_locations != null ? r.num_locations.toLocaleString() : '—'}</td>`;
       case 'vendor_name':        return `<td data-col="vendor_name">${r.vendor_name || '—'}</td>`;
       case 'status':             return `<td data-col="status">${statusBadge(r.status)}</td>`;
@@ -1048,6 +1061,7 @@ const ALL_COLS = [
   { id: 'fts_id',            label: 'FTS ID',           type: 'check' },
   { id: 'parent_account',    label: 'Parent Account',   type: 'check' },
   { id: 'account_name',      label: 'Account',          type: 'check' },
+  { id: 'store_number',      label: 'Store #',          type: 'check' },
   { id: 'num_locations',     label: '# Locs',           type: 'num'   },
   { id: 'vendor_name',       label: 'Vendor',           type: 'check' },
   { id: 'status',            label: 'Status',           type: 'check' },
