@@ -2,7 +2,11 @@ name: Sync Vendor Opps → Supabase
 
 on:
   schedule:
-    - cron: '0 */4 * * *'   # Every 4 hours
+    - cron: '0 11 * * *'   # 7am EST
+    - cron: '0 14 * * *'   # 10am EST
+    - cron: '0 16 * * *'   # 12pm EST
+    - cron: '0 18 * * *'   # 2pm EST
+    - cron: '0 20 * * *'   # 4pm EST
   workflow_dispatch:         # Manual trigger from GitHub Actions tab
 
 jobs:
