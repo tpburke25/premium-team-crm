@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="favicon.png">
 <title>Non-Alcohol Vendor Requests</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -243,6 +244,15 @@ tbody td.mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(-
   </div>
   <div class="header-right">
     <div style="display:flex;align-items:center;gap:10px">
+      <div class="user-chip" id="exportChip" onclick="toggleExportMenu()">
+        <span style="font-size:13px;font-weight:500">Export</span>
+        <span style="font-size:10px;color:var(--text3)">▾</span>
+        <div class="user-dropdown" id="exportDropdown">
+          <button class="dropdown-item" onclick="exportExcel();toggleExportMenu()">📥 Excel</button>
+          <button class="dropdown-item" onclick="exportPDF();toggleExportMenu()">🖨️ PDF</button>
+          <button class="dropdown-item" onclick="exportHTML();toggleExportMenu()">📄 HTML</button>
+        </div>
+      </div>
       <span class="last-synced" id="lastSyncedLabel"></span>
       <button class="sf-sync-btn" id="syncBtn" onclick="triggerSync()">
         <span id="syncBtnIcon">⟳</span>
@@ -436,10 +446,19 @@ if (localStorage.getItem('portal_theme') !== 'dark') {
 }
 
 // ── USER MENU ──────────────────────────────────────
-function toggleUserMenu() { document.getElementById('userChip').classList.toggle('open'); }
+function toggleUserMenu() {
+  document.getElementById('userChip').classList.toggle('open');
+  document.getElementById('exportChip')?.classList.remove('open');
+}
+function toggleExportMenu() {
+  document.getElementById('exportChip').classList.toggle('open');
+  document.getElementById('userChip')?.classList.remove('open');
+}
 document.addEventListener('click', e => {
   const c = document.getElementById('userChip');
   if (c && !c.contains(e.target)) c.classList.remove('open');
+  const ec = document.getElementById('exportChip');
+  if (ec && !ec.contains(e.target)) ec.classList.remove('open');
 });
 
 function doLogout() {
@@ -1509,8 +1528,356 @@ async function pollSyncStatus() {
   setTimeout(poll, 5000);
 }
 
-// ── START ──────────────────────────────────────────
-init();
+// ── EXPORTS ────────────────────────────────────────
+function getExportData() {
+  const visibleCols = colOrder.filter(id => colVisible[id]);
+  const colLabels = visibleCols.map(id => ALL_COLS.find(c => c.id === id)?.label || id);
+
+  // Build account map from filteredRows (same as renderTable)
+  const groupCol = document.getElementById('groupSelect').value;
+  const vendorFilterActive = checkFilters['vendor_name']?.size > 0;
+  const flatMode = groupCol === 'vendor_name' || vendorFilterActive;
+
+  const rows = []; // { isParent, isSubRow, data: {col: value} }
+
+  if (flatMode) {
+    filteredRows.forEach(r => {
+      const days = daysToActive(r);
+      const row = {};
+      visibleCols.forEach(id => {
+        switch(id) {
+          case 'close_date':        row[id] = fmtDate(r.close_date); break;
+          case 'active_date':       row[id] = fmtDate(r.active_date); break;
+          case 'last_process_date': row[id] = fmtDate(r.last_process_date); break;
+          case 'days_to_active':    row[id] = days === null ? '—' : days; break;
+          case 'num_locations':     row[id] = r.num_locations != null ? r.num_locations : '—'; break;
+          default: row[id] = r[id] || '—';
+        }
+      });
+      rows.push({ isParent: false, isSubRow: false, data: row });
+    });
+  } else {
+    const accountMap = new Map();
+    filteredRows.forEach(r => {
+      const key = r.fts_id || '—';
+      if (!accountMap.has(key)) {
+        accountMap.set(key, {
+          fts_id: r.fts_id, account_name: r.account_name !== '—' ? r.account_name : null,
+          parent_account: r.parent_account, opportunity_owner: r.opportunity_owner,
+          close_date: r.close_date, num_locations: r.num_locations, rows: []
+        });
+      } else {
+        const acct = accountMap.get(key);
+        if (!acct.account_name && r.account_name !== '—') acct.account_name = r.account_name;
+      }
+      accountMap.get(key).rows.push(r);
+    });
+
+    accountMap.forEach(acct => {
+      const vendorCount = acct.rows.filter(r => r.vendor_name).length;
+      const statusCounts = {};
+      acct.rows.forEach(r => {
+        const s = (r.status || '').toLowerCase().trim().replace(/-/g,' ');
+        statusCounts[s] = (statusCounts[s] || 0) + 1;
+      });
+      const statusSummaryText = [
+        { key: 'processing',             label: 'Processing'   },
+        { key: 'active non processing',  label: 'Active NP'    },
+        { key: 'waiting on distributor', label: 'Wait Dist.'   },
+        { key: 'waiting on retailer',    label: 'Wait Retailer'},
+      ].filter(d => statusCounts[d.key] > 0)
+       .map(d => `${statusCounts[d.key]} ${d.label}`).join(' · ') || '—';
+
+      // Parent row
+      const parentData = {};
+      visibleCols.forEach(id => {
+        switch(id) {
+          case 'account_name':      parentData[id] = acct.account_name || acct.rows[0]?.retailer_name || '—'; break;
+          case 'opportunity_owner': parentData[id] = acct.opportunity_owner || '—'; break;
+          case 'close_date':        parentData[id] = fmtDate(acct.close_date); break;
+          case 'fts_id':            parentData[id] = acct.fts_id || '—'; break;
+          case 'parent_account':    parentData[id] = acct.parent_account || '—'; break;
+          case 'num_locations':     parentData[id] = acct.num_locations != null ? acct.num_locations : '—'; break;
+          case 'vendor_name':       parentData[id] = vendorCount ? `${vendorCount} vendor${vendorCount!==1?'s':''}` : '0'; break;
+          case 'status':            parentData[id] = statusSummaryText; break;
+          default:                  parentData[id] = '—';
+        }
+      });
+      rows.push({ isParent: true, isSubRow: false, data: parentData });
+
+      // Sub rows
+      acct.rows.forEach(r => {
+        const days = daysToActive(r);
+        const subData = {};
+        visibleCols.forEach(id => {
+          switch(id) {
+            case 'vendor_name':       subData[id] = r.vendor_name || '—'; break;
+            case 'status':            subData[id] = r.status || '—'; break;
+            case 'active_date':       subData[id] = fmtDate(r.active_date); break;
+            case 'last_process_date': subData[id] = fmtDate(r.last_process_date); break;
+            case 'days_to_active':    subData[id] = days === null ? '—' : days; break;
+            case 'store_number':      subData[id] = r.store_number != null ? r.store_number : '—'; break;
+            default:                  subData[id] = '—';
+          }
+        });
+        rows.push({ isParent: false, isSubRow: true, data: subData });
+      });
+    });
+  }
+
+  return { visibleCols, colLabels, rows };
+}
+
+function exportExcel() {
+  const XLSX = window.XLSX;
+  if (!XLSX) { alert('Excel library not loaded. Please try again.'); return; }
+
+  const { visibleCols, colLabels, rows } = getExportData();
+  const today = new Date().toLocaleDateString('en-US', { month:'2-digit', day:'2-digit', year:'numeric' }).replace(/\//g,'-');
+
+  // Header row styles
+  const headerStyle = {
+    font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 11 },
+    fill: { fgColor: { rgb: '1C3354' } },
+    alignment: { horizontal: 'center', vertical: 'center' },
+    border: { bottom: { style: 'thin', color: { rgb: '2A4D7F' } } }
+  };
+  const parentStyle = {
+    font: { bold: true, sz: 11 },
+    fill: { fgColor: { rgb: 'E8ECF4' } },
+  };
+  const subStyle = { font: { sz: 11 }, fill: { fgColor: { rgb: 'FFFFFF' } } };
+  const altSubStyle = { font: { sz: 11 }, fill: { fgColor: { rgb: 'F7F8FB' } } };
+
+  const wsData = [[...colLabels]];
+  rows.forEach(r => { wsData.push(visibleCols.map(id => r.data[id] ?? '—')); });
+
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // Style header row
+  colLabels.forEach((_, ci) => {
+    const cell = ws[XLSX.utils.encode_cell({ r: 0, c: ci })];
+    if (cell) cell.s = headerStyle;
+  });
+
+  // Style data rows
+  let subRowIdx = 0;
+  rows.forEach((row, ri) => {
+    const style = row.isParent ? parentStyle : (subRowIdx++ % 2 === 0 ? subStyle : altSubStyle);
+    visibleCols.forEach((_, ci) => {
+      const cell = ws[XLSX.utils.encode_cell({ r: ri + 1, c: ci })];
+      if (cell) cell.s = style;
+    });
+    if (row.isParent) subRowIdx = 0;
+  });
+
+  // Column widths
+  ws['!cols'] = visibleCols.map(id => {
+    const widths = { opportunity_owner: 20, close_date: 12, fts_id: 10, parent_account: 24, account_name: 30, store_number: 10, num_locations: 8, vendor_name: 28, status: 28, active_date: 12, last_process_date: 16, days_to_active: 14 };
+    return { wch: widths[id] || 16 };
+  });
+
+  ws['!autofilter'] = { ref: XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: 0, c: visibleCols.length - 1 } }) };
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Vendor Portal');
+  XLSX.writeFile(wb, `VendorPortal_${today}.xlsx`);
+}
+
+function exportPDF() {
+  const { visibleCols, colLabels, rows } = getExportData();
+  const now = new Date().toLocaleString('en-US', { month:'long', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' });
+  const today = new Date().toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+
+  const statusColors = {
+    'processing': '#1a7f37', 'active non processing': '#2a4d7f',
+    'waiting on distributor': '#d93025', 'waiting on retailer': '#b08800'
+  };
+  const statusBgColors = {
+    'processing': '#e8f5ec', 'active non processing': '#e8eef8',
+    'waiting on distributor': '#fce8e6', 'waiting on retailer': '#fef8e0'
+  };
+
+  // Build account groups for collapsible PDF
+  const groupCol = document.getElementById('groupSelect').value;
+  const vendorFilterActive = checkFilters['vendor_name']?.size > 0;
+  const flatMode = groupCol === 'vendor_name' || vendorFilterActive;
+
+  const bodyHTML = buildPdfBody(visibleCols, flatMode, statusColors, statusBgColors);
+  const thHTML = colLabels.map(l => `<th>${l}</th>`).join('');
+  const sharedCSS = `
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=DM+Mono:wght@400&display=swap');
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'DM Sans',sans-serif; color:#1c3354; padding:24px; background:#fff; -webkit-print-color-adjust:exact; print-color-adjust:exact; font-size:12px; }
+    .doc-header { background:#1c3354; color:#fff; padding:14px 20px; border-radius:8px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .doc-header h1 { font-size:16px; font-weight:700; }
+    .doc-header .meta { font-size:10px; opacity:.75; text-align:right; line-height:1.8; }
+    .toolbar { display:flex; gap:6px; margin-bottom:14px; }
+    .btn { padding:7px 16px; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; color:#fff; }
+    @media print { .toolbar { display:none; } body { padding:12px; } }
+    table { width:100%; border-collapse:collapse; font-size:11px; }
+    th { background:#1c3354; color:#fff; padding:7px 10px; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; white-space:nowrap; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    td { padding:6px 10px; border-bottom:1px solid #e8ecf0; vertical-align:middle; }
+    .parent-row td { background:#dde4f0; font-weight:600; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .account-name { color:#1c3354; }`;
+  const sharedJS = `
+  function togglePdfAcct(key){const s=document.querySelectorAll('[data-parent="'+key+'"]'),t=document.getElementById('tog-'+key),o=t&&t.textContent==='▾';s.forEach(r=>r.style.display=o?'none':'');if(t)t.textContent=o?'▸':'▾';}
+  function expandAll(){document.querySelectorAll('.sub-row').forEach(r=>r.style.display='');document.querySelectorAll('.toggle-btn').forEach(t=>t.textContent='▾');}
+  function collapseAll(){document.querySelectorAll('.sub-row').forEach(r=>r.style.display='none');document.querySelectorAll('.toggle-btn').forEach(t=>t.textContent='▸');}`;
+  const toolbarHTML = `
+  <div class="toolbar">
+    <button class="btn" style="background:#1c3354" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    <button class="btn" style="background:#2a4d7f" onclick="expandAll()">▾ Expand All</button>
+    <button class="btn" style="background:#555" onclick="collapseAll()">▸ Collapse All</button>
+  </div>`;
+  const docHeader = `<div class="doc-header"><h1>Non-Alcohol Vendor Requests</h1><div class="meta">Premium Fintech Team<br>${now}</div></div>`;
+  const tableHTML = `<table><thead><tr>${thHTML}</tr></thead><tbody>${bodyHTML}</tbody></table>`;
+
+  const printWin = window.open('', '_blank');
+  printWin.document.write(`<!DOCTYPE html><html><head><title>Non-Alcohol Vendor Requests — ${today}</title><style>${sharedCSS}</style></head><body>${toolbarHTML}${docHeader}${tableHTML}<script>${sharedJS}<\/script></body></html>`);
+  printWin.document.close();
+}
+
+function exportHTML() {
+  const { visibleCols, colLabels } = getExportData();
+  const today = new Date().toLocaleDateString('en-US', { month:'2-digit', day:'2-digit', year:'numeric' }).replace(/\//g,'-');
+  const now = new Date().toLocaleString('en-US', { month:'long', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' });
+  const statusColors = { 'processing':'#1a7f37','active non processing':'#2a4d7f','waiting on distributor':'#d93025','waiting on retailer':'#b08800' };
+  const statusBgColors = { 'processing':'#e8f5ec','active non processing':'#e8eef8','waiting on distributor':'#fce8e6','waiting on retailer':'#fef8e0' };
+  const groupCol = document.getElementById('groupSelect').value;
+  const vendorFilterActive = checkFilters['vendor_name']?.size > 0;
+  const flatMode = groupCol === 'vendor_name' || vendorFilterActive;
+  const bodyHTML = buildPdfBody(visibleCols, flatMode, statusColors, statusBgColors);
+  const thHTML = colLabels.map(l => `<th>${l}</th>`).join('');
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Non-Alcohol Vendor Requests — ${today}</title><style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=DM+Mono:wght@400&display=swap');
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'DM Sans',sans-serif; color:#1c3354; padding:24px; background:#fff; font-size:12px; }
+    .doc-header { background:#1c3354; color:#fff; padding:14px 20px; border-radius:8px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; }
+    .doc-header h1 { font-size:16px; font-weight:700; }
+    .doc-header .meta { font-size:10px; opacity:.75; text-align:right; line-height:1.8; }
+    .toolbar { display:flex; gap:6px; margin-bottom:14px; }
+    .btn { padding:7px 16px; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; color:#fff; }
+    @media print { .toolbar { display:none; } body { padding:12px; } @page { size:landscape; margin:12mm; } }
+    table { width:100%; border-collapse:collapse; font-size:11px; }
+    th { background:#1c3354; color:#fff; padding:7px 10px; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; white-space:nowrap; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    td { padding:6px 10px; border-bottom:1px solid #e8ecf0; vertical-align:middle; }
+    .parent-row td { background:#dde4f0; font-weight:600; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .account-name { color:#1c3354; }
+    .mono { font-family:'DM Mono',monospace; }
+    .toggle-btn { cursor:pointer; display:inline-block; width:16px; height:16px; text-align:center; line-height:16px; font-size:11px; color:#2a4d7f; user-select:none; }
+  </style></head><body>
+  <div class="toolbar">
+    <button class="btn" style="background:#1c3354" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    <button class="btn" style="background:#2a4d7f" onclick="expandAll()">▾ Expand All</button>
+    <button class="btn" style="background:#555" onclick="collapseAll()">▸ Collapse All</button>
+  </div>
+  <div class="doc-header"><h1>Non-Alcohol Vendor Requests</h1><div class="meta">Premium Fintech Team<br>${now}</div></div>
+  <table><thead><tr>${thHTML}</tr></thead><tbody>${bodyHTML}</tbody></table>
+  <script>
+  function togglePdfAcct(key){const s=document.querySelectorAll('[data-parent="'+key+'"]'),t=document.getElementById('tog-'+key),o=t&&t.textContent==='▾';s.forEach(r=>r.style.display=o?'none':'');if(t)t.textContent=o?'▸':'▾';}
+  function expandAll(){document.querySelectorAll('.sub-row').forEach(r=>r.style.display='');document.querySelectorAll('.toggle-btn').forEach(t=>t.textContent='▾');}
+  function collapseAll(){document.querySelectorAll('.sub-row').forEach(r=>r.style.display='none');document.querySelectorAll('.toggle-btn').forEach(t=>t.textContent='▸');}
+  <\/script></body></html>`;
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `VendorPortal_${today}.html`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function buildPdfBody(visibleCols, flatMode, statusColors, statusBgColors) {
+  let bodyHTML = '';
+  if (flatMode) {
+    filteredRows.forEach((r, i) => {
+      const bg = i % 2 === 0 ? '#ffffff' : '#f7f8fb';
+      const days = daysToActive(r);
+      const daysVal = days === null ? '—' : days;
+      const daysColor = days === null ? '#999' : days <= 14 ? '#1a7f37' : days <= 30 ? '#b08800' : '#d93025';
+      bodyHTML += `<tr style="background:${bg}">` + visibleCols.map(id => {
+        switch(id) {
+          case 'close_date':        return `<td class="mono">${fmtDate(r.close_date)}</td>`;
+          case 'active_date':       return `<td class="mono">${fmtDate(r.active_date)}</td>`;
+          case 'last_process_date': return `<td class="mono">${fmtDate(r.last_process_date)}</td>`;
+          case 'days_to_active':    return `<td class="mono" style="color:${daysColor}">${daysVal}</td>`;
+          case 'num_locations':     return `<td class="mono">${r.num_locations != null ? r.num_locations : '—'}</td>`;
+          case 'store_number':      return `<td class="mono">${r.store_number != null ? r.store_number : '—'}</td>`;
+          case 'status': {
+            const key = (r.status || '').toLowerCase().trim().replace(/-/g,' ');
+            const c = statusColors[key] || '#444'; const bg2 = statusBgColors[key] || '#f0f0f0';
+            return `<td><span style="background:${bg2};color:${c};padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;white-space:nowrap">${r.status || '—'}</span></td>`;
+          }
+          default: return `<td>${r[id] || '—'}</td>`;
+        }
+      }).join('') + '</tr>';
+    });
+  } else {
+    const accountMap = new Map();
+    filteredRows.forEach(r => {
+      const key = r.fts_id || '—';
+      if (!accountMap.has(key)) {
+        accountMap.set(key, { fts_id: r.fts_id, account_name: r.account_name !== '—' ? r.account_name : null,
+          parent_account: r.parent_account, opportunity_owner: r.opportunity_owner,
+          close_date: r.close_date, num_locations: r.num_locations, rows: [] });
+      } else {
+        const acct = accountMap.get(key);
+        if (!acct.account_name && r.account_name !== '—') acct.account_name = r.account_name;
+      }
+      accountMap.get(key).rows.push(r);
+    });
+    accountMap.forEach((acct, key) => {
+      const vendorCount = acct.rows.filter(r => r.vendor_name).length;
+      const hasVendors = vendorCount > 0;
+      const statusCounts = {};
+      acct.rows.forEach(r => { const s = (r.status || '').toLowerCase().trim().replace(/-/g,' '); statusCounts[s] = (statusCounts[s] || 0) + 1; });
+      const pillsHTML = [
+        { key: 'processing', label: 'Processing', c: '#1a7f37', bg: '#e8f5ec' },
+        { key: 'active non processing', label: 'Active NP', c: '#2a4d7f', bg: '#e8eef8' },
+        { key: 'waiting on distributor', label: 'Wait Dist.', c: '#d93025', bg: '#fce8e6' },
+        { key: 'waiting on retailer', label: 'Wait Retailer', c: '#b08800', bg: '#fef8e0' },
+      ].filter(d => statusCounts[d.key] > 0)
+       .map(d => `<span style="background:${d.bg};color:${d.c};padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;margin-right:3px;white-space:nowrap">${statusCounts[d.key]} ${d.label}</span>`)
+       .join('') || '—';
+      const safeKey = key.replace(/['"\\]/g, '');
+      bodyHTML += `<tr class="parent-row" id="par-${safeKey}">` + visibleCols.map(id => {
+        switch(id) {
+          case 'account_name':      return `<td class="account-name">${acct.account_name || acct.rows[0]?.retailer_name || '—'}</td>`;
+          case 'opportunity_owner': return `<td>${acct.opportunity_owner || '—'}</td>`;
+          case 'close_date':        return `<td class="mono">${fmtDate(acct.close_date)}</td>`;
+          case 'fts_id':            return `<td class="mono">${acct.fts_id || '—'}</td>`;
+          case 'parent_account':    return `<td>${acct.parent_account || '—'}</td>`;
+          case 'num_locations':     return `<td class="mono">${acct.num_locations != null ? acct.num_locations : '—'}</td>`;
+          case 'vendor_name':       return `<td>${hasVendors ? `<span class="toggle-btn" onclick="togglePdfAcct('${safeKey}')" id="tog-${safeKey}">▸</span> <span style="color:#666;font-size:11px">${vendorCount} vendor${vendorCount!==1?'s':''}</span>` : '<span style="color:#aaa;font-size:11px">0</span>'}</td>`;
+          case 'status':            return `<td>${pillsHTML}</td>`;
+          default:                  return `<td>—</td>`;
+        }
+      }).join('') + '</tr>';
+      acct.rows.forEach((r, ri) => {
+        const days = daysToActive(r);
+        const daysVal = days === null ? '—' : days;
+        const daysColor = days === null ? '#999' : days <= 14 ? '#1a7f37' : days <= 30 ? '#b08800' : '#d93025';
+        const subBg = ri % 2 === 0 ? '#ffffff' : '#f7f9fb';
+        bodyHTML += `<tr class="sub-row" data-parent="${safeKey}" style="display:none;background:${subBg}">` + visibleCols.map(id => {
+          switch(id) {
+            case 'vendor_name':       return `<td style="padding-left:20px;font-weight:500">${r.vendor_name || '—'}</td>`;
+            case 'store_number':      return `<td class="mono">${r.store_number != null ? r.store_number : '—'}</td>`;
+            case 'active_date':       return `<td class="mono">${fmtDate(r.active_date)}</td>`;
+            case 'last_process_date': return `<td class="mono">${fmtDate(r.last_process_date)}</td>`;
+            case 'days_to_active':    return `<td class="mono" style="color:${daysColor}">${daysVal}</td>`;
+            case 'status': {
+              const skey = (r.status || '').toLowerCase().trim().replace(/-/g,' ');
+              const sc = statusColors[skey] || '#444'; const sbg = statusBgColors[skey] || '#f0f0f0';
+              return `<td><span style="background:${sbg};color:${sc};padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600">${r.status || '—'}</span></td>`;
+            }
+            default: return `<td>—</td>`;
+          }
+        }).join('') + '</tr>';
+      });
+    });
+  }
+  return bodyHTML;
+}
 </script>
 </body>
 </html>
