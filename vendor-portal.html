@@ -367,7 +367,7 @@ const checkFilters = {}, numFilters = {}, dateFilters = {}, cfValues = {};
 (function checkTokenLogin() {
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
-  if (token === PORTAL_PASSWORD) {
+  if (token && (token === PORTAL_PASSWORD || decodeURIComponent(token) === PORTAL_PASSWORD)) {
     localStorage.setItem('portal_auth', '1');
   }
 })();
@@ -1878,6 +1878,9 @@ function buildPdfBody(visibleCols, flatMode, statusColors, statusBgColors) {
   }
   return bodyHTML;
 }
+
+// ── START ──────────────────────────────────────────
+init();
 </script>
 </body>
 </html>
