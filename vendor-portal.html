@@ -1734,7 +1734,7 @@ function exportPDF() {
   const tableHTML = `<table><thead><tr>${thHTML}</tr></thead><tbody>${bodyHTML}</tbody></table>`;
 
   const printWin = window.open('', '_blank');
-  printWin.document.write(`<!DOCTYPE html><html><head><title>Non-Alcohol Vendor Requests — ${today}</title><style>${sharedCSS}</style></head><body>${toolbarHTML}${docHeader}${tableHTML}<script>${sharedJS}<\/script></body></html>`);
+  printWin.document.write(`<!DOCTYPE html><html><head><title>Non-Alcohol Vendor Requests — ${today}</title><style>${sharedCSS}</style></head><body>${toolbarHTML}${docHeader}` + getBannerHTML() + `${tableHTML}<script>${sharedJS}<\/script></body></html>`);
   printWin.document.close();
 }
 
@@ -1773,6 +1773,7 @@ function exportHTML() {
     <button class="btn" style="background:#555" onclick="collapseAll()">▸ Collapse All</button>
   </div>
   <div class="doc-header"><h1>Non-Alcohol Vendor Requests</h1><div class="meta">Premium Fintech Team<br>${now}</div></div>
+  ` + getBannerHTML() + `
   <table><thead><tr>${thHTML}</tr></thead><tbody>${bodyHTML}</tbody></table>
   <script>
   function togglePdfAcct(key){const s=document.querySelectorAll('[data-parent="'+key+'"]'),t=document.getElementById('tog-'+key),o=t&&t.textContent==='▾';s.forEach(r=>r.style.display=o?'none':'');if(t)t.textContent=o?'▸':'▾';}
@@ -1785,6 +1786,27 @@ function exportHTML() {
   a.download = `VendorPortal_${today}.html`;
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+function getBannerHTML() {
+  var cards = [
+    { label: 'Accounts',             id: 'bn-accounts',   color: '#ffffff', bg: '#565660' },
+    { label: 'Total Relationships',  id: 'bn-total',      color: '#1c3354', bg: '#f0f0f0' },
+    { label: 'Processing',           id: 'bn-processing', color: '#1a7f37', bg: '#e8f5ec' },
+    { label: 'Active Non-Processing',id: 'bn-anp',        color: '#2a4d7f', bg: '#e8eef8' },
+    { label: 'Waiting on Dist.',     id: 'bn-wod',        color: '#d93025', bg: '#fce8e6' },
+    { label: 'Waiting on Retailer',  id: 'bn-wor',        color: '#b08800', bg: '#fef8e0' },
+    { label: 'No Requests',          id: 'bn-norequests', color: '#666666', bg: '#f0f0f0' },
+  ];
+  var cardsHTML = cards.map(function(c) {
+    var val = (document.getElementById(c.id) || {}).textContent || '—';
+    var labelColor = c.color === '#ffffff' ? '#ccc' : '#666';
+    return '<div style="background:' + c.bg + ';border-radius:8px;padding:12px 16px;min-width:100px;flex:1">'
+      + '<div style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:' + labelColor + ';margin-bottom:4px">' + c.label + '</div>'
+      + '<div style="font-size:22px;font-weight:700;color:' + c.color + ';line-height:1">' + val + '</div>'
+      + '</div>';
+  }).join('');
+  return '<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;-webkit-print-color-adjust:exact;print-color-adjust:exact">' + cardsHTML + '</div>';
 }
 
 function buildPdfBody(visibleCols, flatMode, statusColors, statusBgColors) {
