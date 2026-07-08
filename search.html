@@ -72,6 +72,7 @@ tbody tr:hover { background: var(--row-hover); }
 td { padding: 10px 12px; vertical-align: top; line-height: 1.45; }
 .fts-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); }
 .no-results { text-align: center; padding: 60px; color: var(--text-muted); font-size: 14px; }
+.no-results.empty { color: #c0392b; font-weight: 500; }
 
 /* PASSWORD MODAL */
 #pwdOverlay { position:fixed; inset:0; background:rgba(20,38,64,.5); backdrop-filter:blur(2px); z-index:1002; }
@@ -225,7 +226,7 @@ async function runSearch() {
   runBtn.disabled = true;
   setStatus('Triggering search…', 'info');
   document.getElementById('resultsCount').textContent = 'Running…';
-  document.getElementById('resultsBody').innerHTML = '<tr><td colspan="7" class="no-results">Searching Salesforce — this can take 20–40 seconds…</td></tr>';
+  document.getElementById('resultsBody').innerHTML = '<tr><td colspan="7" class="no-results">Rummaging through the database…</td></tr>';
 
   try {
     const triggerRes = await fetch(`${SUPABASE_URL}/functions/v1/trigger-search`, {
@@ -281,7 +282,7 @@ async function pollForResults(label) {
         } else {
           currentResults = [];
           document.getElementById('resultsCount').textContent = 'No results found';
-          document.getElementById('resultsBody').innerHTML = '<tr><td colspan="7" class="no-results">No matching records found in Salesforce.</td></tr>';
+          document.getElementById('resultsBody').innerHTML = '<tr><td colspan="7" class="no-results empty">No matching records found in Salesforce.</td></tr>';
           setStatus('Search complete — no matches found.', 'info');
         }
         return;
@@ -323,7 +324,7 @@ async function checkAgain() {
       } else {
         currentResults = [];
         document.getElementById('resultsCount').textContent = 'No results found';
-        document.getElementById('resultsBody').innerHTML = '<tr><td colspan="7" class="no-results">No matching records found in Salesforce.</td></tr>';
+        document.getElementById('resultsBody').innerHTML = '<tr><td colspan="7" class="no-results empty">No matching records found in Salesforce.</td></tr>';
         setStatus('Search complete — no matches found.', 'info');
       }
       return;
