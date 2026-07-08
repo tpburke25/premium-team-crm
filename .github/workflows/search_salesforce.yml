@@ -1,0 +1,42 @@
+name: Search Salesforce Contact
+
+on:
+  workflow_dispatch:
+    inputs:
+      search_label:
+        description: 'Label for this search (used to identify results later, e.g. "Karen Quiroz - Accountant")'
+        required: true
+        type: string
+      search_field:
+        description: 'Salesforce Contact field to search on (e.g. Name, Email, Title)'
+        required: true
+        default: 'Name'
+        type: string
+      search_value:
+        description: 'Value to search for (e.g. Karen Quiroz)'
+        required: true
+        type: string
+
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install simple-salesforce supabase
+
+      - name: Run search
+        env:
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          python search_salesforce_contact.py "${{ inputs.search_label }}" "${{ inputs.search_field }}" "${{ inputs.search_value }}"
