@@ -130,7 +130,7 @@ td { padding: 10px 12px; vertical-align: top; line-height: 1.45; }
     </div>
     <div class="ctrl-group">
       <span class="ctrl-label">Search Value</span>
-      <input type="text" id="searchValue" placeholder="e.g. Karen Quiroz, or @domain.com">
+      <input type="text" id="searchValue" placeholder="e.g. John Smith, or @domain.com">
     </div>
     <button class="btn btn-run" id="runBtn" onclick="runSearch()">Run Search</button>
     <span id="statusMsg"></span>
@@ -145,16 +145,17 @@ td { padding: 10px 12px; vertical-align: top; line-height: 1.45; }
     <table>
       <thead>
         <tr>
+          <th>FTS ID</th>
+          <th>Account Name</th>
+          <th>Parent Account</th>
           <th>Contact Name</th>
           <th>Email</th>
           <th>Phone</th>
-          <th>Account Name</th>
-          <th>FTS ID</th>
-          <th>Run At</th>
+          <th></th>
         </tr>
       </thead>
       <tbody id="resultsBody">
-        <tr><td colspan="6" class="no-results">Run a search above to see results.</td></tr>
+        <tr><td colspan="7" class="no-results">Run a search above to see results.</td></tr>
       </tbody>
     </table>
   </div>
@@ -224,7 +225,7 @@ async function runSearch() {
   runBtn.disabled = true;
   setStatus('Triggering search…', 'info');
   document.getElementById('resultsCount').textContent = 'Running…';
-  document.getElementById('resultsBody').innerHTML = '<tr><td colspan="6" class="no-results">Searching Salesforce — this can take 20–40 seconds…</td></tr>';
+  document.getElementById('resultsBody').innerHTML = '<tr><td colspan="7" class="no-results">Searching Salesforce — this can take 20–40 seconds…</td></tr>';
 
   try {
     const triggerRes = await fetch(`${SUPABASE_URL}/functions/v1/trigger-search`, {
@@ -245,7 +246,7 @@ async function runSearch() {
 
   } catch (err) {
     setStatus(err.message || 'Something went wrong.', 'error');
-    document.getElementById('resultsBody').innerHTML = '<tr><td colspan="6" class="no-results">Search failed. Please try again.</td></tr>';
+    document.getElementById('resultsBody').innerHTML = '<tr><td colspan="7" class="no-results">Search failed. Please try again.</td></tr>';
   } finally {
     runBtn.disabled = false;
   }
@@ -282,7 +283,7 @@ async function pollForResults(label) {
 
   setStatus('No results found (or search is still running — try Export/refresh shortly).', 'error');
   document.getElementById('resultsCount').textContent = 'No results found';
-  document.getElementById('resultsBody').innerHTML = '<tr><td colspan="6" class="no-results">No matching records found.</td></tr>';
+  document.getElementById('resultsBody').innerHTML = '<tr><td colspan="7" class="no-results">No matching records found.</td></tr>';
 }
 
 function renderResults(rows) {
@@ -290,26 +291,32 @@ function renderResults(rows) {
   document.getElementById('exportBtn').style.display = 'inline-block';
 
   const body = document.getElementById('resultsBody');
-  body.innerHTML = rows.map(r => `
+  body.innerHTML = rows.map(r => {
+    const sfUrl = r.account_id
+      ? `https://fintech.lightning.force.com/lightning/r/Account/${r.account_id}/view`
+      : null;
+    return `
     <tr>
+      <td class="fts-num">${r.fts_id || '—'}</td>
+      <td>${r.account_name || '—'}</td>
+      <td>${r.parent_account_name || '—'}</td>
       <td>${r.contact_name || '—'}</td>
       <td>${r.contact_email || '—'}</td>
       <td>${r.contact_phone || '—'}</td>
-      <td>${r.account_name || '—'}</td>
-      <td class="fts-num">${r.fts_id || '—'}</td>
-      <td class="fts-num">${r.run_at ? new Date(r.run_at).toLocaleString() : '—'}</td>
+      <td>${sfUrl ? `<a href="${sfUrl}" target="_blank" class="btn" style="background:var(--accent);color:#fff;padding:5px 10px;height:auto;display:inline-block;text-decoration:none;font-size:11px;">Open in SF</a>` : '—'}</td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function exportExcel() {
   if (!currentResults.length) return;
 
   const wsData = [
-    ['Contact Name', 'Email', 'Phone', 'Account Name', 'FTS ID', 'Run At'],
+    ['FTS ID', 'Account Name', 'Parent Account', 'Contact Name', 'Email', 'Phone'],
     ...currentResults.map(r => [
-      r.contact_name || '', r.contact_email || '', r.contact_phone || '',
-      r.account_name || '', r.fts_id || '', r.run_at || ''
+      r.fts_id || '', r.account_name || '', r.parent_account_name || '',
+      r.contact_name || '', r.contact_email || '', r.contact_phone || ''
     ])
   ];
   const ws = XLSX.utils.aoa_to_sheet(wsData);

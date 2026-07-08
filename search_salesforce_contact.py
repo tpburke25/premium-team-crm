@@ -121,11 +121,13 @@ def supabase_insert(table, rows):
     return inserted
 
 
-def now_iso():
-    return datetime.now(timezone.utc).isoformat()
+import re
+
+def strip_digits(s):
+    """Return only the digit characters from a string."""
+    return re.sub(r'\D', '', s or '')
 
 
-# ── MAIN ──────────────────────────────────────────────
 def main():
     print("=" * 50)
     print("Premium Team CRM — Salesforce Contact/Account Search")
@@ -135,29 +137,58 @@ def main():
 
     token, instance = sf_login()
 
-    soql = f"""
-        SELECT Id, Name, Email, Phone, AccountId, Account.Name, Account.FTS_ID__c
-        FROM Contact
-        WHERE {SEARCH_FIELD} LIKE '%{SEARCH_VALUE}%'
-    """
-    records = sf_query(token, instance, soql)
-    print(f"Found {len(records)} matching Contact record(s).")
+    is_phone_search = SEARCH_FIELD.strip().lower() == 'phone'
+    search_digits = strip_digits(SEARCH_VALUE)
+
+    if is_phone_search and search_digits:
+        # Broader pull: grab any Contact whose Phone contains the raw typed value
+        # OR whose Phone contains the digit-only version (covers both punctuated
+        # and unpunctuated searches). We then filter precisely in Python by
+        # comparing stripped-digit versions of both sides.
+        soql = f"""
+            SELECT Id, Name, Email, Phone, AccountId,
+                   Account.Name, Account.FTS_ID__c,
+                   Account.Parent.Name
+            FROM Contact
+            WHERE Phone != null
+        """
+        print("  Phone search detected — pulling broader candidate set for digit-based matching...")
+        all_records = sf_query(token, instance, soql)
+        print(f"  Pulled {len(all_records)} Contacts with a phone number to filter locally.")
+
+        records = [
+            r for r in all_records
+            if search_digits in strip_digits(r.get('Phone'))
+        ]
+        print(f"Found {len(records)} matching Contact record(s) after digit-based filtering.")
+    else:
+        soql = f"""
+            SELECT Id, Name, Email, Phone, AccountId,
+                   Account.Name, Account.FTS_ID__c,
+                   Account.Parent.Name
+            FROM Contact
+            WHERE {SEARCH_FIELD} LIKE '%{SEARCH_VALUE}%'
+        """
+        records = sf_query(token, instance, soql)
+        print(f"Found {len(records)} matching Contact record(s).")
 
     rows = []
     for r in records:
         account = r.get('Account') or {}
+        parent = account.get('Parent') or {}
         rows.append({
-            'search_label':  SEARCH_LABEL,
-            'search_field':  f"Contact.{SEARCH_FIELD}",
-            'search_value':  SEARCH_VALUE,
-            'contact_id':    r.get('Id'),
-            'contact_name':  r.get('Name'),
-            'contact_email': r.get('Email'),
-            'contact_phone': r.get('Phone'),
-            'account_id':    r.get('AccountId'),
-            'account_name':  account.get('Name'),
-            'fts_id':        account.get('FTS_ID__c'),
-            'run_at':        now_iso(),
+            'search_label':      SEARCH_LABEL,
+            'search_field':      f"Contact.{SEARCH_FIELD}",
+            'search_value':      SEARCH_VALUE,
+            'contact_id':        r.get('Id'),
+            'contact_name':      r.get('Name'),
+            'contact_email':     r.get('Email'),
+            'contact_phone':     r.get('Phone'),
+            'account_id':        r.get('AccountId'),
+            'account_name':      account.get('Name'),
+            'parent_account_name': parent.get('Name'),
+            'fts_id':            account.get('FTS_ID__c'),
+            'run_at':            now_iso(),
         })
 
     inserted = supabase_insert('tbl_search', rows)
