@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact/Account Search | Premium Team</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<style>
+:root {
+  --navy:        #1c3354;
+  --navy-dark:   #142640;
+  --navy-mid:    #24456e;
+  --navy-light:  #2e5a8a;
+  --accent:      #3a8fd6;
+  --accent-soft: #e8f3fc;
+  --live-bg:     #e6f4ec;
+  --live-fg:     #1a7a3a;
+  --pending-bg:  #fff4e0;
+  --pending-fg:  #9a6200;
+  --row-hover:   #f4f8fd;
+  --border:      #e0e8f0;
+  --text:        #1a2433;
+  --text-muted:  #6b7f96;
+  --bg:          #f3f6fa;
+  --white:       #ffffff;
+  --shadow-sm:   0 1px 3px rgba(28,51,84,.08);
+  --shadow-md:   0 4px 16px rgba(28,51,84,.12);
+  --shadow-lg:   0 8px 32px rgba(28,51,84,.16);
+  --radius:      8px;
+  --radius-sm:   5px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', system-ui, sans-serif; font-size: 13px; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* HEADER */
+.site-header { background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 60%, var(--navy-mid) 100%); padding: 0 28px; display: flex; align-items: center; justify-content: space-between; height: 68px; box-shadow: var(--shadow-md); }
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-title h1 { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: .2px; }
+.header-title span { font-size: 10px; color: rgba(255,255,255,.5); font-weight: 400; letter-spacing: .5px; text-transform: uppercase; }
+.header-right { display: flex; align-items: center; gap: 10px; }
+
+/* FORM PANEL */
+.controls { background: var(--white); border-bottom: 1px solid var(--border); padding: 20px 28px; display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; }
+.ctrl-group { display: flex; flex-direction: column; gap: 5px; }
+.ctrl-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .6px; }
+select, input[type=text] { padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--text); height: 34px; width: 240px; }
+select:focus, input[type=text]:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(58,143,214,.15); }
+
+.btn { padding: 8px 18px; border: none; border-radius: var(--radius-sm); cursor: pointer; font-size: 12px; font-weight: 600; font-family: 'DM Sans', sans-serif; height: 34px; transition: all .15s ease; white-space: nowrap; }
+.btn-run   { background: var(--navy); color: #fff; }
+.btn-run:hover { background: var(--navy-mid); }
+.btn-run:disabled { background: var(--text-muted); cursor: not-allowed; }
+.btn-export { background: var(--live-fg); color: #fff; }
+.btn-export:hover { background: #156030; }
+
+#statusMsg { font-size: 12px; padding: 6px 12px; border-radius: 20px; font-weight: 500; display: none; }
+#statusMsg.info    { background: var(--accent-soft); color: var(--navy); display: inline-block; }
+#statusMsg.success { background: var(--live-bg); color: var(--live-fg); display: inline-block; }
+#statusMsg.error   { background: #fde8e8; color: #9a1a1a; display: inline-block; }
+
+/* RESULTS */
+.results-bar { background: var(--white); border-bottom: 1px solid var(--border); padding: 12px 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.results-count { font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+.table-wrap { overflow-x: auto; padding: 20px 28px 28px; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-md); min-width: 860px; }
+thead tr { background: var(--navy); }
+th { padding: 11px 12px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: rgba(255,255,255,.8); white-space: nowrap; }
+tbody tr { border-bottom: 1px solid var(--border); }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--row-hover); }
+td { padding: 10px 12px; vertical-align: top; line-height: 1.45; }
+.fts-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); }
+.no-results { text-align: center; padding: 60px; color: var(--text-muted); font-size: 14px; }
+
+/* PASSWORD MODAL */
+#pwdOverlay { position:fixed; inset:0; background:rgba(20,38,64,.5); backdrop-filter:blur(2px); z-index:1002; }
+#pwdModal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.25); z-index:1003; width:340px; overflow:hidden; }
+.pwd-header { background:var(--navy); color:#fff; padding:14px 20px; display:flex; justify-content:space-between; align-items:center; }
+.pwd-body { padding:20px; }
+</style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="pwdOverlay">
+  <div id="pwdModal">
+    <div class="pwd-header">
+      <span style="font-weight:700;font-size:14px;">&#x1F512; Contact/Account Search</span>
+    </div>
+    <div class="pwd-body">
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Enter the team password to continue.</p>
+      <div style="position:relative;margin-bottom:8px;">
+        <input type="password" id="pwdInput" placeholder="Password" onkeydown="if(event.key==='Enter')confirmPwd()" style="width:100%;height:36px;font-size:13px;padding-right:36px;">
+        <button onclick="togglePwdVisibility()" id="pwdToggleBtn" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:14px;">&#x1F441;</button>
+      </div>
+      <p id="pwdError" style="color:#dc3545;font-size:11px;margin-bottom:10px;display:none;">Incorrect password. Please try again.</p>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button class="btn" style="background:var(--bg);color:var(--text-muted);" onclick="window.location.href='index.html'">Cancel</button>
+        <button class="btn btn-run" onclick="confirmPwd()">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN PAGE (hidden until unlocked) -->
+<div id="mainApp" style="display:none;">
+
+  <header class="site-header">
+    <div class="header-left">
+      <div class="header-title">
+        <h1>Contact / Account Search</h1>
+        <span>Premium Team &middot; Fintech</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <a href="index.html" style="color:rgba(255,255,255,.7);font-size:11px;text-decoration:none;">&larr; Back to CRM</a>
+    </div>
+  </header>
+
+  <div class="controls">
+    <div class="ctrl-group">
+      <span class="ctrl-label">Field</span>
+      <select id="searchField">
+        <option value="Name">Name</option>
+        <option value="Email">Email</option>
+        <option value="Phone">Phone</option>
+        <option value="Title">Title</option>
+      </select>
+    </div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Search Value</span>
+      <input type="text" id="searchValue" placeholder="e.g. Karen Quiroz, or @domain.com">
+    </div>
+    <button class="btn btn-run" id="runBtn" onclick="runSearch()">Run Search</button>
+    <span id="statusMsg"></span>
+  </div>
+
+  <div class="results-bar">
+    <span class="results-count" id="resultsCount">No search run yet</span>
+    <button class="btn btn-export" onclick="exportExcel()" id="exportBtn" style="display:none;">&#x2B07; Export to Excel</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Contact Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Account Name</th>
+          <th>FTS ID</th>
+          <th>Run At</th>
+        </tr>
+      </thead>
+      <tbody id="resultsBody">
+        <tr><td colspan="6" class="no-results">Run a search above to see results.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://idbnpxedwpjrflsqweyh.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYm5weGVkd3BqcmZsc3F3ZXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNTY3MDYsImV4cCI6MjA5MjkzMjcwNn0.PL7ftdQbTtkCnfFa3Mwo2H3w_uPXuTh_0o75cu3_FLU'; // same anon key used in index.html
+
+let currentLabel = null;
+let currentResults = [];
+
+// ---- Password gate ----
+function confirmPwd() {
+  const pwd = document.getElementById('pwdInput').value;
+  if (pwd !== 'premium$1') {
+    document.getElementById('pwdError').style.display = 'block';
+    document.getElementById('pwdInput').value = '';
+    document.getElementById('pwdInput').focus();
+    return;
+  }
+  document.getElementById('pwdOverlay').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+}
+
+function togglePwdVisibility() {
+  const input = document.getElementById('pwdInput');
+  const btn = document.getElementById('pwdToggleBtn');
+  if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+  else { input.type = 'password'; btn.textContent = '👁'; }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlToken = urlParams.get('token');
+
+  if (urlToken === 'premium$1') {
+    document.getElementById('pwdOverlay').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+  } else {
+    document.getElementById('pwdInput').focus();
+  }
+});
+
+// ---- Status message helper ----
+function setStatus(msg, type) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.className = type;
+}
+
+// ---- Run search: trigger Edge Function -> GitHub Action, then poll tbl_search ----
+async function runSearch() {
+  const field = document.getElementById('searchField').value;
+  const value = document.getElementById('searchValue').value.trim();
+
+  if (!value) {
+    setStatus('Enter a search value first.', 'error');
+    return;
+  }
+
+  const label = `${field}:${value} — ${new Date().toISOString()}`;
+  currentLabel = label;
+
+  const runBtn = document.getElementById('runBtn');
+  runBtn.disabled = true;
+  setStatus('Triggering search…', 'info');
+  document.getElementById('resultsCount').textContent = 'Running…';
+  document.getElementById('resultsBody').innerHTML = '<tr><td colspan="6" class="no-results">Searching Salesforce — this can take 20–40 seconds…</td></tr>';
+
+  try {
+    const triggerRes = await fetch(`${SUPABASE_URL}/functions/v1/trigger-search`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({ search_label: label, search_field: field, search_value: value })
+    });
+
+    if (!triggerRes.ok) {
+      throw new Error('Failed to trigger search workflow.');
+    }
+
+    setStatus('Search running — waiting for results…', 'info');
+    await pollForResults(label);
+
+  } catch (err) {
+    setStatus(err.message || 'Something went wrong.', 'error');
+    document.getElementById('resultsBody').innerHTML = '<tr><td colspan="6" class="no-results">Search failed. Please try again.</td></tr>';
+  } finally {
+    runBtn.disabled = false;
+  }
+}
+
+// Poll tbl_search for rows matching this label, up to ~60s
+async function pollForResults(label) {
+  const maxAttempts = 15;
+  const delayMs = 4000;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    await new Promise(r => setTimeout(r, delayMs));
+
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/tbl_search?search_label=eq.${encodeURIComponent(label)}&select=*`,
+      {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        }
+      }
+    );
+
+    if (res.ok) {
+      const rows = await res.json();
+      if (rows.length > 0) {
+        currentResults = rows;
+        renderResults(rows);
+        setStatus(`Found ${rows.length} result(s).`, 'success');
+        return;
+      }
+    }
+  }
+
+  setStatus('No results found (or search is still running — try Export/refresh shortly).', 'error');
+  document.getElementById('resultsCount').textContent = 'No results found';
+  document.getElementById('resultsBody').innerHTML = '<tr><td colspan="6" class="no-results">No matching records found.</td></tr>';
+}
+
+function renderResults(rows) {
+  document.getElementById('resultsCount').textContent = `${rows.length} result(s)`;
+  document.getElementById('exportBtn').style.display = 'inline-block';
+
+  const body = document.getElementById('resultsBody');
+  body.innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.contact_name || '—'}</td>
+      <td>${r.contact_email || '—'}</td>
+      <td>${r.contact_phone || '—'}</td>
+      <td>${r.account_name || '—'}</td>
+      <td class="fts-num">${r.fts_id || '—'}</td>
+      <td class="fts-num">${r.run_at ? new Date(r.run_at).toLocaleString() : '—'}</td>
+    </tr>
+  `).join('');
+}
+
+function exportExcel() {
+  if (!currentResults.length) return;
+
+  const wsData = [
+    ['Contact Name', 'Email', 'Phone', 'Account Name', 'FTS ID', 'Run At'],
+    ...currentResults.map(r => [
+      r.contact_name || '', r.contact_email || '', r.contact_phone || '',
+      r.account_name || '', r.fts_id || '', r.run_at || ''
+    ])
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Search Results');
+  XLSX.writeFile(wb, `contact_search_${Date.now()}.xlsx`);
+}
+</script>
+
+</body>
+</html>
