@@ -252,10 +252,10 @@ async function runSearch() {
   }
 }
 
-// Poll tbl_search for rows matching this label, up to ~60s
+// Poll tbl_search for rows matching this label, up to ~3 minutes
 async function pollForResults(label) {
-  const maxAttempts = 15;
-  const delayMs = 4000;
+  const maxAttempts = 40;
+  const delayMs = 4500;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     await new Promise(r => setTimeout(r, delayMs));
@@ -281,9 +281,44 @@ async function pollForResults(label) {
     }
   }
 
-  setStatus('No results found (or search is still running — try Export/refresh shortly).', 'error');
-  document.getElementById('resultsCount').textContent = 'No results found';
-  document.getElementById('resultsBody').innerHTML = '<tr><td colspan="7" class="no-results">No matching records found.</td></tr>';
+  setStatus('Still running — click "Check Again" below in a moment.', 'error');
+  document.getElementById('resultsCount').textContent = 'Still running…';
+  document.getElementById('resultsBody').innerHTML = `<tr><td colspan="7" class="no-results">
+    This is taking longer than expected (phone searches can take a few minutes).<br><br>
+    <button class="btn btn-run" onclick="checkAgain()">Check Again</button>
+  </td></tr>`;
+}
+
+async function checkAgain() {
+  if (!currentLabel) return;
+  setStatus('Checking for results…', 'info');
+  document.getElementById('resultsBody').innerHTML = '<tr><td colspan="7" class="no-results">Checking…</td></tr>';
+
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/tbl_search?search_label=eq.${encodeURIComponent(currentLabel)}&select=*`,
+    {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    }
+  );
+
+  if (res.ok) {
+    const rows = await res.json();
+    if (rows.length > 0) {
+      currentResults = rows;
+      renderResults(rows);
+      setStatus(`Found ${rows.length} result(s).`, 'success');
+      return;
+    }
+  }
+
+  setStatus('Still not ready — try again in a bit.', 'error');
+  document.getElementById('resultsBody').innerHTML = `<tr><td colspan="7" class="no-results">
+    No results yet.<br><br>
+    <button class="btn btn-run" onclick="checkAgain()">Check Again</button>
+  </td></tr>`;
 }
 
 function renderResults(rows) {
