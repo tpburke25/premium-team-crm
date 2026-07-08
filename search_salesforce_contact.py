@@ -195,6 +195,25 @@ def main():
             'run_at':            now_iso(),
         })
 
+    if not rows:
+        # Insert a placeholder row so the frontend can distinguish
+        # "search finished, zero matches" from "still running."
+        rows = [{
+            'search_label':        SEARCH_LABEL,
+            'search_field':        f"Contact.{SEARCH_FIELD}",
+            'search_value':        SEARCH_VALUE,
+            'contact_id':          None,
+            'contact_name':        None,
+            'contact_email':       None,
+            'contact_phone':       None,
+            'account_id':          None,
+            'account_name':        None,
+            'parent_account_name': None,
+            'fts_id':              None,
+            'run_at':              now_iso(),
+        }]
+        print("  No matches found — inserting a placeholder 'no results' row.")
+
     inserted = supabase_insert('tbl_search', rows)
     print(f"\n✓ {inserted} row(s) inserted into tbl_search")
     print(f"Finished: {now_iso()}")

@@ -273,9 +273,17 @@ async function pollForResults(label) {
     if (res.ok) {
       const rows = await res.json();
       if (rows.length > 0) {
-        currentResults = rows;
-        renderResults(rows);
-        setStatus(`Found ${rows.length} result(s).`, 'success');
+        const realRows = rows.filter(r => r.contact_id !== null);
+        if (realRows.length > 0) {
+          currentResults = realRows;
+          renderResults(realRows);
+          setStatus(`Found ${realRows.length} result(s).`, 'success');
+        } else {
+          currentResults = [];
+          document.getElementById('resultsCount').textContent = 'No results found';
+          document.getElementById('resultsBody').innerHTML = '<tr><td colspan="7" class="no-results">No matching records found in Salesforce.</td></tr>';
+          setStatus('Search complete — no matches found.', 'info');
+        }
         return;
       }
     }
@@ -307,9 +315,17 @@ async function checkAgain() {
   if (res.ok) {
     const rows = await res.json();
     if (rows.length > 0) {
-      currentResults = rows;
-      renderResults(rows);
-      setStatus(`Found ${rows.length} result(s).`, 'success');
+      const realRows = rows.filter(r => r.contact_id !== null);
+      if (realRows.length > 0) {
+        currentResults = realRows;
+        renderResults(realRows);
+        setStatus(`Found ${realRows.length} result(s).`, 'success');
+      } else {
+        currentResults = [];
+        document.getElementById('resultsCount').textContent = 'No results found';
+        document.getElementById('resultsBody').innerHTML = '<tr><td colspan="7" class="no-results">No matching records found in Salesforce.</td></tr>';
+        setStatus('Search complete — no matches found.', 'info');
+      }
       return;
     }
   }
