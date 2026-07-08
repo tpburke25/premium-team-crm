@@ -128,6 +128,10 @@ def strip_digits(s):
     return re.sub(r'\D', '', s or '')
 
 
+def now_iso():
+    return datetime.now(timezone.utc).isoformat()
+
+
 def main():
     print("=" * 50)
     print("Premium Team CRM — Salesforce Contact/Account Search")
