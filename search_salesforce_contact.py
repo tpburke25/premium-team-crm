@@ -136,7 +136,7 @@ def main():
     token, instance = sf_login()
 
     soql = f"""
-        SELECT Id, Name, Email, Phone, AccountId, Account.Name
+        SELECT Id, Name, Email, Phone, AccountId, Account.Name, Account.FTS_ID__c
         FROM Contact
         WHERE {SEARCH_FIELD} LIKE '%{SEARCH_VALUE}%'
     """
@@ -156,6 +156,7 @@ def main():
             'contact_phone': r.get('Phone'),
             'account_id':    r.get('AccountId'),
             'account_name':  account.get('Name'),
+            'fts_id':        account.get('FTS_ID__c'),
             'run_at':        now_iso(),
         })
 
